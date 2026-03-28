@@ -1,24 +1,23 @@
-import { Application, Text } from "pixi.js";
+import { Application } from "pixi.js";
+import { circles, addCircle } from "./circle";
 
 const app = new Application();
 
 await app.init({
   width: 1000,
   height: 1000,
-  background: "#c6c6c6", 
+  background: "#e5ecea",
 });
 
 document.body.appendChild(app.canvas);
 
-const text = new Text({
-  text: "Hello World",
-  style: {
-    fill: "#ffffff",
-    fontSize: 36,
-  },
+app.stage.eventMode = "static";
+app.stage.hitArea = app.screen;
+
+app.stage.on("pointerdown", (event) => {
+  const { x, y } = event.global;
+
+  addCircle(x, y);
+
+  app.stage.addChild(circles[circles.length - 1]);
 });
-
-text.x = 400;
-text.y = 450;
-
-app.stage.addChild(text);
