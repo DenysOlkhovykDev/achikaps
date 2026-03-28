@@ -1,5 +1,6 @@
 import { Application } from "pixi.js";
-import { circles, addCircle } from "./circle";
+import { addPlatform } from "./platform";
+import { setBuildMode, getBuildMode, addPlus } from "./build-mode";
 
 const app = new Application();
 
@@ -15,9 +16,11 @@ app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
 
 app.stage.on("pointerdown", (event) => {
-  const { x, y } = event.global;
-
-  addCircle(x, y);
-
-  app.stage.addChild(circles[circles.length - 1]);
+  if (getBuildMode()) {
+    const { x, y } = event.global;
+    addPlatform(x, y, app.stage);
+  }
 });
+
+addPlus(app.stage);
+addPlatform(500, 400, app.stage);
