@@ -4,6 +4,7 @@ import { setBuildMode } from "./build-mode";
 type Platform = {
   graphic: Graphics;
   isSelected: boolean;
+  color: string;
   index: number;
   coordinates: {
     x: number;
@@ -13,12 +14,18 @@ type Platform = {
 
 const platforms: Platform[] = [];
 
-export function addPlatform(x: number, y: number, container: Container) {
+export function addPlatform(
+  x: number,
+  y: number,
+  color: string,
+  container: Container,
+) {
   const graphic = new Graphics();
 
   const platform: Platform = {
-    graphic: makeGraphic(graphic, x, y, "#acacac"),
+    graphic: makeGraphic(graphic, x, y, color),
     isSelected: false,
+    color,
     index: platforms.length,
     coordinates: {
       x: x,
@@ -78,7 +85,7 @@ function makeGraphic(graphic: Graphics, x: number, y: number, color: string) {
   return graphic;
 }
 
-function selectPlatform(selected: number) {
+export function selectPlatform(selected: number) {
   platforms.forEach((element) => {
     element.isSelected = false;
 
@@ -86,15 +93,17 @@ function selectPlatform(selected: number) {
       element.graphic,
       element.coordinates.x,
       element.coordinates.y,
-      "#acacac",
+      element.color,
     );
   });
-  platforms[selected].isSelected = true;
+  if (selected !== -1) {
+    platforms[selected].isSelected = true;
 
-  platforms[selected].graphic = makeGraphic(
-    platforms[selected].graphic,
-    platforms[selected].coordinates.x,
-    platforms[selected].coordinates.y,
-    "#c57575",
-  );
+    platforms[selected].graphic = makeGraphic(
+      platforms[selected].graphic,
+      platforms[selected].coordinates.x,
+      platforms[selected].coordinates.y,
+      "#e8ff95",
+    );
+  }
 }
