@@ -62,7 +62,6 @@ export function getBuildMode() {
 }
 
 function greenPlusOnClick(event: FederatedPointerEvent, container: Container) {
-  console.log("greenPlus");
   event.stopPropagation();
 
   const menu = createMenu(menuData, 400, 1000 - 50 * menuData.length);

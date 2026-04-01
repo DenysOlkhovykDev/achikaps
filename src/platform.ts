@@ -1,7 +1,7 @@
 import { Container, Graphics, FederatedPointerEvent } from "pixi.js";
 import { setBuildMode } from "./build-mode";
 
-type Platform = {
+export type Platform = {
   graphic: Graphics;
   isSelected: boolean;
   color: string;
@@ -10,9 +10,10 @@ type Platform = {
     x: number;
     y: number;
   };
+  links: Platform[];
 };
 
-const platforms: Platform[] = [];
+export const platforms: Platform[] = [];
 
 export function addPlatform(
   x: number,
@@ -31,6 +32,7 @@ export function addPlatform(
       x: x,
       y: y,
     },
+    links: [],
   };
 
   const prevSelected = platforms.findIndex((element) => {
@@ -46,6 +48,8 @@ export function addPlatform(
   platforms.push(platform);
 
   if (prevSelected !== -1) {
+    const prev = platforms[prevSelected];
+
     const line = new Graphics()
       .moveTo(
         platforms[prevSelected].coordinates.x,
@@ -56,6 +60,10 @@ export function addPlatform(
         platforms[platform.index].coordinates.y,
       )
       .stroke({ width: 6, color: "#000000" });
+
+    platform.links.push(prev);
+    prev.links.push(platform);
+
     container.addChildAt(line, 0);
   }
 
@@ -106,4 +114,22 @@ export function selectPlatform(selected: number) {
       "#e8ff95",
     );
   }
+}
+
+export function getNextPlatform(
+  current: Platform,
+  prev?: Platform,
+): Platform | undefined {
+  if (current.links.length === 0) return undefined;
+
+  // всі варіанти окрім попереднього
+  const options = current.links.filter((p) => p !== prev);
+
+  // якщо є куди йти — йдемо туди
+  if (options.length > 0) {
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  // 🔴 якщо ні — повертаємось назад
+  return prev ?? undefined;
 }

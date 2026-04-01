@@ -1,10 +1,11 @@
 import { Application } from "pixi.js";
-import { addPlatform, selectPlatform } from "./platform";
+import { addPlatform, selectPlatform, platforms } from "./platform";
 import { setBuildMode, getBuildMode, addPlus } from "./build-mode";
+import { addHuman, updateHumans } from "./worker";
 
 const app = new Application();
 
-let buildingColor: string;
+let buildingColor = "";
 
 await app.init({
   width: 1000,
@@ -29,6 +30,11 @@ app.stage.on("pointerdown", (event) => {
 
 addPlus(app.stage);
 addPlatform(500, 400, "#acacac", app.stage);
+addHuman(500, 400, "#000000", app.stage, platforms[0]);
+
+app.ticker.add(() => {
+  updateHumans();
+});
 
 export function setBuildingType(type: string) {
   buildingColor = type;
