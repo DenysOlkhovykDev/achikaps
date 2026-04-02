@@ -1,11 +1,14 @@
 import { Application } from "pixi.js";
-import { addPlatform, selectPlatform, platforms } from "./platform";
-import { setBuildMode, getBuildMode, addPlus } from "./build-mode";
-import { addHuman, updateHumans } from "./worker";
+import {
+  addBuildMenu,
+  setIsBuildMode,
+  getBuildingType,
+} from "./menus/build-menu";
+
+import { addWorker, moveWorkers } from "./workers/_workers";
+import { addBuilding, buildings } from "./buildings/_buildings";
 
 const app = new Application();
-
-let buildingColor = "";
 
 await app.init({
   width: 1000,
@@ -18,28 +21,17 @@ document.body.appendChild(app.canvas);
 app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
 
-app.stage.on("pointerdown", (event) => {
-  if (getBuildMode() && getBuildingType() !== "") {
-    const { x, y } = event.global;
-    addPlatform(x, y, buildingColor, app.stage);
-    selectPlatform(-1);
-    setBuildingType("");
-    setBuildMode(false);
-  }
-});
-
-addPlus(app.stage);
-addPlatform(500, 400, "#acacac", app.stage);
-addHuman(500, 400, "#000000", app.stage, platforms[0]);
-
 app.ticker.add(() => {
-  updateHumans();
+  moveWorkers();
 });
 
-export function setBuildingType(type: string) {
-  buildingColor = type;
-}
+app.stage.on("pointerdown", (event) => {
+  const { x, y } = event.global;
+  addBuilding(x, y, app.stage, getBuildingType());
+  setIsBuildMode(false);
+});
 
-export function getBuildingType() {
-  return buildingColor;
-}
+addBuildMenu(app.stage);
+setIsBuildMode(false);
+addBuilding(500, 400, app.stage, "Platform");
+addWorker(500, 400, app.stage, buildings[0]);
