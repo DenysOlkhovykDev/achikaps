@@ -1,5 +1,5 @@
 import { FederatedPointerEvent } from "pixi.js";
-import { Building } from "./node";
+import { Building } from "./building";
 import { select } from "./_buildings";
 
 export class Platform extends Building {
@@ -9,6 +9,6 @@ export class Platform extends Building {
   }
 
   constructor(x: number, y: number) {
-    super(x, y, "#acacac");
+    super(x, y, "#acacac", 10);
   }
 }

@@ -1,6 +1,6 @@
 import { Container } from "pixi.js";
 import { Worker } from "./worker";
-import { Building } from "../buildings/node";
+import { Building } from "../buildings/building";
 
 const workers: Worker[] = [];
 
@@ -12,7 +12,7 @@ export function addWorker(
 ) {
   const worker = new Worker(x, y, currentPlatform);
   workers.push(worker);
-  container.addChild(worker.graphic);
+  container.addChild(worker.root);
 }
 
 export function moveWorkers() {

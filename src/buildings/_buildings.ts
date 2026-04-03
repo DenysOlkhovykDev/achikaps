@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import { Building } from "./node";
+import { Building } from "./building";
 import { Road } from "../roads/road";
 import { setIsBuildMode } from "../menus/build-menu";
 
@@ -7,6 +7,15 @@ import { Platform } from "./platform";
 import { Factory } from "./factory";
 import { Mine } from "./mine";
 import { Farm } from "./farm";
+
+type BuildingConstructor = new (x: number, y: number) => Building;
+
+const buildingMap: Record<string, BuildingConstructor> = {
+  Platform,
+  Factory,
+  Mine,
+  Farm,
+};
 
 export const buildings: Building[] = [];
 let selectedBuilding: number;
@@ -17,27 +26,11 @@ export function addBuilding(
   container: Container,
   buildingType: string,
 ) {
-  let building: Building;
-  switch (buildingType) {
-    case "Platform":
-      building = new Platform(x, y);
-      break;
-    case "Factory":
-      building = new Factory(x, y);
-      break;
-    case "Mine":
-      building = new Mine(x, y);
-      break;
-    case "Farm":
-      building = new Farm(x, y);
-      break;
-    default:
-      building = new Platform(x, y);
-      break;
-  }
+  const BuildingClass = buildingMap[buildingType] || Platform;
+  const building = new BuildingClass(x, y);
 
   buildings.push(building);
-  container.addChild(building.graphic);
+  container.addChild(building.root);
 
   if (buildings.length > 1) {
     const from = buildings[selectedBuilding];
