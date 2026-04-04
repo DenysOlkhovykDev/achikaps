@@ -1,4 +1,4 @@
-import { Resource } from "./resource";
+import { Resource } from "@resources/resource";
 
 export class Iron extends Resource {
   protected draw() {

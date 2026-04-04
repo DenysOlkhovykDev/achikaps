@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import { Building } from "../buildings/building";
+import { Building } from "@buildings/building";
 
 export class Road {
   graphic: Graphics;

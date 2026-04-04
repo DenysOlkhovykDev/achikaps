@@ -1,6 +1,6 @@
 import { FederatedPointerEvent } from "pixi.js";
-import { Building } from "./building";
-import { select } from "./_buildings";
+import { Building } from "@buildings/building";
+import { select } from "@buildings/_buildings";
 
 export class Platform extends Building {
   onClick(event: FederatedPointerEvent) {

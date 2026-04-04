@@ -1,12 +1,12 @@
 import { Container } from "pixi.js";
-import { Building } from "./building";
-import { Road } from "../roads/road";
-import { setIsBuildMode } from "../menus/build-menu";
+import { Building } from "@buildings/building";
+import { Road } from "@roads/road";
+import { setIsBuildMode } from "@menus/build-menu";
 
-import { Platform } from "./platform";
-import { Factory } from "./factory";
-import { Mine } from "./mine";
-import { Farm } from "./farm";
+import { Platform } from "@buildings/platform";
+import { Factory } from "@buildings/factory";
+import { Mine } from "@buildings/mine";
+import { Farm } from "@buildings/farm";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
 
@@ -48,19 +48,4 @@ export function addBuilding(
 export function select(node: Building) {
   selectedBuilding = buildings.indexOf(node);
   setIsBuildMode(true);
-}
-
-export function getNextBuilding(
-  current: Building,
-  prev?: Building,
-): Building | undefined {
-  if (current.links.length === 0) return undefined;
-
-  const options = current.links.filter((p) => p !== prev);
-
-  if (options.length > 0) {
-    return options[Math.floor(Math.random() * options.length)];
-  }
-
-  return prev ?? undefined;
 }

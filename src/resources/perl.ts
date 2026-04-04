@@ -1,4 +1,4 @@
-import { Resource } from "./resource";
+import { Resource } from "@resources/resource";
 
 export class Perl extends Resource {
   protected draw() {
