@@ -12,6 +12,7 @@
       "@workers/*": ["./src/workers/*"],
       "@menus/*": ["./src/menus/*"],
       "@roads/*": ["./src/roads/*"],
+      "@utils/*": ["./src/utils/*"],
     }
   }
 }
