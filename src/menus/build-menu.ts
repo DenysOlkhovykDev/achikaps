@@ -56,7 +56,7 @@ export function getIsBuildMode() {
   return isBuildMode;
 }
 
-function setBuildingType(type: string) {
+export function setBuildingType(type: string) {
   buildingType = type;
 }
 

@@ -2,12 +2,18 @@ import { Application, Container } from "pixi.js";
 import {
   addBuildMenu,
   setIsBuildMode,
-  getBuildingType,
   getIsBuildMode,
+  getBuildingType,
+  setBuildingType,
 } from "@menus/build-menu";
 
 import { addWorker, moveWorkers, workers } from "@workers/_workers";
-import { addBuilding, buildings, select } from "@buildings/_buildings";
+import {
+  addBuilding,
+  buildings,
+  select,
+  animations,
+} from "@buildings/_buildings";
 
 import { Task, JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
@@ -32,14 +38,16 @@ app.stage.hitArea = app.screen;
 
 app.ticker.add(() => {
   moveWorkers();
+  animations();
 });
 
 app.stage.on("pointerdown", (event) => {
   const { x, y } = event.global;
   if (getIsBuildMode() && getBuildingType() !== "") {
     addBuilding(x, y, buildingsLayer, getBuildingType());
-    setIsBuildMode(false);
+    setBuildingType("");
   }
+  setIsBuildMode(false);
 });
 
 const buildingsLayer = new Container();
@@ -53,11 +61,13 @@ select(buildings[0]);
 addBuilding(400, 300, buildingsLayer, "Platform");
 addBuilding(400, 500, buildingsLayer, "Platform");
 select(buildings[1]);
-addBuilding(600, 250, buildingsLayer, "Platform");
-addBuilding(600, 350, buildingsLayer, "Platform");
+addBuilding(600, 200, buildingsLayer, "Factory");
+addBuilding(600, 330, buildingsLayer, "Mine");
 select(buildings[2]);
-addBuilding(600, 450, buildingsLayer, "Platform");
-addBuilding(600, 550, buildingsLayer, "Platform");
+addBuilding(600, 480, buildingsLayer, "Farm");
+addBuilding(600, 600, buildingsLayer, "Platform");
+
+setIsBuildMode(false);
 
 addWorker(200, 400, workersLayer, buildings[0]);
 
@@ -99,5 +109,5 @@ for (let i = 0; i < 1; i++) {
   buildings[6].tryToAddResource(resource);
 }
 
-addTask(buildings[2], JobType.delivery, 5, "Iron", 3);
-addTask(buildings[1], JobType.delivery, 9, "Meat", 4);
+// addTask(buildings[2], JobType.delivery, 5, "Iron", 3);
+// addTask(buildings[1], JobType.delivery, 9, "Meat", 4);

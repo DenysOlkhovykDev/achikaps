@@ -1,10 +1,10 @@
-import { Graphics, FederatedPointerEvent, Container } from "pixi.js";
+import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
 import { Resource } from "@resources/resource";
 
 export abstract class Building {
   root: Container = new Container();
 
-  graphic: Graphics;
+  visual: Container;
   links: Building[] = [];
 
   recources: Resource[] = [];
@@ -13,17 +13,15 @@ export abstract class Building {
   constructor(
     public x: number,
     public y: number,
-    public color: string,
     public inventorySize: number,
   ) {
-    this.graphic = new Graphics();
-    this.draw();
+    this.visual = new Container();
     this.initEvents();
 
     this.root.x = this.x;
     this.root.y = this.y;
 
-    this.root.addChild(this.graphic);
+    this.root.addChild(this.visual);
     this.root.addChild(this.resourceContainer);
   }
 
@@ -34,14 +32,9 @@ export abstract class Building {
     );
   }
 
-  protected draw() {
-    this.graphic.clear();
+  protected abstract draw(): void;
 
-    this.graphic
-      .circle(0, 0, 40)
-      .stroke({ width: 3, color: "#000000" })
-      .fill(this.color);
-  }
+  public abstract animation(): void;
 
   addLinkedBuilding(node: Building) {
     this.links.push(node);
@@ -105,5 +98,29 @@ export abstract class Building {
     this.resourceContainer.removeChild(res.graphic);
 
     return res;
+  }
+
+  makeRoundShadow(radius: number) {
+    const shadow = new Graphics();
+
+    shadow.circle(0, 0, radius).stroke({ width: 1, color: "#000000" });
+
+    shadow.alpha = 0.6;
+
+    const shadow2 = new Graphics();
+
+    shadow2.circle(0, 0, radius + 1).stroke({ width: 1, color: "#000000" });
+
+    shadow2.alpha = 0.3;
+
+    const shadow3 = new Graphics();
+
+    shadow3.circle(0, 0, radius + 2).stroke({ width: 1, color: "#000000" });
+
+    shadow3.alpha = 0.1;
+
+    this.visual.addChild(shadow);
+    this.visual.addChild(shadow2);
+    this.visual.addChild(shadow3);
   }
 }
