@@ -1,5 +1,5 @@
 import { Graphics, FederatedPointerEvent, Container } from "pixi.js";
-import { Resource } from "../resource/resource";
+import { Resource } from "@resources/resource";
 
 export abstract class Building {
   root: Container = new Container();
@@ -99,10 +99,8 @@ export abstract class Building {
     return true;
   }
 
-  takeResource(): Resource | undefined {
-    this.recources.sort(() => Math.random() - 0.5);
-    const res = this.recources.pop();
-    if (!res) return undefined;
+  takeResource(resourceIndex: number): Resource {
+    const [res] = this.recources.splice(resourceIndex, 1);
 
     this.resourceContainer.removeChild(res.graphic);
 

@@ -1,8 +1,8 @@
 import { Container } from "pixi.js";
-import { Worker } from "./worker";
-import { Building } from "../buildings/building";
+import { Worker } from "@workers/worker";
+import { Building } from "@buildings/building";
 
-const workers: Worker[] = [];
+export const workers: Worker[] = [];
 
 export function addWorker(
   x: number,

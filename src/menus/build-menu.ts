@@ -1,6 +1,6 @@
-import { Container, Graphics, FederatedPointerEvent, Text } from "pixi.js";
-import { MenuTrigger } from "./menu-trigger";
-import { MenuItem } from "./menu";
+import { Container, Graphics } from "pixi.js";
+import { MenuTrigger } from "@menus/menu-trigger";
+import { MenuItem } from "@menus/menu";
 
 let isBuildMode = false;
 let menuTrigger: MenuTrigger;

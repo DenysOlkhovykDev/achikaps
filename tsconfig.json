@@ -3,6 +3,15 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "strict": true
+    "strict": true,
+    "types": ["node"],
+    "paths": {
+      "@buildings/*": ["./src/buildings/*"],
+      "@dashboard/*": ["./src/dashboard/*"],
+      "@resources/*": ["./src/resources/*"],
+      "@workers/*": ["./src/workers/*"],
+      "@menus/*": ["./src/menus/*"],
+      "@roads/*": ["./src/roads/*"],
+    }
   }
 }

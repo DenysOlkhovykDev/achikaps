@@ -4,15 +4,18 @@ import {
   setIsBuildMode,
   getBuildingType,
   getIsBuildMode,
-} from "./menus/build-menu";
+} from "@menus/build-menu";
 
-import { addWorker, moveWorkers } from "./workers/_workers";
-import { addBuilding, buildings } from "./buildings/_buildings";
+import { addWorker, moveWorkers, workers } from "@workers/_workers";
+import { addBuilding, buildings, select } from "@buildings/_buildings";
 
-import { Iron } from "./resource/iron";
-import { Meat } from "./resource/meat";
-import { Perl } from "./resource/perl";
-import { Battery } from "./resource/battery";
+import { Task, JobType } from "@dashboard/task";
+import { dashboard } from "@dashboard/_dashboard";
+
+import { Iron } from "@resources/iron";
+import { Meat } from "@resources/meat";
+import { Perl } from "@resources/perl";
+import { Battery } from "@resources/battery";
 
 const app = new Application();
 
@@ -44,28 +47,57 @@ const workersLayer = new Container();
 
 addBuildMenu(app.stage);
 setIsBuildMode(false);
-addBuilding(500, 400, buildingsLayer, "Platform");
-addWorker(500, 400, workersLayer, buildings[0]);
+
+addBuilding(200, 400, buildingsLayer, "Platform");
+select(buildings[0]);
+addBuilding(400, 300, buildingsLayer, "Platform");
+addBuilding(400, 500, buildingsLayer, "Platform");
+select(buildings[1]);
+addBuilding(600, 250, buildingsLayer, "Platform");
+addBuilding(600, 350, buildingsLayer, "Platform");
+select(buildings[2]);
+addBuilding(600, 450, buildingsLayer, "Platform");
+addBuilding(600, 550, buildingsLayer, "Platform");
+
+addWorker(200, 400, workersLayer, buildings[0]);
 
 app.stage.addChild(buildingsLayer);
 app.stage.addChild(workersLayer);
 
-for (let i = 0; i < 2; i++) {
-  const iron = new Iron();
-  buildings[0].tryToAddResource(iron);
+for (let i = 0; i < 1; i++) {
+  const resource = new Iron();
+  buildings[0].tryToAddResource(resource);
 }
 
 for (let i = 0; i < 3; i++) {
-  const iron = new Meat();
-  buildings[0].tryToAddResource(iron);
+  const resource = new Meat();
+  buildings[0].tryToAddResource(resource);
 }
 
-for (let i = 0; i < 3; i++) {
-  const iron = new Perl();
-  buildings[0].tryToAddResource(iron);
+for (let i = 0; i < 1; i++) {
+  const resource = new Perl();
+  buildings[0].tryToAddResource(resource);
 }
 
-for (let i = 0; i < 2; i++) {
-  const iron = new Battery();
-  buildings[0].tryToAddResource(iron);
+for (let i = 0; i < 1; i++) {
+  const resource = new Battery();
+  buildings[0].tryToAddResource(resource);
 }
+
+for (let i = 0; i < 1; i++) {
+  const resource = new Meat();
+  buildings[3].tryToAddResource(resource);
+}
+
+for (let i = 0; i < 1; i++) {
+  const resource = new Iron();
+  buildings[5].tryToAddResource(resource);
+}
+
+for (let i = 0; i < 1; i++) {
+  const resource = new Iron();
+  buildings[6].tryToAddResource(resource);
+}
+
+dashboard.addTask(buildings[2], JobType.delivery, 5, "Iron", 3);
+dashboard.addTask(buildings[1], JobType.delivery, 9, "Meat", 4);

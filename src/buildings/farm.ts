@@ -1,4 +1,4 @@
-import { Building } from "./building";
+import { Building } from "@buildings/building";
 
 export class Farm extends Building {
   constructor(x: number, y: number) {
