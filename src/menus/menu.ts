@@ -65,6 +65,6 @@ export class Menu {
   }
 
   hide() {
-    this.container.parent?.removeChild(this.container);
+    this.container.parent!.removeChild(this.container);
   }
 }

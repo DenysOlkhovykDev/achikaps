@@ -1,6 +1,5 @@
 import { Building } from "@buildings/building";
-
-import { Resource } from "@resources/resource";
+import { aStar, dijkstra, buildPath } from "@utils/algorithms";
 
 import { buildings } from "@buildings/_buildings";
 
@@ -21,101 +20,40 @@ export class Task {
     public resource?: string,
   ) {}
 
-  // rework
   public getRouteForTarget(current: Building): Building[] {
-    const openSet: Building[] = [current];
-
-    const cameFrom = new Map<Building, Building>();
-
-    const gScore = new Map<Building, number>();
-    const fScore = new Map<Building, number>();
-
-    for (const b of buildings) {
-      gScore.set(b, Infinity);
-      fScore.set(b, Infinity);
-    }
-
-    gScore.set(current, 0);
-    fScore.set(current, this.heuristic(current, this.target));
-
-    while (openSet.length) {
-      const current = openSet.reduce((a, b) =>
-        fScore.get(a)! < fScore.get(b)! ? a : b,
-      );
-
-      if (current === this.target) {
-        return this.reconstructPath(cameFrom, current);
-      }
-
-      openSet.splice(openSet.indexOf(current), 1);
-
-      for (const next of current.links) {
-        const tentativeG = gScore.get(current)! + this.distance(current, next);
-
-        if (tentativeG < gScore.get(next)!) {
-          cameFrom.set(next, current);
-          gScore.set(next, tentativeG);
-
-          const f = tentativeG + this.heuristic(next, this.target);
-
-          fScore.set(next, f);
-
-          if (!openSet.includes(next)) {
-            openSet.push(next);
-          }
-        }
-      }
-    }
-
-    return [];
+    return aStar(current, this.target);
   }
 
-  // rework
-  public getRouteForResource(start: Building): [Building[], number] {
-    const cameFrom = new Map<Building, Building>();
-    const dist = new Map<Building, number>();
-    const visited = new Set<Building>();
+  public getRouteForResource(
+    start: Building,
+  ): [Building[], number | undefined] {
+    const { distances, previous } = dijkstra(start);
 
-    for (const b of buildings) {
-      dist.set(b, Infinity);
-    }
+    let bestBuilding: Building | undefined = undefined;
+    let bestDistance = Infinity;
+    let resourceIndex: number | undefined = undefined;
 
-    dist.set(start, 0);
+    for (const building of buildings) {
+      if (building === this.target) continue;
 
-    while (true) {
-      let current: Building | undefined = undefined;
+      const index = this.hasNeededResource(building);
 
-      for (const [b, d] of dist) {
-        if (
-          !visited.has(b) &&
-          (current === undefined || d < dist.get(current)!)
-        ) {
-          current = b;
-        }
-      }
+      if (index !== undefined) {
+        const distance = distances.get(building)!;
 
-      if (!current) break;
-
-      if (current !== this.target) {
-        const resourceIndex = this.hasNeededResource(current);
-        if (resourceIndex !== undefined) {
-          return [this.reconstructPath(cameFrom, current), resourceIndex];
-        }
-      }
-
-      visited.add(current);
-
-      for (const next of current.links) {
-        const newDist = dist.get(current)! + this.distance(current, next);
-
-        if (newDist < dist.get(next)!) {
-          dist.set(next, newDist);
-          cameFrom.set(next, current);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestBuilding = building;
+          resourceIndex = index;
         }
       }
     }
 
-    return [[], -1];
+    if (!bestBuilding) return [[], undefined];
+
+    bestBuilding.recources[resourceIndex!].isReserved = true;
+
+    return [buildPath(previous, bestBuilding), resourceIndex];
   }
 
   private hasNeededResource(building: Building): number | undefined {
@@ -123,33 +61,10 @@ export class Task {
       const element = building.recources[i];
 
       if (element.constructor.name === this.resource && !element.isReserved) {
-        element.isReserved = true;
         return i;
       }
     }
 
     return undefined;
-  }
-
-  private heuristic(a: Building, b: Building): number {
-    return Math.hypot(a.root.x - b.root.x, a.root.y - b.root.y);
-  }
-
-  private distance(a: Building, b: Building): number {
-    return Math.hypot(a.root.x - b.root.x, a.root.y - b.root.y);
-  }
-
-  private reconstructPath(
-    cameFrom: Map<Building, Building>,
-    current: Building,
-  ): Building[] {
-    const path: Building[] = [current];
-
-    while (cameFrom.has(current)) {
-      current = cameFrom.get(current)!;
-      path.push(current);
-    }
-
-    return path.reverse();
   }
 }

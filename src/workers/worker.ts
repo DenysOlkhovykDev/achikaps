@@ -2,7 +2,7 @@ import { Graphics, Container } from "pixi.js";
 import { Building } from "@buildings/building";
 
 import { Resource } from "@resources/resource";
-import { dashboard } from "@dashboard/_dashboard";
+import { getPosibleTaskWithHighestPriority } from "@dashboard/_dashboard";
 import { Task, JobType } from "@dashboard/task";
 
 export class Worker {
@@ -74,14 +74,14 @@ export class Worker {
     const vx = dx / distance;
     const vy = dy / distance;
 
-    this.x += vx * 1.5;
-    this.y += vy * 1.5;
+    this.x += vx * 2;
+    this.y += vy * 2;
 
     this.root.position.set(this.x, this.y);
   }
 
   private pickTask() {
-    this.task = dashboard.getPosibleTaskWithHighestPriority(
+    this.task = getPosibleTaskWithHighestPriority(
       this.currentPlatform,
       JobType.delivery,
     );

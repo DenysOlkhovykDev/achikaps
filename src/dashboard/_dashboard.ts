@@ -1,117 +1,74 @@
 import { Task, JobType } from "@dashboard/task";
 import { Building } from "@buildings/building";
+import { dijkstra } from "@utils/algorithms";
 
-import { buildings } from "@buildings/_buildings";
+export const dashboard: Task[] = [];
 
-export class DashBoard {
-  tasks: Task[] = [];
+export function addTask(
+  target: Building,
+  jobType: JobType,
+  priority: number,
+  resource?: string,
+  countOfResources?: number,
+) {
+  if (resource && countOfResources) {
+    const result: Record<string, number> = {};
 
-  public addTask(
-    target: Building,
-    jobType: JobType,
-    priority: number,
-    resource?: string,
-    countOfResources?: number,
-  ) {
-    if (resource && countOfResources) {
-      const result: Record<string, number> = {};
-
-      target.recources.forEach((element) => {
-        if (!result[element.constructor.name]) {
-          result[element.constructor.name] = 0;
-        }
-        if (!element.isReserved) {
-          result[element.constructor.name]++;
-        }
-      });
-
-      if (!result[resource]) {
-        result[resource] = 0;
+    target.recources.forEach((element) => {
+      if (!result[element.constructor.name]) {
+        result[element.constructor.name] = 0;
       }
-
-      if (countOfResources - result[resource] > 0) {
-        for (let i = 0; i < countOfResources - result[resource]; i++) {
-          this.tasks.push(new Task(target, jobType, priority, resource));
-        }
+      if (!element.isReserved) {
+        result[element.constructor.name]++;
       }
-    } else {
-      this.tasks.push(new Task(target, jobType, priority));
-    }
-  }
+    });
 
-  public deleteTask(task: Task) {
-    const index = this.tasks.indexOf(task);
-
-    if (index !== -1) {
-      this.tasks.splice(index, 1);
-    }
-  }
-
-  // rework
-  public getPosibleTaskWithHighestPriority(
-    currentBuilding: Building,
-    jobType: JobType,
-  ) {
-    const dist = new Map();
-    const visited = new Set();
-
-    for (const b of buildings) {
-      dist.set(b, Infinity);
+    if (!result[resource]) {
+      result[resource] = 0;
     }
 
-    dist.set(currentBuilding, 0);
-
-    let bestTask = undefined;
-    let bestScore = -Infinity;
-
-    while (true) {
-      let current = undefined;
-
-      for (const [b, d] of dist) {
-        if (
-          !visited.has(b) &&
-          (current === undefined || d < dist.get(current))
-        ) {
-          current = b;
-        }
-      }
-
-      if (!current) break;
-
-      visited.add(current);
-
-      const currentDist = dist.get(current);
-
-      // перевіряємо задачі
-      for (const task of this.tasks) {
-        if (task.target === current && task.jobType === jobType) {
-          const score = task.priority - currentDist;
-
-          if (score > bestScore) {
-            bestScore = score;
-            bestTask = task;
-          }
-        }
-      }
-
-      // релаксація
-      for (const next of current.links) {
-        const weight = 1; // або твоя реальна вага
-
-        const newDist = currentDist + weight;
-
-        if (newDist < dist.get(next)) {
-          dist.set(next, newDist);
-        }
+    if (countOfResources - result[resource] > 0) {
+      for (let i = 0; i < countOfResources - result[resource]; i++) {
+        dashboard.push(new Task(target, jobType, priority, resource));
       }
     }
-
-    if (bestTask) {
-      this.deleteTask(bestTask);
-    }
-
-    return bestTask;
+  } else {
+    dashboard.push(new Task(target, jobType, priority));
   }
 }
 
-export const dashboard = new DashBoard();
+export function deleteTask(task: Task) {
+  const index = dashboard.indexOf(task);
+
+  if (index !== -1) {
+    dashboard.splice(index, 1);
+  }
+}
+
+export function getPosibleTaskWithHighestPriority(
+  currentBuilding: Building,
+  jobType: JobType,
+) {
+  const { distances } = dijkstra(currentBuilding);
+
+  let bestTask: Task | undefined;
+  let bestScore = -Infinity;
+
+  for (const task of dashboard) {
+    if (task.jobType !== jobType) continue;
+
+    const distanceToTask = distances.get(task.target)!;
+    const score = task.priority - distanceToTask;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTask = task;
+    }
+  }
+
+  if (bestTask) {
+    deleteTask(bestTask);
+  }
+
+  return bestTask;
+}

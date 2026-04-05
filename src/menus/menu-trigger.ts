@@ -42,6 +42,6 @@ export class MenuTrigger {
   }
 
   hide() {
-    this.parent?.removeChild(this.graphic);
+    this.parent.removeChild(this.graphic);
   }
 }

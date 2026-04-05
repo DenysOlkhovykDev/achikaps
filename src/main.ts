@@ -10,7 +10,7 @@ import { addWorker, moveWorkers, workers } from "@workers/_workers";
 import { addBuilding, buildings, select } from "@buildings/_buildings";
 
 import { Task, JobType } from "@dashboard/task";
-import { dashboard } from "@dashboard/_dashboard";
+import { addTask } from "@dashboard/_dashboard";
 
 import { Iron } from "@resources/iron";
 import { Meat } from "@resources/meat";
@@ -99,5 +99,5 @@ for (let i = 0; i < 1; i++) {
   buildings[6].tryToAddResource(resource);
 }
 
-dashboard.addTask(buildings[2], JobType.delivery, 5, "Iron", 3);
-dashboard.addTask(buildings[1], JobType.delivery, 9, "Meat", 4);
+addTask(buildings[2], JobType.delivery, 5, "Iron", 3);
+addTask(buildings[1], JobType.delivery, 9, "Meat", 4);
