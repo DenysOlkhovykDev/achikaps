@@ -16,5 +16,7 @@ export class Road {
       .moveTo(from.x, from.y)
       .lineTo(to.x, to.y)
       .stroke({ width: 6, color: "#000000" });
+
+    this.graphic.alpha = 0.75;
   }
 }

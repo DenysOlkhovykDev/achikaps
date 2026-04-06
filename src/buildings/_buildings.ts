@@ -49,3 +49,9 @@ export function select(node: Building) {
   selectedBuilding = buildings.indexOf(node);
   setIsBuildMode(true);
 }
+
+export function animations() {
+  for (const building of buildings) {
+    building.animation();
+  }
+}
