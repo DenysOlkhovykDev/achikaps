@@ -2,83 +2,92 @@ import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
 
 export class Mine extends Building {
-  lines: Graphics = new Graphics();
-  crosses: Graphics[] = [];
+  numberOfAntennas: number = 4;
+  antennaArmsSize: number = 7;
+  rotationSpeed: number = 0.005;
+  maxRotationAngle: number = 0.25;
 
-  count: number = 4;
+  antennaArms: Graphics[] = [];
 
-  isAsc: boolean = true;
-  angle: number = 0;
+  rotationDirection: boolean = true;
+  antennasArmsAngle: number = 0;
 
   constructor(x: number, y: number) {
     super(x, y, 5);
+    this.baseSize = 40;
     this.draw();
   }
 
   draw() {
-    const graphic = new Graphics();
+    this.makeBasicCircle(this.baseSize, "#aaa84c", true);
 
-    graphic
-      .circle(0, 0, 40)
-      .stroke({ width: 3, color: "#000000" })
-      .fill("#d6d1a8");
+    this.makeRoundShadow(this.baseSize);
 
-    this.makeRoundShadow(42);
-    this.visual.addChild(graphic);
-
-    const size = 7;
-
-    for (let i = 0; i < this.count; i++) {
-      const angle = (Math.PI * 2 * i) / this.count;
-
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-
-      const x1 = cos * 40;
-      const y1 = sin * 40;
-
-      const x2 = cos * 50;
-      const y2 = sin * 50;
-
-      this.lines.moveTo(x1, y1).lineTo(x2, y2);
-
-      const tx1 = -sin * size;
-      const ty1 = cos * size;
-
-      const tx2 = sin * size;
-      const ty2 = -cos * size;
-
-      this.crosses[i] = new Graphics();
-
-      this.crosses[i].position.set(x2, y2);
-
-      this.crosses[i]
-        .lineTo(tx1, ty1)
-        .lineTo(tx2, ty2)
-        .stroke({ width: 3, color: "#000000" });
-
-      this.visual.addChild(this.crosses[i]);
+    for (let i = 0; i < this.numberOfAntennas; i++) {
+      this.drawAntena(i);
     }
-    this.lines.stroke({ width: 3, color: "#000000" });
+    this.mainGraphic.stroke({ width: 3, color: "#000000" });
 
-    this.visual.addChild(this.lines);
+    this.visual.addChild(this.mainGraphic);
+  }
+
+  private drawAntena(i: number) {
+    const { x: x1, y: y1 } = this.getRadialPoint(
+      i,
+      this.numberOfAntennas,
+      this.baseSize,
+    );
+    const { x: x2, y: y2 } = this.getRadialPoint(
+      i,
+      this.numberOfAntennas,
+      this.baseSize + 10,
+    );
+
+    this.mainGraphic.moveTo(x1, y1).lineTo(x2, y2);
+
+    const { angle } = this.getRadialPoint(i, this.numberOfAntennas, 1);
+
+    this.antennaArms[i] = this.createPerpendicular(x2, y2, angle);
+  }
+
+  private createPerpendicular(x: number, y: number, angle: number) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    const xRight = -sin * this.antennaArmsSize;
+    const yRight = cos * this.antennaArmsSize;
+
+    const xLeft = sin * this.antennaArmsSize;
+    const yLeft = -cos * this.antennaArmsSize;
+
+    const perpendicular = new Graphics();
+
+    perpendicular.position.set(x, y);
+
+    perpendicular
+      .lineTo(xRight, yRight)
+      .lineTo(xLeft, yLeft)
+      .stroke({ width: 3, color: "#000000" });
+
+    this.visual.addChild(perpendicular);
+
+    return perpendicular;
   }
 
   animation() {
-    for (let i = 0; i < this.count; i++) {
-      if (this.isAsc) {
-        this.crosses[i].rotation += 0.02;
-        this.angle += 0.02;
-        if (this.angle > 1) {
-          this.isAsc = false;
-        }
-      } else {
-        this.crosses[i].rotation -= 0.02;
-        this.angle -= 0.02;
-        if (this.angle < -1) {
-          this.isAsc = true;
-        }
+    for (let i = 0; i < this.numberOfAntennas; i++) {
+      const direction = this.rotationDirection ? 1 : -1;
+
+      for (let i = 0; i < this.numberOfAntennas; i++) {
+        this.antennaArms[i].rotation += this.rotationSpeed * direction;
       }
+
+      this.antennasArmsAngle += this.rotationSpeed * direction;
+
+      if (this.antennasArmsAngle > this.maxRotationAngle)
+        this.rotationDirection = false;
+      if (this.antennasArmsAngle < -this.maxRotationAngle)
+        this.rotationDirection = true;
     }
   }
 }
