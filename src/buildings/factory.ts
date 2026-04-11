@@ -2,23 +2,20 @@ import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
 
 export class Factory extends Building {
-  circles: Graphics[] = [];
-  angles: number[] = [];
+  numberOfSatelites: number = 5;
+  sateliteSize: number = 5;
+  rotationSpeed: number = 0.005;
 
-  count = 5;
+  satelites: Graphics = new Graphics();
 
   constructor(x: number, y: number) {
     super(x, y, 5);
+    this.baseSize = 40;
     this.draw();
   }
 
   draw() {
-    const graphic = new Graphics();
-
-    graphic
-      .circle(0, 0, 40)
-      .stroke({ width: 3, color: "#000000" })
-      .fill("#a8d0db");
+    this.makeBasicCircle(this.baseSize, "#a8d0db", true);
 
     const segments = 4;
     const step = (Math.PI * 2) / segments;
@@ -28,36 +25,34 @@ export class Factory extends Building {
       const startAngle = i * step + gap;
       const endAngle = (i + 1) * step - gap;
 
-      graphic
+      this.mainGraphic
         .moveTo(0, 0)
-        .arc(0, 0, 40, startAngle, endAngle)
-        .lineTo(0, 0)
+        .arc(0, 0, this.baseSize, startAngle, endAngle)
         .fill("#73b8b6");
     }
 
-    graphic.circle(0, 0, 34).fill("#a8d0db");
+    this.makeBasicCircle(this.baseSize - 8, "#a8d0db", false);
 
-    this.makeRoundShadow(42);
-    this.visual.addChild(graphic);
+    this.makeRoundShadow(this.baseSize);
 
-    for (let i = 0; i < this.count; i++) {
-      this.circles[i] = new Graphics();
-      this.circles[i]
+    this.visual.addChild(this.mainGraphic);
+
+    for (let i = 0; i < this.numberOfSatelites; i++) {
+      const { x, y } = this.getRadialPoint(
+        i,
+        this.numberOfSatelites,
+        this.baseSize + 10,
+      );
+
+      this.satelites
         .moveTo(0, 0)
-        .circle(
-          Math.cos((Math.PI * 2 * i) / this.count) * 50,
-          Math.sin((Math.PI * 2 * i) / this.count) * 50,
-          5,
-        )
+        .circle(x, y, this.sateliteSize)
         .fill("#000000");
-
-      this.visual.addChild(this.circles[i]);
     }
+    this.visual.addChild(this.satelites);
   }
 
   animation() {
-    for (let i = 0; i < this.circles.length; i++) {
-      this.circles[i].rotation += 0.005;
-    }
+    this.satelites.rotation -= this.rotationSpeed;
   }
 }

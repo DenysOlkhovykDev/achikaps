@@ -7,6 +7,12 @@ import { Platform } from "@buildings/platform";
 import { Factory } from "@buildings/factory";
 import { Mine } from "@buildings/mine";
 import { Farm } from "@buildings/farm";
+import { MeatGrinder } from "@buildings/meat-grinder";
+import { Junkuard } from "@buildings/junkuard";
+import { House } from "@buildings/house";
+import { Windmill } from "@buildings/windmill";
+import { Laboratory } from "@buildings/laboratory";
+import { Smelter } from "@buildings/smelter";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
 
@@ -15,6 +21,12 @@ const buildingMap: Record<string, BuildingConstructor> = {
   Factory,
   Mine,
   Farm,
+  MeatGrinder,
+  Junkuard,
+  House,
+  Windmill,
+  Laboratory,
+  Smelter,
 };
 
 export const buildings: Building[] = [];

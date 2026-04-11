@@ -2,87 +2,95 @@ import { Graphics, Triangle } from "pixi.js";
 import { Building } from "@buildings/building";
 
 export class Farm extends Building {
-  count: number = 8;
+  numberOfSpikes: number = 8;
+  numberOfAntennas: number = 4;
+  antennasAngleOffset: number = Math.PI / 4;
 
-  picks: Graphics[] = [];
-  isAsc: boolean = true;
-  length: number = 0;
+  spikeShape: Triangle = new Triangle(-10, 0, 6, 10, 6, -10);
+
+  antennas: Graphics[] = [];
+  movingDirection: boolean = true;
+  antennasOffset: number = 0;
 
   constructor(x: number, y: number) {
     super(x, y, 5);
+    this.baseSize = 40;
     this.draw();
   }
 
   draw() {
-    const graphic = new Graphics();
+    this.drawAntennas();
 
-    this.drawPicks();
+    this.makeBasicCircle(this.baseSize, "#c08484", true);
 
-    this.drawSpikes(graphic, true);
+    this.drawSpikes();
 
-    graphic
-      .circle(0, 0, 40)
-      .stroke({ width: 3, color: "#000000" })
-      .fill("#c08484");
+    this.makeBasicCircle(this.baseSize, "#c08484", false);
 
-    this.drawSpikes(graphic, false);
+    this.makeBasicCircle(this.baseSize - 10, "#c08484", false);
 
-    graphic
-      .circle(0, 0, 30)
-      .fill("#c08484")
-      .stroke({ width: 4, color: "#b06667" });
+    this.mainGraphic.stroke({ width: 4, color: "#b06667" });
 
-    this.makeRoundShadow(42);
-    this.visual.addChild(graphic);
+    this.makeRoundShadow(this.baseSize);
+    this.visual.addChild(this.mainGraphic);
   }
 
-  private drawSpikes(graphic: Graphics, stroke: boolean) {
-    for (let i = 0; i < this.count; i++) {
-      const angle = (Math.PI * 2 * i) / this.count;
+  private drawSpikes() {
+    for (let i = 0; i < this.numberOfSpikes; i++) {
+      const {
+        angle,
+        x: cx,
+        y: cy,
+      } = this.getRadialPoint(i, this.numberOfSpikes, this.baseSize);
 
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
 
-      const cos2 = Math.cos(angle + 0.5);
-      const sin2 = Math.sin(angle + 0.5);
-
-      const cx = cos * 40;
-      const cy = sin * 40;
-
-      const points = new Triangle(0, -10, 10, 8, -10, 8);
-
-      const triangle = new Triangle(
-        cx + (points.x * cos2 - points.y * sin2),
-        cy + (points.x * sin2 + points.y * cos2),
-
-        cx + (points.x2 * cos2 - points.y2 * sin2),
-        cy + (points.x2 * sin2 + points.y2 * cos2),
-
-        cx + (points.x3 * cos2 - points.y3 * sin2),
-        cy + (points.x3 * sin2 + points.y3 * cos2),
+      const p1 = this.rotatePoint(
+        this.spikeShape.x,
+        this.spikeShape.y,
+        cos,
+        sin,
+      );
+      const p2 = this.rotatePoint(
+        this.spikeShape.x2,
+        this.spikeShape.y2,
+        cos,
+        sin,
+      );
+      const p3 = this.rotatePoint(
+        this.spikeShape.x3,
+        this.spikeShape.y3,
+        cos,
+        sin,
       );
 
-      graphic
-        .moveTo(triangle.x, triangle.y)
-        .lineTo(triangle.x2, triangle.y2)
-        .lineTo(triangle.x3, triangle.y3)
+      this.mainGraphic
+        .moveTo(cx + p1.x, cy + p1.y)
+        .lineTo(cx + p2.x, cy + p2.y)
+        .lineTo(cx + p3.x, cy + p3.y)
         .closePath()
         .fill("#c08484");
 
-      if (stroke) {
-        graphic.stroke({ width: 4, color: "#000000" });
-      }
+      this.mainGraphic.stroke({ width: 2, color: "#000000" });
     }
   }
 
-  private drawPicks() {
-    for (let i = 0; i < this.count / 2; i++) {
-      this.picks[i] = new Graphics();
+  private rotatePoint(px: number, py: number, cos: number, sin: number) {
+    return {
+      x: px * cos - py * sin,
+      y: px * sin + py * cos,
+    };
+  }
 
-      const angle = (Math.PI * 2 * i) / (this.count / 2) + 0.8;
+  private drawAntennas() {
+    for (let i = 0; i < this.numberOfAntennas; i++) {
+      this.antennas[i] = new Graphics();
 
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
+      const { angle } = this.getRadialPoint(i, this.numberOfAntennas, 1);
+
+      const cos = Math.cos(angle + this.antennasAngleOffset);
+      const sin = Math.sin(angle + this.antennasAngleOffset);
 
       const x1 = cos * 20;
       const y1 = sin * 20;
@@ -90,40 +98,35 @@ export class Farm extends Building {
       const x2 = cos * 55;
       const y2 = sin * 55;
 
-      this.picks[i]
+      this.antennas[i]
         .moveTo(x1, y1)
         .lineTo(x2, y2)
         .stroke({ width: 4, color: "#000000" })
         .circle(x2, y2, 4)
         .fill("#000000");
 
-      this.visual.addChild(this.picks[i]);
+      this.visual.addChild(this.antennas[i]);
     }
   }
 
   animation() {
-    if (this.isAsc) {
-      this.length += 0.1;
-      if (this.length > 2) {
-        this.isAsc = false;
-      }
-    } else {
-      this.length -= 0.1;
-      if (this.length < -2) {
-        this.isAsc = true;
-      }
-    }
+    const direction = this.movingDirection ? 1 : -1;
 
-    for (let i = 0; i < this.count / 2; i++) {
-      const angle = (Math.PI * 2 * i) / (this.count / 2) + 0.8;
+    this.antennasOffset += 0.1 * direction;
 
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
+    if (this.antennasOffset > 2) this.movingDirection = false;
+    if (this.antennasOffset < -2) this.movingDirection = true;
 
-      const x1 = cos * this.length;
-      const y1 = sin * this.length;
+    for (let i = 0; i < this.numberOfAntennas; i++) {
+      const { angle } = this.getRadialPoint(i, this.numberOfAntennas, 1);
 
-      this.picks[i].position.set(x1, y1);
+      const cos = Math.cos(angle + this.antennasAngleOffset);
+      const sin = Math.sin(angle + this.antennasAngleOffset);
+
+      const x1 = cos * this.antennasOffset;
+      const y1 = sin * this.antennasOffset;
+
+      this.antennas[i].position.set(x1, y1);
     }
   }
 }

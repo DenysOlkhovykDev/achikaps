@@ -63,9 +63,14 @@ addBuilding(400, 500, buildingsLayer, "Platform");
 select(buildings[1]);
 addBuilding(600, 200, buildingsLayer, "Factory");
 addBuilding(600, 330, buildingsLayer, "Mine");
+addBuilding(400, 150, buildingsLayer, "Smelter");
 select(buildings[2]);
 addBuilding(600, 480, buildingsLayer, "Farm");
-addBuilding(600, 600, buildingsLayer, "Platform");
+addBuilding(600, 600, buildingsLayer, "MeatGrinder");
+addBuilding(450, 700, buildingsLayer, "Junkuard");
+addBuilding(350, 600, buildingsLayer, "House");
+addBuilding(400, 400, buildingsLayer, "Windmill");
+addBuilding(250, 500, buildingsLayer, "Laboratory");
 
 setIsBuildMode(false);
 

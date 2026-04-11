@@ -10,19 +10,16 @@ export class Platform extends Building {
 
   constructor(x: number, y: number) {
     super(x, y, 10);
+    this.baseSize = 40;
     this.draw();
   }
 
   draw() {
-    const graphic = new Graphics();
+    this.makeBasicCircle(this.baseSize, "#acacac", true);
 
-    graphic
-      .circle(0, 0, 40)
-      .stroke({ width: 3, color: "#000000" })
-      .fill("#acacac");
+    this.makeRoundShadow(this.baseSize);
 
-    this.makeRoundShadow(42);
-    this.visual.addChild(graphic);
+    this.visual.addChild(this.mainGraphic);
   }
 
   animation() {}
