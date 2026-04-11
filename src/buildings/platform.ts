@@ -22,5 +22,5 @@ export class Platform extends Building {
     this.visual.addChild(this.mainGraphic);
   }
 
-  animation() {}
+  animation(delta: number) {}
 }

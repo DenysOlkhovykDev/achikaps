@@ -74,15 +74,15 @@ export class Mine extends Building {
     return perpendicular;
   }
 
-  animation() {
+  animation(delta: number) {
     for (let i = 0; i < this.numberOfAntennas; i++) {
       const direction = this.rotationDirection ? 1 : -1;
 
       for (let i = 0; i < this.numberOfAntennas; i++) {
-        this.antennaArms[i].rotation += this.rotationSpeed * direction;
+        this.antennaArms[i].rotation += this.rotationSpeed * direction * delta;
       }
 
-      this.antennasArmsAngle += this.rotationSpeed * direction;
+      this.antennasArmsAngle += this.rotationSpeed * direction * delta;
 
       if (this.antennasArmsAngle > this.maxRotationAngle)
         this.rotationDirection = false;

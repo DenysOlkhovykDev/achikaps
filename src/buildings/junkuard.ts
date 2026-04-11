@@ -41,20 +41,20 @@ export class Junkuard extends Building {
     }
   }
 
-  animation() {
+  animation(delta: number) {
     for (const particle of this.particles) {
       if (particle.delay <= 0) {
-        particle.gfx.x += Math.cos(particle.angle) * particle.speed;
-        particle.gfx.y += Math.sin(particle.angle) * particle.speed;
+        particle.gfx.x += Math.cos(particle.angle) * particle.speed * delta;
+        particle.gfx.y += Math.sin(particle.angle) * particle.speed * delta;
 
-        particle.scale -= 0.012;
+        particle.scale -= 0.012 * delta;
         particle.gfx.scale.set(particle.scale);
 
         if (particle.scale <= 0.2) {
           this.resetParticle(particle);
         }
       } else {
-        particle.delay -= 1;
+        particle.delay -= delta;
       }
     }
   }

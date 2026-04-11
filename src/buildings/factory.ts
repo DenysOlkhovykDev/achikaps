@@ -52,7 +52,7 @@ export class Factory extends Building {
     this.visual.addChild(this.satelites);
   }
 
-  animation() {
-    this.satelites.rotation -= this.rotationSpeed;
+  animation(delta: number) {
+    this.satelites.rotation -= this.rotationSpeed * delta;
   }
 }

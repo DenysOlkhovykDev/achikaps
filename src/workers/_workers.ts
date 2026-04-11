@@ -15,8 +15,8 @@ export function addWorker(
   container.addChild(worker.root);
 }
 
-export function moveWorkers() {
+export function moveWorkers(delta: number) {
   for (const worker of workers) {
-    worker.moveWorker();
+    worker.moveWorker(delta);
   }
 }
