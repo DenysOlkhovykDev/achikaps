@@ -109,10 +109,10 @@ export class Farm extends Building {
     }
   }
 
-  animation() {
+  animation(delta: number) {
     const direction = this.movingDirection ? 1 : -1;
 
-    this.antennasOffset += 0.1 * direction;
+    this.antennasOffset += 0.1 * delta * direction;
 
     if (this.antennasOffset > 2) this.movingDirection = false;
     if (this.antennasOffset < -2) this.movingDirection = true;

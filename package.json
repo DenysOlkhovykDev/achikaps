@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite"
+    "dev": "vite",
+    "dev:test": "vite --mode test",
+    "test": "playwright test"
   },
   "repository": {
     "type": "git",
@@ -22,7 +24,9 @@
     "pixi.js": "^8.17.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/node": "^25.5.2",
+    "playwright": "^1.59.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.3"
   }

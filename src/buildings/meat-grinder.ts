@@ -73,9 +73,9 @@ export class MeatGrinder extends Building {
     this.mainGraphic.stroke({ width: 8, color: "#bd8e67", cap: "round" });
   }
 
-  animation() {
+  animation(delta: number) {
     for (let i = 0; i < this.numberOfBlades; i++) {
-      this.blades[i].rotation += this.rotationSpeed;
+      this.blades[i].rotation += this.rotationSpeed * delta;
     }
   }
 }

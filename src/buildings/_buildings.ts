@@ -62,8 +62,8 @@ export function select(node: Building) {
   setIsBuildMode(true);
 }
 
-export function animations() {
+export function animations(delta: number) {
   for (const building of buildings) {
-    building.animation();
+    building.animation(delta);
   }
 }

@@ -69,9 +69,9 @@ export class Laboratory extends Building {
     }
   }
 
-  animation() {
+  animation(delta: number) {
     for (let i = 0; i < this.numberOfSatelites; i++) {
-      this.satelites[i].rotation += this.rotationSpeed;
+      this.satelites[i].rotation += this.rotationSpeed * delta;
     }
   }
 }

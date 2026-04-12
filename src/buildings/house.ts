@@ -48,10 +48,10 @@ export class House extends Building {
     }
   }
 
-  animation() {
+  animation(delta: number) {
     if (this.changeSizeDelay <= 0) {
       const direction = this.movingDirection ? 1 : -1;
-      this.size += 0.01 * direction;
+      this.size += 0.01 * delta * direction;
       if (this.size > 1.1) {
         this.movingDirection = false;
       }
@@ -62,7 +62,7 @@ export class House extends Building {
 
       this.mainGraphic.scale.set(this.size);
     } else {
-      this.changeSizeDelay -= 1;
+      this.changeSizeDelay -= delta;
     }
   }
 }

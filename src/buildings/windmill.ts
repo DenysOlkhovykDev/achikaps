@@ -99,7 +99,7 @@ export class Windmill extends Building {
     }
   }
 
-  animation() {
-    this.windmillBlades.rotation += this.rotationSpeed;
+  animation(delta: number) {
+    this.windmillBlades.rotation += this.rotationSpeed * delta;
   }
 }

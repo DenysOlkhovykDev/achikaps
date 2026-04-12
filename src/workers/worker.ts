@@ -10,6 +10,7 @@ export class Worker {
   graphic: Graphics;
 
   health: number = 100;
+  speed: number = 2;
   color: string = "#000000";
   targetPlatform?: Building;
 
@@ -47,7 +48,7 @@ export class Worker {
     this.root.eventMode = "none";
   }
 
-  public moveWorker() {
+  public moveWorker(delta: number) {
     if (!this.targetPlatform) {
       if (!this.task) {
         this.pickTask();
@@ -74,8 +75,8 @@ export class Worker {
     const vx = dx / distance;
     const vy = dy / distance;
 
-    this.x += vx * 2;
-    this.y += vy * 2;
+    this.x += vx * this.speed * delta;
+    this.y += vy * this.speed * delta;
 
     this.root.position.set(this.x, this.y);
   }

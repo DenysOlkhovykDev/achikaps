@@ -58,7 +58,7 @@ export class Smelter extends Building {
     this.mainGraphic.stroke({ width: width, color: color });
   }
 
-  animation() {
-    this.mainGraphic.rotation += this.rotationSpeed;
+  animation(delta: number) {
+    this.mainGraphic.rotation += this.rotationSpeed * delta;
   }
 }
