@@ -1,14 +1,11 @@
-import { Container } from "pixi.js";
-import { setIsBuildMode } from "@menus/build-menu";
+import { Container, Graphics } from "pixi.js";
+import { addBuildMenu, setIsBuildMode } from "@menus/build-menu";
 
 import { addWorker } from "@workers/_workers";
 import { addBuilding, buildings, select } from "@buildings/_buildings";
 
-import { Task, JobType } from "@dashboard/task";
-import {
-  addTask,
-  getPosibleTaskWithHighestPriority,
-} from "@dashboard/_dashboard";
+import { JobType } from "@dashboard/task";
+import { addTask } from "@dashboard/_dashboard";
 
 import { Iron } from "@resources/iron";
 import { Meat } from "@resources/meat";
@@ -22,30 +19,34 @@ function getTestTaskFromURL() {
   return params.get("testTask") === "true";
 }
 
-export function createTestScene(
+export function createTestBulding(
   buildingsLayer: Container,
   workersLayer: Container,
   stage: Container,
 ) {
-  addBuilding(200, 400, buildingsLayer, "Platform");
+  addBuildMenu(stage);
+  setIsBuildMode(false);
+
+  addBuilding(300, 450, buildingsLayer, "Platform");
   select(buildings[0]);
-  addBuilding(400, 300, buildingsLayer, "Platform");
-  addBuilding(400, 500, buildingsLayer, "Platform");
+  addBuilding(500, 350, buildingsLayer, "Platform");
+  addBuilding(500, 550, buildingsLayer, "Platform");
   select(buildings[1]);
-  addBuilding(600, 200, buildingsLayer, "Factory");
-  addBuilding(600, 330, buildingsLayer, "Mine");
-  addBuilding(400, 150, buildingsLayer, "Smelter");
+  addBuilding(700, 250, buildingsLayer, "Factory");
+  addBuilding(700, 380, buildingsLayer, "Mine");
+  addBuilding(500, 200, buildingsLayer, "Smelter");
+  addBuilding(350, 250, buildingsLayer, "Engine");
   select(buildings[2]);
-  addBuilding(600, 480, buildingsLayer, "Farm");
-  addBuilding(600, 600, buildingsLayer, "MeatGrinder");
-  addBuilding(450, 700, buildingsLayer, "Junkuard");
-  addBuilding(350, 600, buildingsLayer, "House");
-  addBuilding(400, 400, buildingsLayer, "Windmill");
-  addBuilding(250, 500, buildingsLayer, "Laboratory");
+  addBuilding(700, 530, buildingsLayer, "Farm");
+  addBuilding(700, 650, buildingsLayer, "MeatGrinder");
+  addBuilding(550, 750, buildingsLayer, "Junkuard");
+  addBuilding(450, 650, buildingsLayer, "House");
+  addBuilding(500, 450, buildingsLayer, "Windmill");
+  addBuilding(350, 550, buildingsLayer, "Laboratory");
 
   setIsBuildMode(false);
 
-  addWorker(200, 400, workersLayer, buildings[0]);
+  addWorker(300, 450, workersLayer, buildings[0]);
 
   stage.addChild(buildingsLayer);
   stage.addChild(workersLayer);
@@ -89,4 +90,25 @@ export function createTestScene(
     addTask(buildings[2], JobType.delivery, 5, "Iron", 3);
     addTask(buildings[1], JobType.delivery, 9, "Meat", 4);
   }
+}
+
+export function createTestWorld(worldLayer: Container, stage: Container) {
+  const testCircle = new Graphics()
+    .circle(500, 100, 100)
+    .stroke({ width: 4, color: "#000000" })
+    .fill("#bababa");
+
+  testCircle
+    .circle(500, -100, 100)
+    .stroke({ width: 4, color: "#000000" })
+    .fill("#bababa");
+
+  testCircle
+    .circle(-500, -200, 100)
+    .stroke({ width: 4, color: "#000000" })
+    .fill("#bababa");
+
+  worldLayer.addChild(testCircle);
+
+  stage.addChild(worldLayer);
 }

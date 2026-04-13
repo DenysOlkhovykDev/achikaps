@@ -1,6 +1,5 @@
 import { Application, Container } from "pixi.js";
 import {
-  addBuildMenu,
   setIsBuildMode,
   getIsBuildMode,
   getBuildingType,
@@ -8,7 +7,8 @@ import {
 } from "@menus/build-menu";
 import { moveWorkers } from "@workers/_workers";
 import { addBuilding, animations } from "@buildings/_buildings";
-import { createTestScene } from "./test-poligon";
+import { createTestBulding, createTestWorld } from "./test-poligon";
+import { moveWorld } from "./moving/moving";
 
 const app = new Application();
 
@@ -21,20 +21,11 @@ await app.init({
 });
 
 (window as any).app = app;
-
 document.body.appendChild(app.canvas);
-
 app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
 
 const isTest = import.meta.env.MODE === "test";
-
-app.ticker.add((delta) => {
-  moveWorkers(delta.deltaTime);
-  if (!isTest) {
-    animations(delta.deltaTime);
-  }
-});
 
 if (isTest) {
   let seed = 123;
@@ -44,6 +35,16 @@ if (isTest) {
     return (seed - 1) / 2147483646;
   };
 }
+
+const keys = new Set<string>();
+
+window.addEventListener("keydown", (e) => {
+  keys.add(e.key.toLowerCase());
+});
+
+window.addEventListener("keyup", (e) => {
+  keys.delete(e.key.toLowerCase());
+});
 
 app.stage.on("pointerdown", (event) => {
   const { x, y } = event.global;
@@ -56,8 +57,19 @@ app.stage.on("pointerdown", (event) => {
 
 const buildingsLayer = new Container();
 const workersLayer = new Container();
+createTestBulding(buildingsLayer, workersLayer, app.stage);
 
-addBuildMenu(app.stage);
-setIsBuildMode(false);
+const worldLayer = new Container();
+createTestWorld(worldLayer, app.stage);
 
-createTestScene(buildingsLayer, workersLayer, app.stage);
+app.ticker.add((delta) => {
+  const dt = delta.deltaTime;
+
+  const angle = moveWorld(dt, worldLayer, keys, buildingsLayer, workersLayer);
+
+  moveWorkers(dt);
+
+  if (!isTest) {
+    animations(dt, angle);
+  }
+});

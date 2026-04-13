@@ -13,6 +13,7 @@ import { House } from "@buildings/house";
 import { Windmill } from "@buildings/windmill";
 import { Laboratory } from "@buildings/laboratory";
 import { Smelter } from "@buildings/smelter";
+import { Engine } from "@buildings/engine";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
 
@@ -27,6 +28,7 @@ const buildingMap: Record<string, BuildingConstructor> = {
   Windmill,
   Laboratory,
   Smelter,
+  Engine,
 };
 
 export const buildings: Building[] = [];
@@ -62,8 +64,8 @@ export function select(node: Building) {
   setIsBuildMode(true);
 }
 
-export function animations(delta: number) {
+export function animations(delta: number, movingAngle: number) {
   for (const building of buildings) {
-    building.animation(delta);
+    building.animation(delta, movingAngle);
   }
 }
