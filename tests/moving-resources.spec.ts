@@ -10,7 +10,7 @@ test("moving-resources", async ({ page }) => {
 
   await page.waitForFunction(() => (window as any).app !== undefined);
 
-  await skipFrames(page, 2000);
+  await skipFrames(page, 2200);
 
   await page.evaluate(() => {
     console.log(performance.now());

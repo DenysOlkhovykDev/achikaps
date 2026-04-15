@@ -37,7 +37,7 @@ export abstract class Building {
 
   protected abstract draw(): void;
 
-  public abstract animation(delta: number): void;
+  public abstract animation(delta: number, movingAngle?: number): void;
 
   addLinkedBuilding(node: Building) {
     this.links.push(node);
