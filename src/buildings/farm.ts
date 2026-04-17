@@ -14,7 +14,6 @@ export class Farm extends Building {
 
   constructor(x: number, y: number) {
     super(x, y, 5);
-    this.baseSize = 40;
     this.draw();
   }
 
@@ -92,11 +91,11 @@ export class Farm extends Building {
       const cos = Math.cos(angle + this.antennasAngleOffset);
       const sin = Math.sin(angle + this.antennasAngleOffset);
 
-      const x1 = cos * 20;
-      const y1 = sin * 20;
+      const x1 = cos * (this.baseSize - 20);
+      const y1 = sin * (this.baseSize - 20);
 
-      const x2 = cos * 55;
-      const y2 = sin * 55;
+      const x2 = cos * (this.baseSize + 15);
+      const y2 = sin * (this.baseSize + 15);
 
       this.antennas[i]
         .moveTo(x1, y1)

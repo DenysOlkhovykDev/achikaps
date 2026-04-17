@@ -9,7 +9,6 @@ export class MeatGrinder extends Building {
 
   constructor(x: number, y: number) {
     super(x, y, 5);
-    this.baseSize = 40;
     this.draw();
   }
 

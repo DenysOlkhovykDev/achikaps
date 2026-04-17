@@ -16,7 +16,6 @@ export class Junkuard extends Building {
 
   constructor(x: number, y: number) {
     super(x, y, 20);
-    this.baseSize = 60;
     this.draw();
   }
 

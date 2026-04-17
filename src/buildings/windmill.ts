@@ -8,13 +8,12 @@ export class Windmill extends Building {
 
   numberOfDecorativeWindmillBlades: number = 3;
   tracesWidth: number = 1.6;
-  traceRadiuses = [11, 21, 31];
+  traceRadiuses = [this.baseSize - 25, this.baseSize - 15, this.baseSize - 5];
 
   windmillBlades: Graphics = new Graphics();
 
   constructor(x: number, y: number) {
     super(x, y, 10);
-    this.baseSize = 36;
     this.draw();
   }
 

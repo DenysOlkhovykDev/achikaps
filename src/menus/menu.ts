@@ -54,17 +54,19 @@ export class Menu {
     background.on("pointerdown", (e) => {
       e.stopPropagation();
       item.onClick?.();
-      this.hide();
+      this.menuHide();
     });
 
     this.container.addChild(background, text);
   }
 
-  show(parent: Container) {
+  menuShow(parent: Container) {
+    console.log("menuShow");
     parent.addChild(this.container);
   }
 
-  hide() {
+  menuHide() {
+    console.log("menuHide");
     this.container.parent?.removeChild(this.container);
   }
 }

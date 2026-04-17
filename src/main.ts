@@ -6,7 +6,7 @@ import {
   setBuildingType,
 } from "@menus/build-menu";
 import { moveWorkers } from "@workers/_workers";
-import { addBuilding, animations } from "@buildings/_buildings";
+import { addBuilding, addBlueprint, animations } from "@buildings/_buildings";
 import { createTestBulding, createTestWorld } from "./test-poligon";
 import { moveWorld } from "./moving/moving";
 
@@ -48,8 +48,9 @@ window.addEventListener("keyup", (e) => {
 
 app.stage.on("pointerdown", (event) => {
   const { x, y } = event.global;
+  console.log("stage", getIsBuildMode(), getBuildingType());
   if (getIsBuildMode() && getBuildingType() !== "") {
-    addBuilding(x, y, buildingsLayer, getBuildingType());
+    addBlueprint(x, y, buildingsLayer, getBuildingType());
     setBuildingType("");
   }
   setIsBuildMode(false);

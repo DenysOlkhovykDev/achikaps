@@ -1,7 +1,12 @@
 import { Container } from "pixi.js";
 import { Building } from "@buildings/building";
 import { Road } from "@roads/road";
+import { BlueprintRoad } from "@roads/blueprint-road";
 import { setIsBuildMode } from "@menus/build-menu";
+import { JobType } from "@dashboard/task";
+import { addTask } from "@dashboard/_dashboard";
+import { dashboard } from "@dashboard/_dashboard";
+import { Resource } from "@resources/resource";
 
 import { Platform } from "@buildings/platform";
 import { Factory } from "@buildings/factory";
@@ -14,6 +19,7 @@ import { Windmill } from "@buildings/windmill";
 import { Laboratory } from "@buildings/laboratory";
 import { Smelter } from "@buildings/smelter";
 import { Engine } from "@buildings/engine";
+import { Blueprint } from "@buildings/blueprint";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
 
@@ -31,7 +37,108 @@ const buildingMap: Record<string, BuildingConstructor> = {
   Engine,
 };
 
+export const buidingParameters = {
+  Blueprint: { baseSize: 0, minLinkLength: 120, maxLinkLength: 200, craft: [] },
+  Platform: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Factory: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 4 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Mine: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [{ type: "Iron", amount: 5 }],
+  },
+  Farm: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 3 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  MeatGrinder: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 6 },
+      { type: "Meat", amount: 1 },
+    ],
+  },
+  Junkuard: {
+    baseSize: 60,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 5 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  House: {
+    baseSize: 25,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 1 },
+      { type: "Perl", amount: 5 },
+    ],
+  },
+  Windmill: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 6 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  Laboratory: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Meat", amount: 1 },
+      { type: "Iron", amount: 5 },
+    ],
+  },
+  Smelter: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Meat", amount: 2 },
+      { type: "Iron", amount: 5 },
+    ],
+  },
+  Engine: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 3 },
+      { type: "Perl", amount: 3 },
+    ],
+  },
+};
+
 export const buildings: Building[] = [];
+export const blueprints: Blueprint[] = [];
 let selectedBuilding: number;
 
 export function addBuilding(
@@ -52,11 +159,49 @@ export function addBuilding(
 
     const line = new Road(from, to);
 
-    from.addLinkedBuilding(to);
-    to.addLinkedBuilding(from);
+    from.addLinkedBuilding(line);
+    to.addLinkedBuilding(line);
 
     container.addChildAt(line.graphic, 0);
   }
+
+  return building;
+}
+
+export function addBlueprint(
+  x: number,
+  y: number,
+  container: Container,
+  buildingType: string,
+) {
+  const blueprint = new Blueprint(x, y, buildingType);
+
+  blueprints.push(blueprint);
+  container.addChild(blueprint.root);
+
+  if (buildings.length > 1) {
+    const from = buildings[selectedBuilding];
+
+    const line = new BlueprintRoad(from, blueprint);
+
+    blueprint.addLinkedBuilding(line);
+
+    container.addChildAt(line.graphic, 0);
+    const craft =
+      buidingParameters[buildingType as keyof typeof buidingParameters].craft;
+    for (let i = 0; i < craft.length; i++) {
+      addTask(from, JobType.build, 5, craft[i].type, craft[i].amount);
+      blueprint.tasks.set(craft[i].type, craft[i].amount);
+      blueprint.allTasks.set(craft[i].type, craft[i].amount);
+    }
+    const source = blueprint.links[0].from;
+
+    source.onResourceAdded((resource: Resource, building: Building) => {
+      blueprint.onBlueprintResourceAdded(resource, container);
+    });
+  }
+
+  return blueprint;
 }
 
 export function select(node: Building) {
@@ -67,5 +212,27 @@ export function select(node: Building) {
 export function animations(delta: number, movingAngle: number) {
   for (const building of buildings) {
     building.animation(delta, movingAngle);
+  }
+  for (const blueprint of blueprints) {
+    for (const building of buildings) {
+      blueprint.checkAndMove(building, delta);
+    }
+  }
+  for (const blueprint of blueprints) {
+    for (const blueprintForCheck of blueprints) {
+      if (blueprint !== blueprintForCheck) {
+        blueprint.checkAndMove(blueprintForCheck, delta);
+      }
+    }
+  }
+
+  for (let i = blueprints.length - 1; i >= 0; i--) {
+    if (blueprints[i].redraws > 5000) {
+      for (const link of blueprints[i].links) {
+        link.graphic.destroy();
+      }
+      blueprints[i].root.destroy();
+      blueprints.splice(i, 1);
+    }
   }
 }
