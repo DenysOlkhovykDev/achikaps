@@ -82,10 +82,19 @@ export class Worker {
   }
 
   private pickTask() {
-    this.task = getPosibleTaskWithHighestPriority(
-      this.currentPlatform,
-      JobType.delivery,
-    );
+    const currentJobType = "build";
+
+    if (currentJobType === "build") {
+      this.task = getPosibleTaskWithHighestPriority(
+        this.currentPlatform,
+        JobType.build,
+      );
+    } else if (currentJobType === "delivery") {
+      this.task = getPosibleTaskWithHighestPriority(
+        this.currentPlatform,
+        JobType.delivery,
+      );
+    }
 
     if (!this.task) return;
 
@@ -118,7 +127,9 @@ export class Worker {
 
   private handleResourceLogic() {
     if (this.resourceIndex !== undefined) {
-      this.inventory = this.currentPlatform.takeResource(this.resourceIndex);
+      this.inventory = this.currentPlatform.takeResourceByIndex(
+        this.resourceIndex,
+      );
       this.resourceIndex = undefined;
 
       if (this.inventory) {

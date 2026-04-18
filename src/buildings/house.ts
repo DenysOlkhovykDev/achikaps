@@ -11,7 +11,6 @@ export class House extends Building {
 
   constructor(x: number, y: number) {
     super(x, y, 5);
-    this.baseSize = 25;
     this.draw();
   }
 
@@ -33,11 +32,11 @@ export class House extends Building {
       const cos = Math.cos(angle + this.antennasAngleOffset);
       const sin = Math.sin(angle + this.antennasAngleOffset);
 
-      const x1 = cos * 20;
-      const y1 = sin * 20;
+      const x1 = cos * (this.baseSize - 5);
+      const y1 = sin * (this.baseSize - 5);
 
-      const x2 = cos * 38;
-      const y2 = sin * 38;
+      const x2 = cos * (this.baseSize + 18);
+      const y2 = sin * (this.baseSize + 18);
 
       this.mainGraphic
         .moveTo(x1, y1)

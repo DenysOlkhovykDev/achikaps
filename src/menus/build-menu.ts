@@ -27,6 +27,41 @@ const menuData: MenuItem[] = [
     color: "#dba8a8",
     onClick: () => setBuildingType("Farm"),
   },
+  {
+    label: "Junkuard",
+    color: "#b7b697",
+    onClick: () => setBuildingType("Junkuard"),
+  },
+  {
+    label: "MeatGrinder",
+    color: "#c0ac9a",
+    onClick: () => setBuildingType("MeatGrinder"),
+  },
+  {
+    label: "House",
+    color: "#a4bc9a",
+    onClick: () => setBuildingType("House"),
+  },
+  {
+    label: "Windmill",
+    color: "#c5cade",
+    onClick: () => setBuildingType("Windmill"),
+  },
+  {
+    label: "Laboratory",
+    color: "#caa5c3",
+    onClick: () => setBuildingType("Laboratory"),
+  },
+  {
+    label: "Smelter",
+    color: "#dba8a8",
+    onClick: () => setBuildingType("Smelter"),
+  },
+  {
+    label: "Engine",
+    color: "#a8b1db",
+    onClick: () => setBuildingType("Engine"),
+  },
 ];
 
 export function addBuildMenu(container: Container) {
@@ -38,7 +73,7 @@ export function addBuildMenu(container: Container) {
     .lineTo(x + 25, y)
     .moveTo(x, y - 25)
     .lineTo(x, y + 25)
-    .stroke({ width: 6, color: "#00ff60" });
+    .stroke({ width: 16, color: "#00ff60" });
 
   menuTrigger = new MenuTrigger(x, y, menuData, 200, 50, graphic, container);
 }
@@ -46,10 +81,11 @@ export function addBuildMenu(container: Container) {
 export function setIsBuildMode(type: boolean) {
   isBuildMode = type;
   if (isBuildMode) {
-    menuTrigger.show();
+    menuTrigger.menuTriggershow();
   } else {
-    menuTrigger.hide();
+    menuTrigger.menuTriggerHide();
   }
+  console.log("setIsBuildMode", isBuildMode);
 }
 
 export function getIsBuildMode() {

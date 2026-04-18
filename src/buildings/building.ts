@@ -1,5 +1,9 @@
 import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
 import { Resource } from "@resources/resource";
+import { buidingParameters } from "@buildings/_buildings";
+import { Road } from "@roads/road";
+
+type ResourceListener = (resource: Resource, building: Building) => void;
 
 export abstract class Building {
   root: Container = new Container();
@@ -8,10 +12,12 @@ export abstract class Building {
   baseSize: number = 0;
 
   visual: Container;
-  links: Building[] = [];
+  links: Road[] = [];
 
   recources: Resource[] = [];
   resourceContainer: Container = new Container();
+
+  private resourceListeners: ResourceListener[] = [];
 
   constructor(
     public x: number,
@@ -26,6 +32,11 @@ export abstract class Building {
 
     this.root.addChild(this.visual);
     this.root.addChild(this.resourceContainer);
+
+    this.baseSize =
+      buidingParameters[
+        this.constructor.name as keyof typeof buidingParameters
+      ].baseSize;
   }
 
   protected initEvents() {
@@ -39,8 +50,8 @@ export abstract class Building {
 
   public abstract animation(delta: number, movingAngle?: number): void;
 
-  addLinkedBuilding(node: Building) {
-    this.links.push(node);
+  addLinkedBuilding(line: Road) {
+    this.links.push(line);
   }
 
   onClick(event: FederatedPointerEvent) {
@@ -84,6 +95,10 @@ export abstract class Building {
     }
   }
 
+  onResourceAdded(fn: ResourceListener) {
+    this.resourceListeners.push(fn);
+  }
+
   tryToAddResource(resource: Resource) {
     if (this.recources.length >= this.inventorySize) return false;
 
@@ -92,15 +107,29 @@ export abstract class Building {
 
     this.placeResource(resource);
 
+    for (const fn of this.resourceListeners) {
+      fn(resource, this);
+    }
+
     return true;
   }
 
-  takeResource(resourceIndex: number): Resource {
+  takeResourceByIndex(resourceIndex: number): Resource {
     const [res] = this.recources.splice(resourceIndex, 1);
 
     this.resourceContainer.removeChild(res.graphic);
 
     return res;
+  }
+
+  takeResourceByName(resourceName: string) {
+    for (let i = 0; i < this.recources.length; i++) {
+      if (this.recources[i].constructor.name === resourceName) {
+        const [res] = this.recources.splice(i, 1);
+
+        this.resourceContainer.removeChild(res.graphic);
+      }
+    }
   }
 
   makeRoundShadow(radius: number) {

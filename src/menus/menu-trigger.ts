@@ -28,20 +28,23 @@ export class MenuTrigger {
 
   private toggleMenu() {
     if (this.menu) {
-      this.menu.hide();
+      this.menu.menuHide();
       this.menu = undefined;
-      return;
+    } else {
+      this.menu = new Menu(this.items, this.x, this.y, this.width, this.height);
+      this.menu.menuShow(this.parent);
     }
-
-    this.menu = new Menu(this.items, this.x, this.y, this.width, this.height);
-    this.menu.show(this.parent);
   }
 
-  show() {
+  menuTriggershow() {
+    console.log("menuTriggerShow");
     this.parent.addChild(this.graphic);
   }
 
-  hide() {
+  menuTriggerHide() {
+    console.log("menuTriggerHide");
     this.parent.removeChild(this.graphic);
+    this.menu?.menuHide();
+    this.menu = undefined;
   }
 }

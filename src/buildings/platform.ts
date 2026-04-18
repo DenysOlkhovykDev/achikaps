@@ -1,4 +1,4 @@
-import { FederatedPointerEvent, Graphics } from "pixi.js";
+import { FederatedPointerEvent } from "pixi.js";
 import { Building } from "@buildings/building";
 import { select } from "@buildings/_buildings";
 
@@ -10,7 +10,6 @@ export class Platform extends Building {
 
   constructor(x: number, y: number) {
     super(x, y, 10);
-    this.baseSize = 40;
     this.draw();
   }
 
