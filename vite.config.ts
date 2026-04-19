@@ -11,6 +11,7 @@ export default defineConfig({
       "@menus": path.resolve(__dirname, "src/menus"),
       "@roads": path.resolve(__dirname, "src/roads"),
       "@utils": path.resolve(__dirname, "src/utils"),
+      "@test-poligons": path.resolve(__dirname, "src/test-poligons"),
     },
   },
 });

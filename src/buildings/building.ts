@@ -2,8 +2,9 @@ import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
 import { Resource } from "@resources/resource";
 import { buidingParameters } from "@buildings/_buildings";
 import { Road } from "@roads/road";
+import { Task } from "@dashboard/task";
 
-type ResourceListener = (resource: Resource, building: Building) => void;
+type ResourceListener = (task: Task) => void;
 
 export abstract class Building {
   root: Container = new Container();
@@ -97,9 +98,16 @@ export abstract class Building {
 
   onResourceAdded(fn: ResourceListener) {
     this.resourceListeners.push(fn);
+
+    return () => {
+      const index = this.resourceListeners.indexOf(fn);
+      if (index !== -1) {
+        this.resourceListeners.splice(index, 1);
+      }
+    };
   }
 
-  tryToAddResource(resource: Resource) {
+  tryToAddResource(resource: Resource, task: Task) {
     if (this.recources.length >= this.inventorySize) return false;
 
     this.recources.push(resource);
@@ -108,7 +116,7 @@ export abstract class Building {
     this.placeResource(resource);
 
     for (const fn of this.resourceListeners) {
-      fn(resource, this);
+      fn(task);
     }
 
     return true;

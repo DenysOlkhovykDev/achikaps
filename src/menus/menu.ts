@@ -50,6 +50,7 @@ export class Menu {
 
     text.x = 10;
     text.y = yOffset + 10;
+    text.eventMode = "none";
 
     background.on("pointerdown", (e) => {
       e.stopPropagation();
@@ -61,12 +62,10 @@ export class Menu {
   }
 
   menuShow(parent: Container) {
-    console.log("menuShow");
     parent.addChild(this.container);
   }
 
   menuHide() {
-    console.log("menuHide");
     this.container.parent?.removeChild(this.container);
   }
 }

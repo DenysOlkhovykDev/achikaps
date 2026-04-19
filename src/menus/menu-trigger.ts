@@ -37,12 +37,10 @@ export class MenuTrigger {
   }
 
   menuTriggershow() {
-    console.log("menuTriggerShow");
     this.parent.addChild(this.graphic);
   }
 
   menuTriggerHide() {
-    console.log("menuTriggerHide");
     this.parent.removeChild(this.graphic);
     this.menu?.menuHide();
     this.menu = undefined;

@@ -14,7 +14,7 @@ export async function skipFrames(page: Page, frames: number, step = 16.66) {
       app.ticker.stop();
 
       let time = 0;
-      const scale = 3;
+      const scale = 1;
 
       for (let i = 0; i < frames / scale; i++) {
         time += step * scale;
