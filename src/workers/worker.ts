@@ -2,7 +2,10 @@ import { Graphics, Container } from "pixi.js";
 import { Building } from "@buildings/building";
 
 import { Resource } from "@resources/resource";
-import { getPosibleTaskWithHighestPriority } from "@dashboard/_dashboard";
+import {
+  dashboard,
+  getPosibleTaskWithHighestPriority,
+} from "@dashboard/_dashboard";
 import { Task, JobType } from "@dashboard/task";
 
 export class Worker {
@@ -82,14 +85,25 @@ export class Worker {
   }
 
   private pickTask() {
-    const currentJobType = "build";
+    // const currentJobType = "build";
 
-    if (currentJobType === "build") {
-      this.task = getPosibleTaskWithHighestPriority(
-        this.currentPlatform,
-        JobType.build,
-      );
-    } else if (currentJobType === "delivery") {
+    // if (currentJobType === "build") {
+    //   this.task = getPosibleTaskWithHighestPriority(
+    //     this.currentPlatform,
+    //     JobType.build,
+    //   );
+    // } else if (currentJobType === "delivery") {
+    //   this.task = getPosibleTaskWithHighestPriority(
+    //     this.currentPlatform,
+    //     JobType.delivery,
+    //   );
+    // }
+
+    this.task = getPosibleTaskWithHighestPriority(
+      this.currentPlatform,
+      JobType.build,
+    );
+    if (!this.task) {
       this.task = getPosibleTaskWithHighestPriority(
         this.currentPlatform,
         JobType.delivery,
@@ -148,7 +162,9 @@ export class Worker {
 
     if (this.inventory) {
       this.root.removeChild(this.inventory.graphic);
-      this.currentPlatform.tryToAddResource(this.inventory);
+      if (this.task) {
+        this.currentPlatform.tryToAddResource(this.inventory, this.task);
+      }
 
       this.inventory = undefined;
       this.task = undefined;

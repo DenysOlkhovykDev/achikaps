@@ -3,7 +3,7 @@ import { Building } from "@buildings/building";
 import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
 import { setIsBuildMode } from "@menus/build-menu";
-import { JobType } from "@dashboard/task";
+import { JobType, Task } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
 import { dashboard } from "@dashboard/_dashboard";
 import { Resource } from "@resources/resource";
@@ -179,7 +179,7 @@ export function addBlueprint(
   blueprints.push(blueprint);
   container.addChild(blueprint.root);
 
-  if (buildings.length > 1) {
+  if (buildings.length > 0) {
     const from = buildings[selectedBuilding];
 
     const line = new BlueprintRoad(from, blueprint);
@@ -189,16 +189,25 @@ export function addBlueprint(
     container.addChildAt(line.graphic, 0);
     const craft =
       buidingParameters[buildingType as keyof typeof buidingParameters].craft;
+
     for (let i = 0; i < craft.length; i++) {
-      addTask(from, JobType.build, 5, craft[i].type, craft[i].amount);
-      blueprint.tasks.set(craft[i].type, craft[i].amount);
-      blueprint.allTasks.set(craft[i].type, craft[i].amount);
+      for (let j = 0; j < craft[i].amount; j++) {
+        const task = addTask(from, JobType.build, 5, craft[i].type, 1);
+        if (task) {
+          blueprint.tasks.push(task);
+        }
+        blueprint.resources.push(craft[i].type);
+      }
     }
+
     const source = blueprint.links[0].from;
 
-    source.onResourceAdded((resource: Resource, building: Building) => {
-      blueprint.onBlueprintResourceAdded(resource, container);
+    const unsubscribe = source.onResourceAdded((task: Task) => {
+      blueprint.onBlueprintResourceAdded(task, container);
     });
+
+    blueprint.unsubscribe = unsubscribe;
+    blueprint.blueprinToBuilding(container);
   }
 
   return blueprint;
@@ -213,6 +222,9 @@ export function animations(delta: number, movingAngle: number) {
   for (const building of buildings) {
     building.animation(delta, movingAngle);
   }
+}
+
+export function movingBlueprints(delta: number) {
   for (const blueprint of blueprints) {
     for (const building of buildings) {
       blueprint.checkAndMove(building, delta);
@@ -234,5 +246,23 @@ export function animations(delta: number, movingAngle: number) {
       blueprints[i].root.destroy();
       blueprints.splice(i, 1);
     }
+  }
+}
+
+export function deleteBlueprint(blueprint: Blueprint) {
+  blueprint.unsubscribe?.();
+  let index = -1;
+  for (let i = 0; i < blueprints.length; i++) {
+    if (blueprints[i] === blueprint) {
+      index = i;
+    }
+  }
+  for (const link of blueprint.links) {
+    link.graphic.destroy();
+  }
+  blueprint.root.destroy();
+
+  if (index !== -1) {
+    blueprints.splice(index, 1);
   }
 }

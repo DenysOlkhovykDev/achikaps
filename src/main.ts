@@ -6,8 +6,14 @@ import {
   setBuildingType,
 } from "@menus/build-menu";
 import { moveWorkers } from "@workers/_workers";
-import { addBuilding, addBlueprint, animations } from "@buildings/_buildings";
-import { createTestBulding, createTestWorld } from "./test-poligon";
+import {
+  addBuilding,
+  addBlueprint,
+  animations,
+  movingBlueprints,
+} from "@buildings/_buildings";
+import { createTestBulding } from "./test-poligons/test-building";
+import { createTestWorld } from "@test-poligons/test-world";
 import { moveWorld } from "./moving/moving";
 
 const app = new Application();
@@ -48,7 +54,6 @@ window.addEventListener("keyup", (e) => {
 
 app.stage.on("pointerdown", (event) => {
   const { x, y } = event.global;
-  console.log("stage", getIsBuildMode(), getBuildingType());
   if (getIsBuildMode() && getBuildingType() !== "") {
     addBlueprint(x, y, buildingsLayer, getBuildingType());
     setBuildingType("");
@@ -64,7 +69,7 @@ const worldLayer = new Container();
 createTestWorld(worldLayer, app.stage);
 
 app.ticker.add((delta) => {
-  const dt = delta.deltaTime;
+  const dt = 1;
 
   const angle = moveWorld(dt, worldLayer, keys, buildingsLayer, workersLayer);
 
@@ -73,4 +78,6 @@ app.ticker.add((delta) => {
   if (!isTest) {
     animations(dt, angle);
   }
+
+  movingBlueprints(dt);
 });

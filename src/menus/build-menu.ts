@@ -85,7 +85,6 @@ export function setIsBuildMode(type: boolean) {
   } else {
     menuTrigger.menuTriggerHide();
   }
-  console.log("setIsBuildMode", isBuildMode);
 }
 
 export function getIsBuildMode() {

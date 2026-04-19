@@ -29,11 +29,15 @@ export function addTask(
 
     if (countOfResources - result[resource] > 0) {
       for (let i = 0; i < countOfResources - result[resource]; i++) {
-        dashboard.push(new Task(target, jobType, priority, resource));
+        const task = new Task(target, jobType, priority, resource);
+        dashboard.push(task);
+        return task;
       }
     }
   } else {
+    const task = new Task(target, jobType, priority);
     dashboard.push(new Task(target, jobType, priority));
+    return task;
   }
 }
 

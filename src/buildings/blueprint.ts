@@ -4,12 +4,14 @@ import { buidingParameters } from "@buildings/_buildings";
 import { getDistance } from "@utils/distance";
 import { Resource } from "@resources/resource";
 import { addBuilding } from "@buildings/_buildings";
+import { deleteBlueprint } from "@buildings/_buildings";
+import { Task } from "@dashboard/task";
 
 export class Blueprint extends Building {
   redraws: number = 0;
 
-  tasks: Map<string, number> = new Map();
-  allTasks: Map<string, number> = new Map();
+  tasks: Task[] = [];
+  resources: string[] = [];
 
   constructor(
     x: number,
@@ -33,26 +35,6 @@ export class Blueprint extends Building {
   }
 
   animation(delta: number) {}
-
-  public onBlueprintResourceAdded(resource: Resource, container: Container) {
-    const resourceName = this.tasks.get(String(resource.constructor.name));
-    if (resourceName && resourceName > 0) {
-      if (resourceName > 1) {
-        this.tasks.set(String(resource.constructor.name), resourceName - 1);
-      } else {
-        this.tasks.delete(String(resource.constructor.name));
-      }
-    }
-
-    if (this.tasks.size === 0) {
-      addBuilding(this.x, this.y, container, this.type);
-      for (const task of this.allTasks) {
-        for (let i = 0; i < task[1]; i++) {
-          this.links[0].from.takeResourceByName(task[0]);
-        }
-      }
-    }
-  }
 
   private drawDashedCircle(radius: number, dash = 8, gap = 6) {
     const g = this.mainGraphic;
@@ -139,18 +121,18 @@ export class Blueprint extends Building {
     const prevRedraws = this.redraws;
 
     if (distanceBetween <= minDistanceToBuilding) {
-      this.redraws++;
+      this.redraws += 5;
       this.moveAwayFrom(building.x, building.y, delta, 2);
     }
 
     if (linkLength <= minLinkLength) {
       this.redraws++;
-      this.moveAwayFrom(this.links[0].from.x, this.links[0].from.y, delta, 0.1);
+      this.moveAwayFrom(this.links[0].from.x, this.links[0].from.y, delta, 0.5);
     }
 
     if (linkLength >= maxLinkLength) {
       this.redraws++;
-      this.moveTowards(this.links[0].from.x, this.links[0].from.y, delta, 0.1);
+      this.moveTowards(this.links[0].from.x, this.links[0].from.y, delta, 0.5);
     }
 
     this.checkLinksCollision(building, delta);
@@ -197,9 +179,33 @@ export class Blueprint extends Building {
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < minDist) {
-        this.redraws++;
+        this.redraws += 5;
         this.moveAwayFrom(closestX, closestY, delta, 2);
       }
     }
   }
+
+  public onBlueprintResourceAdded(task: Task, container: Container) {
+    if (task.resource) {
+      const index = this.tasks.indexOf(task);
+      if (index !== -1) {
+        this.tasks.splice(index, 1);
+      }
+    }
+    this.blueprinToBuilding(container);
+  }
+
+  public blueprinToBuilding(container: Container) {
+    if (this.tasks.length === 0) {
+      addBuilding(this.x, this.y, container, this.type);
+      for (const resource of this.resources) {
+        if (resource) {
+          this.links[0].from.takeResourceByName(resource);
+        }
+      }
+      deleteBlueprint(this);
+    }
+  }
+
+  public unsubscribe?: () => void;
 }
