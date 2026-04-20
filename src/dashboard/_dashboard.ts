@@ -61,6 +61,15 @@ export function getPosibleTaskWithHighestPriority(
   for (const task of dashboard) {
     if (task.jobType !== jobType) continue;
 
+    if (jobType === JobType.building || jobType === JobType.delivering) {
+      const [path, resourceIndex] = task.getRouteForResource(
+        currentBuilding,
+        false,
+      );
+
+      if (path.length === 0 || resourceIndex === undefined) continue;
+    }
+
     const distanceToTask = distances.get(task.target)!;
     const score = task.priority - distanceToTask;
 

@@ -4,9 +4,9 @@ import { aStar, dijkstra, buildPath } from "@utils/algorithms";
 import { buildings } from "@buildings/_buildings";
 
 export const JobType = {
-  delivery: "delivery",
-  build: "build",
-  produce: "produce",
+  delivering: "delivering",
+  building: "building",
+  production: "production",
   defend: "defend",
 } as const;
 
@@ -26,6 +26,7 @@ export class Task {
 
   public getRouteForResource(
     start: Building,
+    reserve: boolean,
   ): [Building[], number | undefined] {
     const { distances, previous } = dijkstra(start);
 
@@ -51,7 +52,9 @@ export class Task {
 
     if (!bestBuilding) return [[], undefined];
 
-    bestBuilding.recources[resourceIndex!].isReserved = true;
+    if (reserve) {
+      bestBuilding.recources[resourceIndex!].isReserved = true;
+    }
 
     return [buildPath(previous, bestBuilding), resourceIndex];
   }

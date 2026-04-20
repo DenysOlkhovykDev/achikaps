@@ -192,7 +192,7 @@ export function addBlueprint(
 
     for (let i = 0; i < craft.length; i++) {
       for (let j = 0; j < craft[i].amount; j++) {
-        const task = addTask(from, JobType.build, 5, craft[i].type, 1);
+        const task = addTask(from, JobType.building, 5, craft[i].type, 1);
         if (task) {
           blueprint.tasks.push(task);
         }

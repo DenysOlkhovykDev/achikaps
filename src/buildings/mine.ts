@@ -1,5 +1,6 @@
 import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
+import { Iron } from "@resources/iron";
 
 export class Mine extends Building {
   numberOfAntennas: number = 4;
@@ -15,6 +16,8 @@ export class Mine extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5);
     this.draw();
+    this.priorityForTasks = 5;
+    this.genProductionTask();
   }
 
   draw() {
@@ -88,5 +91,14 @@ export class Mine extends Building {
       if (this.antennasArmsAngle < -this.maxRotationAngle)
         this.rotationDirection = true;
     }
+  }
+
+  genProductionTask() {
+    this.generateProductionTask();
+  }
+
+  override tryToDoProduction() {
+    const perl = new Iron();
+    return this.tryToAddResource(perl);
   }
 }

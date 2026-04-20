@@ -7,6 +7,7 @@ import {
   getPosibleTaskWithHighestPriority,
 } from "@dashboard/_dashboard";
 import { Task, JobType } from "@dashboard/task";
+import { delay } from "@utils/delay";
 
 export class Worker {
   root: Container = new Container();
@@ -22,11 +23,13 @@ export class Worker {
   path: Building[] = [];
   resourceIndex?: number;
   task: Task | undefined;
+  isWorking: boolean = false;
 
   constructor(
     public x: number,
     public y: number,
     public currentPlatform: Building,
+    public profession: string,
   ) {
     this.graphic = new Graphics();
     this.draw();
@@ -38,6 +41,20 @@ export class Worker {
 
   protected draw() {
     this.graphic.clear();
+
+    let jobColor = "#000000";
+    if (this.profession === "building") {
+      jobColor = "#0000ff";
+    } else if (this.profession === "delivering") {
+      jobColor = "#eeff00";
+    } else if (this.profession === "production") {
+      jobColor = "#00ff00";
+    }
+
+    this.graphic
+      .circle(0, 0, 10)
+      .stroke({ width: 2, color: jobColor })
+      .fill(this.color);
 
     this.graphic
       .circle(0, 0, 8)
@@ -85,35 +102,48 @@ export class Worker {
   }
 
   private pickTask() {
-    // const currentJobType = "build";
-
-    // if (currentJobType === "build") {
-    //   this.task = getPosibleTaskWithHighestPriority(
-    //     this.currentPlatform,
-    //     JobType.build,
-    //   );
-    // } else if (currentJobType === "delivery") {
-    //   this.task = getPosibleTaskWithHighestPriority(
-    //     this.currentPlatform,
-    //     JobType.delivery,
-    //   );
-    // }
-
-    this.task = getPosibleTaskWithHighestPriority(
-      this.currentPlatform,
-      JobType.build,
-    );
-    if (!this.task) {
+    if (this.profession === "building") {
       this.task = getPosibleTaskWithHighestPriority(
         this.currentPlatform,
-        JobType.delivery,
+        JobType.building,
       );
-    }
+      this.pickPathForResource();
+    } else if (this.profession === "delivering") {
+      this.task = getPosibleTaskWithHighestPriority(
+        this.currentPlatform,
+        JobType.delivering,
+      );
+      this.pickPathForResource();
+    } else if (this.profession === "production") {
+      this.task = getPosibleTaskWithHighestPriority(
+        this.currentPlatform,
+        JobType.production,
+      );
+      if (!this.task) return;
 
+      this.path = this.task.getRouteForTarget(this.currentPlatform);
+      this.path.shift();
+
+      if (this.path.length === 0) {
+        if (
+          this.task.target.recources.length < this.task.target.inventorySize
+        ) {
+          this.handleProductionLogic();
+        } else {
+          this.task = undefined;
+          this.targetPlatform = undefined;
+          this.path = [];
+        }
+      }
+    }
+  }
+
+  private pickPathForResource() {
     if (!this.task) return;
 
     const [path, resourceIndex] = this.task.getRouteForResource(
       this.currentPlatform,
+      true,
     );
 
     this.path = path;
@@ -134,9 +164,27 @@ export class Worker {
       return;
     }
 
-    this.handleResourceLogic();
-
+    if (this.profession === "building" || this.profession === "delivering") {
+      this.handleResourceLogic();
+    } else {
+      this.handleProductionLogic();
+    }
     this.targetPlatform = undefined;
+  }
+
+  private async handleProductionLogic() {
+    if (this.isWorking) return;
+
+    this.isWorking = true;
+    while (true) {
+      await delay(1000);
+
+      const result = this.task?.target.tryToDoProduction();
+
+      if (!result) break;
+    }
+    this.isWorking = false;
+    this.task = undefined;
   }
 
   private handleResourceLogic() {
