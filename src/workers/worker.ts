@@ -9,6 +9,12 @@ import {
 import { Task, JobType } from "@dashboard/task";
 import { delay } from "@utils/delay";
 
+type Leg = {
+  x: number;
+  y: number;
+  isMovingForward: boolean;
+};
+
 export class Worker {
   root: Container = new Container();
   graphic: Graphics;
@@ -24,6 +30,15 @@ export class Worker {
   resourceIndex?: number;
   task: Task | undefined;
   isWorking: boolean = false;
+
+  legX = 4;
+  legY = 14;
+  numberOfLegs = 4;
+
+  legCoordinates: Leg[] = [];
+  legs: Graphics[] = [];
+  stepPhase = 0;
+  isMoving = false;
 
   constructor(
     public x: number,
@@ -42,26 +57,34 @@ export class Worker {
   protected draw() {
     this.graphic.clear();
 
-    let jobColor = "#000000";
-    if (this.profession === "building") {
-      jobColor = "#0000ff";
-    } else if (this.profession === "delivering") {
-      jobColor = "#eeff00";
-    } else if (this.profession === "production") {
-      jobColor = "#00ff00";
+    for (let i = 0; i < this.numberOfLegs; i++) {
+      this.legs[i] = new Graphics();
     }
-
-    this.graphic
-      .circle(0, 0, 10)
-      .stroke({ width: 2, color: jobColor })
-      .fill(this.color);
+    this.setLegsIdlePose(false);
+    this.drawLegs();
 
     this.graphic
       .circle(0, 0, 8)
-      .stroke({ width: 2, color: "#000000" })
+      .stroke({ width: 3, color: "#000000" })
       .fill(this.color);
 
+    this.graphic.circle(-5, -5, 2).fill("#ffffff");
+    this.graphic.circle(5, -5, 2).fill("#ffffff");
+
+    let jobColor = "#000000";
+    if (this.profession === "building") {
+      jobColor = "#127ce1";
+    } else if (this.profession === "delivering") {
+      jobColor = "#bdb434";
+    } else if (this.profession === "production") {
+      jobColor = "#2ccb1a";
+    }
+
+    this.graphic.circle(0, 4, 4).fill(jobColor);
+
     this.graphic.position.set(0, 0);
+
+    this.root.addChild(...this.legs);
   }
 
   protected initEvents() {
@@ -77,18 +100,30 @@ export class Worker {
       if (this.path.length > 0) {
         this.targetPlatform = this.path.shift();
       }
-
       return;
     }
+    if (this.targetPlatform) {
+      if (!this.isMoving) {
+        this.isMoving = true;
+        this.setLegsIdlePose(true);
+      }
+    }
+    this.legAnimation(delta);
 
     const dx = this.targetPlatform.x - this.x;
     const dy = this.targetPlatform.y - this.y;
+
+    const angle = Math.atan2(dy, dx);
+    this.root.rotation = angle + Math.PI / 2;
 
     const distance = Math.sqrt(dx * dx + dy * dy);
     if (distance === 0) return;
 
     if (distance < 3) {
       this.onReachPlatform();
+      this.setLegsIdlePose(false);
+      this.isMoving = false;
+      this.drawLegs();
       return;
     }
 
@@ -99,6 +134,54 @@ export class Worker {
     this.y += vy * this.speed * delta;
 
     this.root.position.set(this.x, this.y);
+  }
+
+  private legAnimation(delta: number) {
+    this.stepPhase += 0.14 * delta;
+
+    const amplitude = 6;
+
+    const groupA = Math.sin(this.stepPhase);
+    const groupB = Math.sin(this.stepPhase + Math.PI);
+
+    this.legCoordinates[0].y = -this.legY + groupA * amplitude + amplitude;
+    this.legCoordinates[3].y = this.legY + groupA * amplitude + amplitude;
+
+    this.legCoordinates[1].y = -this.legY + groupB * amplitude + amplitude;
+    this.legCoordinates[2].y = this.legY + groupB * amplitude + amplitude;
+
+    this.drawLegs();
+  }
+
+  private drawLegs() {
+    for (let i = 0; i < this.numberOfLegs; i++) {
+      this.legs[i].clear();
+      this.legs[i]
+        .moveTo(0, 0)
+        .lineTo(this.legCoordinates[i].x, this.legCoordinates[i].y)
+        .stroke({ width: 4, color: "#000000" })
+        .circle(this.legCoordinates[i].x, this.legCoordinates[i].y, 2)
+        .stroke({ width: 2, color: "#000000" })
+        .fill("#000000");
+    }
+  }
+
+  private setLegsIdlePose(isMoving: boolean) {
+    if (isMoving) {
+      this.legCoordinates = [
+        { x: -this.legX, y: -this.legY, isMovingForward: true },
+        { x: this.legX, y: -this.legY, isMovingForward: false },
+        { x: -this.legX, y: this.legY + 4, isMovingForward: true },
+        { x: this.legX, y: this.legY + 4, isMovingForward: false },
+      ];
+    } else {
+      this.legCoordinates = [
+        { x: -this.legX * 2, y: -this.legY, isMovingForward: true },
+        { x: this.legX * 2, y: -this.legY, isMovingForward: false },
+        { x: -this.legX * 2, y: this.legY, isMovingForward: true },
+        { x: this.legX * 2, y: this.legY, isMovingForward: false },
+      ];
+    }
   }
 
   private pickTask() {
@@ -198,7 +281,7 @@ export class Worker {
         this.root.addChild(this.inventory.graphic);
 
         this.inventory.graphic.x = 0;
-        this.inventory.graphic.y = 0;
+        this.inventory.graphic.y = 16;
       }
 
       if (this.task) {

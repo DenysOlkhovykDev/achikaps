@@ -1,11 +1,12 @@
 import { Container } from "pixi.js";
 import { Building } from "@buildings/building";
-import { buidingParameters } from "@buildings/_buildings";
+import { buidingParameters, select } from "@buildings/_buildings";
 import { getDistance } from "@utils/distance";
 import { Resource } from "@resources/resource";
 import { addBuilding } from "@buildings/_buildings";
 import { deleteBlueprint } from "@buildings/_buildings";
 import { Task } from "@dashboard/task";
+import { setIsBuildMode } from "@menus/build-menu";
 
 export class Blueprint extends Building {
   redraws: number = 0;
@@ -197,6 +198,7 @@ export class Blueprint extends Building {
 
   public blueprinToBuilding(container: Container) {
     if (this.tasks.length === 0) {
+      select(this.links[0].from);
       addBuilding(this.x, this.y, container, this.type);
       for (const resource of this.resources) {
         if (resource) {
@@ -204,6 +206,7 @@ export class Blueprint extends Building {
         }
       }
       deleteBlueprint(this);
+      setIsBuildMode(false);
     }
   }
 
