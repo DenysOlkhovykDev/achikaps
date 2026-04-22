@@ -1,5 +1,6 @@
 import { Graphics, Triangle } from "pixi.js";
 import { Building } from "@buildings/building";
+import { Meat } from "@resources/meat";
 
 export class Farm extends Building {
   numberOfSpikes: number = 8;
@@ -15,6 +16,8 @@ export class Farm extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5);
     this.draw();
+    this.priorityForTasks = 5;
+    this.genProductionTask();
   }
 
   draw() {
@@ -127,5 +130,14 @@ export class Farm extends Building {
 
       this.antennas[i].position.set(x1, y1);
     }
+  }
+
+  genProductionTask() {
+    this.generateProductionTask();
+  }
+
+  override tryToDoProduction() {
+    const meat = new Meat();
+    return this.tryToAddResource(meat);
   }
 }

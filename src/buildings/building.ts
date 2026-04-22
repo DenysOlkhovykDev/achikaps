@@ -2,7 +2,8 @@ import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
 import { Resource } from "@resources/resource";
 import { buidingParameters } from "@buildings/_buildings";
 import { Road } from "@roads/road";
-import { Task } from "@dashboard/task";
+import { Task, JobType } from "@dashboard/task";
+import { addTask } from "@dashboard/_dashboard";
 
 type ResourceListener = (task: Task) => void;
 
@@ -17,6 +18,8 @@ export abstract class Building {
 
   recources: Resource[] = [];
   resourceContainer: Container = new Container();
+
+  priorityForTasks: number = -1;
 
   private resourceListeners: ResourceListener[] = [];
 
@@ -50,6 +53,14 @@ export abstract class Building {
   protected abstract draw(): void;
 
   public abstract animation(delta: number, movingAngle?: number): void;
+
+  protected generateProductionTask() {
+    addTask(this, JobType.production, this.priorityForTasks);
+  }
+
+  public tryToDoProduction(): boolean {
+    return false;
+  }
 
   addLinkedBuilding(line: Road) {
     this.links.push(line);
@@ -107,7 +118,7 @@ export abstract class Building {
     };
   }
 
-  tryToAddResource(resource: Resource, task: Task) {
+  tryToAddResource(resource: Resource, task?: Task) {
     if (this.recources.length >= this.inventorySize) return false;
 
     this.recources.push(resource);
@@ -116,7 +127,9 @@ export abstract class Building {
     this.placeResource(resource);
 
     for (const fn of this.resourceListeners) {
-      fn(task);
+      if (task) {
+        fn(task);
+      }
     }
 
     return true;
@@ -127,15 +140,20 @@ export abstract class Building {
 
     this.resourceContainer.removeChild(res.graphic);
 
+    if (
+      this.recources.length < this.inventorySize &&
+      this.priorityForTasks > -1
+    ) {
+      this.generateProductionTask();
+    }
+
     return res;
   }
 
   takeResourceByName(resourceName: string) {
     for (let i = 0; i < this.recources.length; i++) {
       if (this.recources[i].constructor.name === resourceName) {
-        const [res] = this.recources.splice(i, 1);
-
-        this.resourceContainer.removeChild(res.graphic);
+        this.takeResourceByIndex(i);
       }
     }
   }

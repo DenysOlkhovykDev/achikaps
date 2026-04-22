@@ -9,8 +9,9 @@ export function addWorker(
   y: number,
   container: Container,
   currentPlatform: Building,
+  profession: string,
 ) {
-  const worker = new Worker(x, y, currentPlatform);
+  const worker = new Worker(x, y, currentPlatform, profession);
   workers.push(worker);
   container.addChild(worker.root);
 }

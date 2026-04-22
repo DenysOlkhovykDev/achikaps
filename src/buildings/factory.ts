@@ -1,5 +1,6 @@
 import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
+import { Perl } from "@resources/perl";
 
 export class Factory extends Building {
   numberOfSatelites: number = 5;
@@ -11,6 +12,8 @@ export class Factory extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5);
     this.draw();
+    this.priorityForTasks = 5;
+    this.genProductionTask();
   }
 
   draw() {
@@ -53,5 +56,14 @@ export class Factory extends Building {
 
   animation(delta: number) {
     this.satelites.rotation -= this.rotationSpeed * delta;
+  }
+
+  genProductionTask() {
+    this.generateProductionTask();
+  }
+
+  override tryToDoProduction() {
+    const perl = new Perl();
+    return this.tryToAddResource(perl);
   }
 }

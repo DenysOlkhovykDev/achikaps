@@ -41,11 +41,11 @@ type Scenario = {
     buildingId: string;
     x: number;
     y: number;
+    profession: string;
   }[];
 
   deliveryTasks?: {
-    buildingId: string;
-    type: JobType;
+    target: string;
     priority: number;
     resource: string;
     count: number;
@@ -73,7 +73,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p0", type: "Iron", count: 2 },
       { buildingId: "p0", type: "Perl", count: 2 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450 }],
+    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -114,7 +114,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p1", type: "Iron", count: 5 },
       { buildingId: "p2", type: "Perl", count: 5 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450 }],
+    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -169,18 +169,16 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p1", type: "Iron", count: 1 },
       { buildingId: "p2", type: "Perl", count: 1 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450 }],
+    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "delivering" }],
     deliveryTasks: [
       {
-        buildingId: "p2",
-        type: JobType.delivery,
+        target: "p2",
         priority: 5,
         resource: "Iron",
         count: 1,
       },
       {
-        buildingId: "p1",
-        type: JobType.delivery,
+        target: "p1",
         priority: 5,
         resource: "Perl",
         count: 1,
@@ -197,7 +195,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p1", type: "Iron", count: 5 },
       { buildingId: "p2", type: "Perl", count: 5 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450 }],
+    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -224,7 +222,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p2", type: "Perl", count: 2 },
       { buildingId: "p2", type: "Meat", count: 1 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450 }],
+    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -237,6 +235,27 @@ const scenarios: Record<string, Scenario> = {
         x: 300,
         y: 600,
         buildingType: "MeatGrinder",
+      },
+    ],
+  },
+  //working
+  "production-resources": {
+    buildings: [
+      { from: "", id: "p0", type: "Platform", x: 500, y: 500 },
+      { from: "p0", id: "factory", type: "Factory", x: 300, y: 500 },
+      { from: "p0", id: "farm", type: "Farm", x: 700, y: 500 },
+      { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
+    ],
+    workers: [
+      { buildingId: "p0", x: 500, y: 500, profession: "production" },
+      { buildingId: "p0", x: 500, y: 500, profession: "building" },
+    ],
+    buildingTasks: [
+      {
+        from: "p0",
+        x: 500,
+        y: 700,
+        buildingType: "Platform",
       },
     ],
   },
@@ -275,7 +294,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "farm", type: "Meat", count: 5 },
       { buildingId: "windmill", type: "Battery", count: 5 },
     ],
-    workers: [{ buildingId: "p0", x: 500, y: 100 }],
+    workers: [{ buildingId: "p0", x: 500, y: 100, profession: "building" }],
   },
 };
 
@@ -341,12 +360,18 @@ function runScenario(
 
   for (const worker of scenario.workers || []) {
     const newBuilding = buildingsMap.get(worker.buildingId);
-    addWorker(worker.x, worker.y, workersLayer, newBuilding);
+    addWorker(worker.x, worker.y, workersLayer, newBuilding, worker.profession);
   }
 
   for (const task of scenario.deliveryTasks || []) {
-    const newBuilding = buildingsMap.get(task.buildingId);
-    addTask(newBuilding, task.type, task.priority, task.resource, task.count);
+    const newBuilding = buildingsMap.get(task.target);
+    addTask(
+      newBuilding,
+      JobType.delivering,
+      task.priority,
+      task.resource,
+      task.count,
+    );
   }
 
   for (const blueprint of scenario.buildingTasks || []) {
