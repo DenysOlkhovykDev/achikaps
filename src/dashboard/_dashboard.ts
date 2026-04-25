@@ -12,27 +12,14 @@ export function addTask(
   countOfResources?: number,
 ) {
   if (resource && countOfResources) {
-    const result: Record<string, number> = {};
+    const result = target.resourceList.get(resource)
+      ? target.resourceList.get(resource)
+      : 0;
 
-    target.recources.forEach((element) => {
-      if (!result[element.constructor.name]) {
-        result[element.constructor.name] = 0;
-      }
-      if (!element.isReserved) {
-        result[element.constructor.name]++;
-      }
-    });
-
-    if (!result[resource]) {
-      result[resource] = 0;
-    }
-
-    if (countOfResources - result[resource] > 0) {
-      for (let i = 0; i < countOfResources - result[resource]; i++) {
-        const task = new Task(target, jobType, priority, resource);
-        dashboard.push(task);
-        return task;
-      }
+    if (countOfResources - result! > 0) {
+      const task = new Task(target, jobType, priority, resource);
+      dashboard.push(task);
+      return task;
     }
   } else {
     const task = new Task(target, jobType, priority);

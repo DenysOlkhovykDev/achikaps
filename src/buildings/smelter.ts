@@ -5,8 +5,18 @@ export class Smelter extends Building {
   rotationSpeed: number = 0.005;
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 9);
     this.draw();
+    this.craft = {
+      ingridients: [
+        { resourceName: "Meat", count: 1 },
+        { resourceName: "Iron", count: 2 },
+      ],
+      result: "Gear",
+    };
+    this.priorityForTasks = 5;
+    this.generateDeliveryTasks();
+    this.generateProductionTask();
   }
 
   draw() {

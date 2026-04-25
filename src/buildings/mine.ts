@@ -17,7 +17,7 @@ export class Mine extends Building {
     super(x, y, 5);
     this.draw();
     this.priorityForTasks = 5;
-    this.genProductionTask();
+    this.generateProductionTask();
   }
 
   draw() {
@@ -91,10 +91,6 @@ export class Mine extends Building {
       if (this.antennasArmsAngle < -this.maxRotationAngle)
         this.rotationDirection = true;
     }
-  }
-
-  genProductionTask() {
-    this.generateProductionTask();
   }
 
   override tryToDoProduction() {

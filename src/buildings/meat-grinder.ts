@@ -8,8 +8,18 @@ export class MeatGrinder extends Building {
   blades: Graphics[] = [];
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 9);
     this.draw();
+    this.craft = {
+      ingridients: [
+        { resourceName: "Perl", count: 1 },
+        { resourceName: "Meat", count: 2 },
+      ],
+      result: "Arrow",
+    };
+    this.priorityForTasks = 5;
+    this.generateDeliveryTasks();
+    this.generateProductionTask();
   }
 
   draw() {
