@@ -22,7 +22,7 @@ await app.init({
   width: 1000,
   height: 1000,
   background: "#e5ecea",
-  resolution: 1,
+  resolution: 2,
   antialias: false,
 });
 

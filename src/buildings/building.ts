@@ -4,8 +4,14 @@ import { buidingParameters } from "@buildings/_buildings";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
+import { createResource } from "@test-poligons/test-building";
 
 type ResourceListener = (task: Task) => void;
+
+type Craft = {
+  ingridients: { resourceName: string; count: number }[];
+  result: string;
+};
 
 export abstract class Building {
   root: Container = new Container();
@@ -16,10 +22,13 @@ export abstract class Building {
   visual: Container;
   links: Road[] = [];
 
+  resourceList: Map<string, number> = new Map<string, number>();
   recources: Resource[] = [];
   resourceContainer: Container = new Container();
 
   priorityForTasks: number = -1;
+
+  craft: Craft | undefined;
 
   private resourceListeners: ResourceListener[] = [];
 
@@ -55,11 +64,68 @@ export abstract class Building {
   public abstract animation(delta: number, movingAngle?: number): void;
 
   protected generateProductionTask() {
-    addTask(this, JobType.production, this.priorityForTasks);
+    if (this.checkIsEnoughResourceswForCraft()) {
+      addTask(this, JobType.production, this.priorityForTasks);
+    }
+  }
+
+  protected generateDeliveryTask(resourceName: string, count: number) {
+    addTask(
+      this,
+      JobType.delivering,
+      this.priorityForTasks,
+      resourceName,
+      count,
+    );
+  }
+
+  protected generateDeliveryTasks() {
+    if (this.craft) {
+      if (!this.checkIsEnoughResourceswForCraft()) {
+        for (let i = 0; i < this.craft?.ingridients.length; i++) {
+          for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
+            this.generateDeliveryTask(
+              this.craft?.ingridients[i].resourceName,
+              this.craft?.ingridients[i].count,
+            );
+          }
+        }
+      }
+    }
   }
 
   public tryToDoProduction(): boolean {
+    if (this.craft) {
+      if (this.checkIsEnoughResourceswForCraft()) {
+        for (let i = 0; i < this.craft?.ingridients.length; i++) {
+          for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
+            this.takeResourceByName(this.craft?.ingridients[i].resourceName);
+          }
+        }
+        const newResource = createResource(this.craft?.result);
+        this.generateDeliveryTasks();
+        return this.tryToAddResource(newResource);
+      }
+    }
+
     return false;
+  }
+
+  public checkIsEnoughResourceswForCraft() {
+    if (this.craft) {
+      let isEnoughResources = true;
+      for (let i = 0; i < this.craft?.ingridients.length; i++) {
+        const countOfResources =
+          this.resourceList.get(this.craft?.ingridients[i].resourceName) ?? 0;
+
+        if (countOfResources < this.craft?.ingridients[i].count) {
+          isEnoughResources = false;
+        }
+      }
+      return isEnoughResources;
+    } else {
+      return true;
+    }
   }
 
   addLinkedBuilding(line: Road) {
@@ -124,7 +190,13 @@ export abstract class Building {
     this.recources.push(resource);
     this.resourceContainer.addChild(resource.graphic);
 
+    const resourceName = resource.constructor.name;
+    const current = this.resourceList.get(resourceName) ?? 0;
+
+    this.resourceList.set(resourceName, current + 1);
+
     this.placeResource(resource);
+    this.generateProductionTask();
 
     for (const fn of this.resourceListeners) {
       if (task) {
@@ -136,6 +208,15 @@ export abstract class Building {
   }
 
   takeResourceByIndex(resourceIndex: number): Resource {
+    const resourceName = this.recources[resourceIndex].constructor.name;
+    const current = this.resourceList.get(resourceName) ?? 0;
+
+    if (current > 1) {
+      this.resourceList.set(resourceName, current - 1);
+    } else {
+      this.resourceList.delete(resourceName);
+    }
+
     const [res] = this.recources.splice(resourceIndex, 1);
 
     this.resourceContainer.removeChild(res.graphic);
@@ -151,11 +232,16 @@ export abstract class Building {
   }
 
   takeResourceByName(resourceName: string) {
-    for (let i = 0; i < this.recources.length; i++) {
-      if (this.recources[i].constructor.name === resourceName) {
-        this.takeResourceByIndex(i);
-      }
+    const index = this.recources.findIndex(
+      (r) => r.constructor.name === resourceName,
+    );
+
+    if (index !== -1) {
+      this.takeResourceByIndex(index);
+      return true;
     }
+
+    return false;
   }
 
   makeRoundShadow(radius: number) {

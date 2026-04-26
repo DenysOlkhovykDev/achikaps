@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 import { testSettings, skipFrames } from "./test-infra";
 
 test("scene-render", async ({ page }) => {
-  await page.goto("http://localhost:5173/?scenario=render-scene");
+  await page.goto("http://localhost:5173/?scenario=scene-render");
 
   const canvas = page.locator("canvas");
   await expect(canvas).toBeVisible();

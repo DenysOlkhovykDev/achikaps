@@ -11,8 +11,18 @@ export class Laboratory extends Building {
   circles: number = 6;
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 9);
     this.draw();
+    this.craft = {
+      ingridients: [
+        { resourceName: "Iron", count: 1 },
+        { resourceName: "Perl", count: 2 },
+      ],
+      result: "Gum",
+    };
+    this.priorityForTasks = 5;
+    this.generateDeliveryTasks();
+    this.generateProductionTask();
   }
 
   draw() {

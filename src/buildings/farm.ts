@@ -17,7 +17,7 @@ export class Farm extends Building {
     super(x, y, 5);
     this.draw();
     this.priorityForTasks = 5;
-    this.genProductionTask();
+    this.generateProductionTask();
   }
 
   draw() {
@@ -130,10 +130,6 @@ export class Farm extends Building {
 
       this.antennas[i].position.set(x1, y1);
     }
-  }
-
-  genProductionTask() {
-    this.generateProductionTask();
   }
 
   override tryToDoProduction() {

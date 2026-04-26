@@ -16,6 +16,9 @@ import { Iron } from "@resources/iron";
 import { Meat } from "@resources/meat";
 import { Perl } from "@resources/perl";
 import { Battery } from "@resources/battery";
+import { Gum } from "@resources/gum";
+import { Gear } from "@resources/gear";
+import { Arrow } from "@resources/arrow";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -122,6 +125,22 @@ const scenarios: Record<string, Scenario> = {
         y: 300,
         buildingType: "Platform",
       },
+    ],
+  },
+  "crafting-resources": {
+    buildings: [
+      { from: "", id: "p0", type: "Platform", x: 300, y: 450 },
+      { from: "p0", id: "laboratory", type: "Laboratory", x: 500, y: 350 },
+      { from: "p0", id: "factory", type: "Factory", x: 200, y: 350 },
+      { from: "p0", id: "mine", type: "Mine", x: 300, y: 350 },
+    ],
+    resources: [
+      { buildingId: "laboratory", type: "Iron", count: 1 },
+      { buildingId: "laboratory", type: "Perl", count: 2 },
+    ],
+    workers: [
+      { buildingId: "p0", x: 300, y: 450, profession: "production" },
+      { buildingId: "p0", x: 300, y: 450, profession: "delivering" },
     ],
   },
   "moving-blueprints": {
@@ -259,7 +278,7 @@ const scenarios: Record<string, Scenario> = {
       },
     ],
   },
-  "render-scene": {
+  "scene-render": {
     buildings: [
       { from: "", id: "p0", type: "Platform", x: 500, y: 100 },
       { from: "p0", id: "factory", type: "Factory", x: 300, y: 100 },
@@ -271,13 +290,13 @@ const scenarios: Record<string, Scenario> = {
       { from: "p2", id: "farm", type: "Farm", x: 300, y: 300 },
 
       { from: "p2", id: "p3", type: "Platform", x: 500, y: 400 },
-      { from: "p3", id: "meat-grinder", type: "MeatGrinder", x: 700, y: 400 },
+      { from: "p3", id: "house", type: "House", x: 700, y: 400 },
 
       { from: "p3", id: "p4", type: "Platform", x: 500, y: 500 },
       { from: "p4", id: "junkuard", type: "Junkuard", x: 300, y: 500 },
 
       { from: "p4", id: "p5", type: "Platform", x: 500, y: 600 },
-      { from: "p5", id: "house", type: "House", x: 700, y: 600 },
+      { from: "p5", id: "meat-grinder", type: "MeatGrinder", x: 700, y: 600 },
 
       { from: "p5", id: "p6", type: "Platform", x: 500, y: 700 },
       { from: "p6", id: "windmill", type: "Windmill", x: 300, y: 700 },
@@ -293,6 +312,9 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "mine", type: "Iron", count: 5 },
       { buildingId: "farm", type: "Meat", count: 5 },
       { buildingId: "windmill", type: "Battery", count: 5 },
+      { buildingId: "laboratory", type: "Gum", count: 5 },
+      { buildingId: "smelter", type: "Gear", count: 5 },
+      { buildingId: "meat-grinder", type: "Arrow", count: 5 },
     ],
     workers: [{ buildingId: "p0", x: 500, y: 100, profession: "building" }],
   },
@@ -385,7 +407,7 @@ function runScenario(
   }
 }
 
-function createResource(type: string) {
+export function createResource(type: string) {
   switch (type) {
     case "Iron":
       return new Iron();
@@ -395,6 +417,12 @@ function createResource(type: string) {
       return new Perl();
     case "Battery":
       return new Battery();
+    case "Gum":
+      return new Gum();
+    case "Gear":
+      return new Gear();
+    case "Arrow":
+      return new Arrow();
     default:
       throw new Error("Unknown resource: " + type);
   }

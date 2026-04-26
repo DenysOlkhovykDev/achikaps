@@ -68,8 +68,8 @@ export class Worker {
       .stroke({ width: 3, color: "#000000" })
       .fill(this.color);
 
-    this.graphic.circle(-5, -5, 2).fill("#ffffff");
-    this.graphic.circle(5, -5, 2).fill("#ffffff");
+    this.graphic.circle(-5, -4, 2).fill("#ffffff");
+    this.graphic.circle(5, -4, 2).fill("#ffffff");
 
     let jobColor = "#000000";
     if (this.profession === "building") {
@@ -80,7 +80,7 @@ export class Worker {
       jobColor = "#2ccb1a";
     }
 
-    this.graphic.circle(0, 4, 4).fill(jobColor);
+    this.graphic.circle(0, 3, 4).fill(jobColor);
 
     this.graphic.position.set(0, 0);
 

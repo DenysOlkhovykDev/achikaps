@@ -1,6 +1,7 @@
 import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
 import { Perl } from "@resources/perl";
+import { Battery } from "@resources/battery";
 
 export class Factory extends Building {
   numberOfSatelites: number = 5;
