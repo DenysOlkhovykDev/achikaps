@@ -26,6 +26,7 @@ export function addTask(
     dashboard.push(new Task(target, jobType, priority));
     return task;
   }
+  console.log(jobType, resource);
 }
 
 export function deleteTask(task: Task) {
@@ -48,17 +49,27 @@ export function getPosibleTaskWithHighestPriority(
   for (const task of dashboard) {
     if (task.jobType !== jobType) continue;
 
-    if (jobType === JobType.building || jobType === JobType.delivering) {
-      const [path, resourceIndex] = task.getRouteForResource(
-        currentBuilding,
-        false,
-      );
+    let resourceDistance = 0;
 
-      if (path.length === 0 || resourceIndex === undefined) continue;
+    if (jobType === JobType.building || jobType === JobType.delivering) {
+      const [path, resourceIndex, distanceToResource] =
+        task.getRouteForResource(currentBuilding, false);
+
+      if (
+        path.length === 0 ||
+        resourceIndex === undefined ||
+        distanceToResource === undefined
+      )
+        continue;
+
+      resourceDistance = distanceToResource;
     }
 
     const distanceToTask = distances.get(task.target)!;
-    const score = task.priority - distanceToTask;
+
+    const totalDistance = distanceToTask + resourceDistance * 2;
+
+    const score = task.priority - totalDistance;
 
     if (score > bestScore) {
       bestScore = score;

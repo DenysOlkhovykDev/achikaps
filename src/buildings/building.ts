@@ -81,12 +81,23 @@ export abstract class Building {
 
   protected generateDeliveryTasks() {
     if (this.craft) {
-      if (!this.checkIsEnoughResourceswForCraft()) {
+      let neededSpace = 0;
+      for (let i = 0; i < this.craft?.ingridients.length; i++) {
+        neededSpace += this.craft?.ingridients[i].count;
+      }
+      let actualSpace = 0;
+      for (const resource of this.resourceList) {
+        actualSpace += resource[1];
+      }
+      if (
+        !this.checkIsEnoughResourceswForCraft() &&
+        this.inventorySize - actualSpace > neededSpace
+      ) {
         for (let i = 0; i < this.craft?.ingridients.length; i++) {
           for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
             this.generateDeliveryTask(
               this.craft?.ingridients[i].resourceName,
-              this.craft?.ingridients[i].count,
+              1,
             );
           }
         }
