@@ -27,7 +27,7 @@ export class Task {
   public getRouteForResource(
     start: Building,
     reserve: boolean,
-  ): [Building[], number | undefined] {
+  ): [Building[], number | undefined, number | undefined] {
     const { distances, previous } = dijkstra(start);
 
     let bestBuilding: Building | undefined = undefined;
@@ -50,13 +50,13 @@ export class Task {
       }
     }
 
-    if (!bestBuilding) return [[], undefined];
+    if (!bestBuilding) return [[], undefined, undefined];
 
     if (reserve) {
       bestBuilding.recources[resourceIndex!].isReserved = true;
     }
 
-    return [buildPath(previous, bestBuilding), resourceIndex];
+    return [buildPath(previous, bestBuilding), resourceIndex, bestDistance];
   }
 
   private hasNeededResource(building: Building): number | undefined {
