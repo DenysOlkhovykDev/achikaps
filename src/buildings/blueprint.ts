@@ -7,6 +7,7 @@ import { addBuilding } from "@buildings/_buildings";
 import { deleteBlueprint } from "@buildings/_buildings";
 import { Task } from "@dashboard/task";
 import { setIsBuildMode } from "@menus/build-menu";
+import { createResource } from "@test-poligons/test-building";
 
 export class Blueprint extends Building {
   redraws: number = 0;
@@ -211,4 +212,15 @@ export class Blueprint extends Building {
   }
 
   public unsubscribe?: () => void;
+
+  showCraft() {
+    if (!this.resources) return;
+
+    this.craftSignElements = [];
+    for (let i = 0; i < this.resources.length; i++) {
+      this.craftSignElements.push(createResource(this.resources[i]).graphic);
+    }
+
+    this.drawCraftSign();
+  }
 }

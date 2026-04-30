@@ -1,11 +1,14 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { Building } from "@buildings/building";
-import { select } from "@buildings/_buildings";
+import { select, showCrafts } from "@buildings/_buildings";
+import { setIsBuildMode } from "@menus/build-menu";
 
 export class Platform extends Building {
   onClick(event: FederatedPointerEvent) {
     select(this);
     super.onClick(event);
+    setIsBuildMode(true);
+    showCrafts();
   }
 
   constructor(x: number, y: number) {
