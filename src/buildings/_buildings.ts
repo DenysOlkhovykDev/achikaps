@@ -216,6 +216,23 @@ export function addBlueprint(
 export function select(node: Building) {
   selectedBuilding = buildings.indexOf(node);
   setIsBuildMode(true);
+  showCrafts();
+}
+
+export function showCrafts() {
+  hideCrafts();
+  for (const blueprint of blueprints) {
+    blueprint.showCraft();
+  }
+}
+
+export function hideCrafts() {
+  for (const building of buildings) {
+    building.hideCraftSign();
+  }
+  for (const blueprint of blueprints) {
+    blueprint.hideCraftSign();
+  }
 }
 
 export function animations(delta: number, movingAngle: number) {

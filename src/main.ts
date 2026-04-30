@@ -11,6 +11,7 @@ import {
   addBlueprint,
   animations,
   movingBlueprints,
+  hideCrafts,
 } from "@buildings/_buildings";
 import { createTestBulding } from "./test-poligons/test-building";
 import { createTestWorld } from "@test-poligons/test-world";
@@ -59,6 +60,7 @@ app.stage.on("pointerdown", (event) => {
     setBuildingType("");
   }
   setIsBuildMode(false);
+  hideCrafts();
 });
 
 const buildingsLayer = new Container();

@@ -1,10 +1,11 @@
 import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
 import { Resource } from "@resources/resource";
-import { buidingParameters } from "@buildings/_buildings";
+import { buidingParameters, hideCrafts } from "@buildings/_buildings";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
 import { createResource } from "@test-poligons/test-building";
+import { setIsBuildMode } from "@menus/build-menu";
 
 type ResourceListener = (task: Task) => void;
 
@@ -15,7 +16,10 @@ type Craft = {
 
 export abstract class Building {
   root: Container = new Container();
-  mainGraphic = new Graphics();
+  mainGraphic: Graphics = new Graphics();
+
+  craftSign: Container = new Container();
+  craftSignElements: Graphics[] = [];
 
   baseSize: number = 0;
 
@@ -45,6 +49,7 @@ export abstract class Building {
 
     this.root.addChild(this.visual);
     this.root.addChild(this.resourceContainer);
+    this.root.addChild(this.craftSign);
 
     this.baseSize =
       buidingParameters[
@@ -144,6 +149,9 @@ export abstract class Building {
   }
 
   onClick(event: FederatedPointerEvent) {
+    hideCrafts();
+    this.showCraft();
+    setIsBuildMode(false);
     event.stopPropagation();
   }
 
@@ -295,5 +303,68 @@ export abstract class Building {
       x: Math.cos(angle) * radius,
       y: Math.sin(angle) * radius,
     };
+  }
+
+  showCraft() {
+    if (this.craft) {
+      this.craftSignElements = [];
+      for (let i = 0; i < this.craft.ingridients.length; i++) {
+        for (let j = 0; j < this.craft.ingridients[i].count; j++) {
+          this.craftSignElements.push(
+            createResource(this.craft.ingridients[i].resourceName).graphic,
+          );
+        }
+      }
+      const arrow = new Graphics();
+
+      arrow
+        .moveTo(-5, 0)
+        .lineTo(5, 0)
+        .moveTo(5, 0)
+        .lineTo(0, -5)
+        .moveTo(5, 0)
+        .lineTo(0, 5)
+        .stroke({ width: 2, color: "#000000", cap: "round" });
+
+      this.craftSignElements.push(arrow);
+
+      this.craftSignElements.push(createResource(this.craft.result).graphic);
+
+      this.drawCraftSign();
+    }
+  }
+
+  hideCraftSign() {
+    this.craftSign.removeChildren();
+  }
+
+  drawCraftSign() {
+    if (!this.craftSignElements) return;
+
+    const spacing = 15;
+    const padding = 10;
+
+    const count = this.craftSignElements.length;
+    const center = (count - 1) / 2;
+
+    const width = (count - 1) * spacing + padding * 2;
+    const height = 25;
+
+    const background = new Graphics();
+    background
+      .rect(-width / 2, -this.baseSize - height, width, height - 5)
+      .fill("#c9c6bb")
+      .stroke({ width: 2, color: "#000000" });
+
+    this.craftSign.addChild(background);
+
+    for (let i = 0; i < this.craftSignElements.length; i++) {
+      this.craftSignElements[i].position.set(
+        (i - center) * spacing,
+        -this.baseSize - 15,
+      );
+
+      this.craftSign.addChild(this.craftSignElements[i]);
+    }
   }
 }

@@ -7,6 +7,7 @@ import {
   addBlueprint,
   buildings,
   select,
+  hideCrafts,
 } from "@buildings/_buildings";
 
 import { JobType } from "@dashboard/task";
@@ -337,6 +338,7 @@ export function createTestBulding(
 
   runScenario(scenario, buildingsLayer, workersLayer);
 
+  hideCrafts();
   setIsBuildMode(false);
 
   stage.addChild(buildingsLayer);
