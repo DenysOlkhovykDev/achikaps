@@ -219,6 +219,12 @@ export function select(node: Building) {
   showCrafts();
 }
 
+export function deSelectAllBuildings() {
+  for (const building of buildings) {
+    building.selectShadowContainer.removeChildren();
+  }
+}
+
 export function showCrafts() {
   hideCrafts();
   for (const blueprint of blueprints) {

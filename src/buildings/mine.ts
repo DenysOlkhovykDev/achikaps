@@ -23,7 +23,7 @@ export class Mine extends Building {
   draw() {
     this.makeBasicCircle(this.baseSize, "#aaa84c", true);
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
     for (let i = 0; i < this.numberOfAntennas; i++) {
       this.drawAntena(i);

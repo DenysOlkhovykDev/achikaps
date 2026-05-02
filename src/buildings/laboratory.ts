@@ -51,7 +51,7 @@ export class Laboratory extends Building {
 
     this.makeBasicCircle(this.baseSize, "#cc92c3", true);
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
     this.visual.addChild(this.mainGraphic);
 

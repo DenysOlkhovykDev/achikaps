@@ -22,7 +22,7 @@ export class Windmill extends Building {
 
     this.makeBasicCircle(this.baseSize, "#7a8fe3", true);
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
     this.drawDecorativeWindmillBlades();
 

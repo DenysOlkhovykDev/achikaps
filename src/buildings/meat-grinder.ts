@@ -26,7 +26,7 @@ export class MeatGrinder extends Building {
     this.drawBlades();
 
     this.makeBasicCircle(this.baseSize, "#d2aa8a", true);
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
     for (let i = 0; i < this.numberOfBlades; i++) {
       this.visual.addChild(this.blades[i]);

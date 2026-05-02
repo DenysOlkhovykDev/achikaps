@@ -19,7 +19,7 @@ export class Platform extends Building {
   draw() {
     this.makeBasicCircle(this.baseSize, "#acacac", true);
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
     this.visual.addChild(this.mainGraphic);
   }
