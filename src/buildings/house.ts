@@ -21,7 +21,7 @@ export class House extends Building {
 
     this.makeBasicCircle(this.baseSize - 18, "#5b8937", false);
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
     this.visual.addChild(this.mainGraphic);
   }
 

@@ -1,6 +1,10 @@
 import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
 import { Resource } from "@resources/resource";
-import { buidingParameters, hideCrafts } from "@buildings/_buildings";
+import {
+  buidingParameters,
+  deSelectAllBuildings,
+  hideCrafts,
+} from "@buildings/_buildings";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
@@ -33,6 +37,9 @@ export abstract class Building {
   priorityForTasks: number = -1;
 
   craft: Craft | undefined;
+
+  shadowContainer: Container = new Container();
+  selectShadowContainer: Container = new Container();
 
   private resourceListeners: ResourceListener[] = [];
 
@@ -152,6 +159,12 @@ export abstract class Building {
     hideCrafts();
     this.showCraft();
     setIsBuildMode(false);
+    deSelectAllBuildings();
+    this.makeRoundShadow(
+      this.baseSize + 1,
+      "#00ff00",
+      this.selectShadowContainer,
+    );
     event.stopPropagation();
   }
 
@@ -263,28 +276,29 @@ export abstract class Building {
     return false;
   }
 
-  makeRoundShadow(radius: number) {
+  makeRoundShadow(radius: number, color: string, shadowContainer: Container) {
     const shadow = new Graphics();
 
-    shadow.circle(0, 0, radius + 2).stroke({ width: 1, color: "#000000" });
+    shadow.circle(0, 0, radius + 2).stroke({ width: 1, color: color });
 
     shadow.alpha = 0.6;
 
     const shadow2 = new Graphics();
 
-    shadow2.circle(0, 0, radius + 3).stroke({ width: 1, color: "#000000" });
+    shadow2.circle(0, 0, radius + 3).stroke({ width: 1, color: color });
 
     shadow2.alpha = 0.3;
 
     const shadow3 = new Graphics();
 
-    shadow3.circle(0, 0, radius + 4).stroke({ width: 1, color: "#000000" });
+    shadow3.circle(0, 0, radius + 4).stroke({ width: 1, color: color });
 
     shadow3.alpha = 0.1;
 
-    this.visual.addChildAt(shadow, 0);
-    this.visual.addChildAt(shadow2, 0);
-    this.visual.addChildAt(shadow3, 0);
+    shadowContainer.addChildAt(shadow, 0);
+    shadowContainer.addChildAt(shadow2, 0);
+    shadowContainer.addChildAt(shadow3, 0);
+    this.visual.addChildAt(shadowContainer, 0);
   }
 
   makeBasicCircle(size: number, color: string, isStroke: boolean) {

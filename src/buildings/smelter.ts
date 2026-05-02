@@ -22,7 +22,7 @@ export class Smelter extends Building {
   draw() {
     this.makeBasicCircle(this.baseSize, "#dec6a4", true);
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
     this.drawChimneyPart(-1, 15, 20, "#000000");
     this.drawChimneyPart(-1, 14, 16, "#dec6a4");

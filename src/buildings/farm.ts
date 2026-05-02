@@ -33,7 +33,7 @@ export class Farm extends Building {
 
     this.mainGraphic.stroke({ width: 4, color: "#b06667" });
 
-    this.makeRoundShadow(this.baseSize);
+    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
     this.visual.addChild(this.mainGraphic);
   }
 
