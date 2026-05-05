@@ -127,7 +127,7 @@ export const buidingParameters = {
     ],
   },
   Engine: {
-    baseSize: 40,
+    baseSize: 20,
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -241,7 +241,7 @@ export function hideCrafts() {
   }
 }
 
-export function animations(delta: number, movingAngle: number) {
+export function animations(delta: number, movingAngle?: number) {
   for (const building of buildings) {
     building.animation(delta, movingAngle);
   }

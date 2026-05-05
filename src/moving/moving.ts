@@ -13,31 +13,40 @@ const ship = {
 export function moveWorld(
   delta: number,
   worldLayer: Container,
-  keys: Set<string>,
   buildingsLayer: Container,
   workersLayer: Container,
+  vr: number,
+  vy: number,
 ) {
+  // if (keys.has("w") || keys.has("ц")) vy -= 1;
+  // if (keys.has("s") || keys.has("і")) vy += 1;
+  // if (keys.has("a") || keys.has("ф")) vx -= 1;
+  // if (keys.has("d") || keys.has("в")) vx += 1;
+  // if (keys.has("q") || keys.has("й")) ship.m += 0.001;
+  // if (keys.has("e") || keys.has("у")) ship.m -= 0.001;
+
   let vx = 0;
-  let vy = 0;
-
-  if (keys.has("w") || keys.has("ц")) vy -= 1;
-  if (keys.has("s") || keys.has("і")) vy += 1;
-  if (keys.has("a") || keys.has("ф")) vx -= 1;
-  if (keys.has("d") || keys.has("в")) vx += 1;
-  if (keys.has("q") || keys.has("й")) ship.m += 0.001;
-  if (keys.has("e") || keys.has("у")) ship.m -= 0.001;
-
   const length = Math.hypot(vx, vy);
   if (length > 0) {
     vx /= length;
     vy /= length;
   }
 
-  ship.x += vx * ship.speed * delta;
-  ship.y += vy * ship.speed * delta;
+  const angle = -worldLayer.rotation;
 
-  worldLayer.x = centerX - ship.x;
-  worldLayer.y = centerY - ship.y;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  const worldVx = vx * cos - vy * sin;
+  const worldVy = vx * sin + vy * cos;
+
+  ship.x += worldVx * ship.speed * delta;
+  ship.y += worldVy * ship.speed * delta;
+
+  worldLayer.pivot.set(ship.x, ship.y);
+  worldLayer.position.set(centerX, centerY);
+
+  worldLayer.rotation -= vr / 100;
 
   worldLayer.scale.set(ship.m);
   buildingsLayer.scale.set(ship.m);
@@ -46,5 +55,6 @@ export function moveWorld(
   centerX = (1000 / 2) * ship.m;
   centerY = (1000 / 2) * ship.m;
 
+  if (vy === 0 && vx === 0) return undefined;
   return Math.atan2(vy, vx);
 }

@@ -169,7 +169,7 @@ export abstract class Building {
   }
 
   placeResource(res: Resource) {
-    const radius = 32;
+    const radius = this.baseSize - 8;
     const minDist = 12;
 
     let tries = 0;

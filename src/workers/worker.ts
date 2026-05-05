@@ -121,7 +121,9 @@ export class Worker {
 
     if (distance < 3) {
       this.onReachPlatform();
-      this.setLegsIdlePose(false);
+      if (!this.task) {
+        this.setLegsIdlePose(false);
+      }
       this.isMoving = false;
       this.drawLegs();
       return;
