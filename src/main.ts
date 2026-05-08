@@ -16,6 +16,7 @@ import {
 import { createTestBulding } from "./test-poligons/test-building";
 import { createTestWorld } from "@test-poligons/test-world";
 import { moveWorld } from "./moving/moving";
+import { Joystick } from "./joystick/joystick";
 
 const app = new Application();
 
@@ -61,6 +62,7 @@ app.stage.on("pointerdown", (event) => {
   }
   setIsBuildMode(false);
   hideCrafts();
+  hideJoystick();
 });
 
 const buildingsLayer = new Container();
@@ -70,10 +72,32 @@ createTestBulding(buildingsLayer, workersLayer, app.stage);
 const worldLayer = new Container();
 createTestWorld(worldLayer, app.stage);
 
+const joystick = new Joystick();
+
+joystick.position.set(500, 930);
+joystick.hide();
+
+export function showJoystick() {
+  joystick.show();
+}
+
+export function hideJoystick() {
+  joystick.hide();
+}
+
+app.stage.addChild(joystick);
+
 app.ticker.add((delta) => {
   const dt = 1;
 
-  const angle = moveWorld(dt, worldLayer, keys, buildingsLayer, workersLayer);
+  const angle = moveWorld(
+    dt,
+    worldLayer,
+    buildingsLayer,
+    workersLayer,
+    joystick.inputX,
+    joystick.inputY,
+  );
 
   moveWorkers(dt);
 
