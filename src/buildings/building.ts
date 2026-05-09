@@ -147,7 +147,7 @@ export abstract class Building {
       }
       return isEnoughResources;
     } else {
-      return true;
+      return false;
     }
   }
 

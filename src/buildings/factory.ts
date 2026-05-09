@@ -13,6 +13,10 @@ export class Factory extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5);
     this.draw();
+    this.craft = {
+      ingridients: [],
+      result: "Perl",
+    };
     this.priorityForTasks = 5;
     this.genProductionTask();
   }
@@ -61,10 +65,5 @@ export class Factory extends Building {
 
   genProductionTask() {
     this.generateProductionTask();
-  }
-
-  override tryToDoProduction() {
-    const perl = new Perl();
-    return this.tryToAddResource(perl);
   }
 }

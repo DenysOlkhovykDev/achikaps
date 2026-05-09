@@ -8,6 +8,7 @@ import {
   buildings,
   select,
   hideCrafts,
+  blueprints,
 } from "@buildings/_buildings";
 
 import { JobType } from "@dashboard/task";
@@ -20,6 +21,9 @@ import { Battery } from "@resources/battery";
 import { Gum } from "@resources/gum";
 import { Gear } from "@resources/gear";
 import { Arrow } from "@resources/arrow";
+import { Tutorials } from "../tutorial-overlay/_tutorials";
+import { worldLayer } from "../main";
+import { getDistance } from "@utils/distance";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -43,8 +47,6 @@ type Scenario = {
 
   workers?: {
     buildingId: string;
-    x: number;
-    y: number;
     profession: string;
   }[];
 
@@ -60,6 +62,26 @@ type Scenario = {
     x: number;
     y: number;
     buildingType: string;
+  }[];
+
+  pointers?: {
+    condition: Function;
+    x?: number;
+    y?: number;
+    findTarget?: Function;
+  }[];
+
+  compasses?: {
+    condition: Function;
+    findTarget?: Function;
+  }[];
+
+  messages?: {
+    condition: Function;
+    x: number;
+    y: number;
+    text: string;
+    fontSize: number;
   }[];
 };
 
@@ -77,7 +99,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p0", type: "Iron", count: 2 },
       { buildingId: "p0", type: "Perl", count: 2 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
+    workers: [{ buildingId: "p0", profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -118,7 +140,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p1", type: "Iron", count: 5 },
       { buildingId: "p2", type: "Perl", count: 5 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
+    workers: [{ buildingId: "p0", profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -140,8 +162,8 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "laboratory", type: "Perl", count: 2 },
     ],
     workers: [
-      { buildingId: "p0", x: 300, y: 450, profession: "production" },
-      { buildingId: "p0", x: 300, y: 450, profession: "delivering" },
+      { buildingId: "p0", profession: "production" },
+      { buildingId: "p0", profession: "delivering" },
     ],
   },
   "moving-blueprints": {
@@ -189,7 +211,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p1", type: "Iron", count: 1 },
       { buildingId: "p2", type: "Perl", count: 1 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "delivering" }],
+    workers: [{ buildingId: "p0", profession: "delivering" }],
     deliveryTasks: [
       {
         target: "p2",
@@ -215,7 +237,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p1", type: "Iron", count: 5 },
       { buildingId: "p2", type: "Perl", count: 5 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
+    workers: [{ buildingId: "p0", profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -242,7 +264,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "p2", type: "Perl", count: 2 },
       { buildingId: "p2", type: "Meat", count: 1 },
     ],
-    workers: [{ buildingId: "p0", x: 300, y: 450, profession: "building" }],
+    workers: [{ buildingId: "p0", profession: "building" }],
     buildingTasks: [
       {
         from: "p0",
@@ -258,6 +280,69 @@ const scenarios: Record<string, Scenario> = {
       },
     ],
   },
+  "showing-pointers": {
+    buildings: [
+      { from: "", id: "p0", type: "Platform", x: 500, y: 500 },
+      { from: "p0", id: "factory", type: "Factory", x: 400, y: 450 },
+      { from: "p0", id: "farm", type: "Farm", x: 600, y: 450 },
+      { from: "p0", id: "mine", type: "Mine", x: 500, y: 400 },
+      { from: "p0", id: "p1", type: "Platform", x: 400, y: 600 },
+      { from: "p0", id: "p2", type: "Platform", x: 600, y: 600 },
+      { from: "p0", id: "engine", type: "Engine", x: 500, y: 600 },
+    ],
+    workers: [
+      { buildingId: "p0", profession: "building" },
+      { buildingId: "p0", profession: "production" },
+    ],
+
+    pointers: [
+      {
+        condition: () => blueprints.length > 0,
+
+        findTarget: () => {
+          const blueprint = blueprints[0];
+
+          if (!blueprint) {
+            return;
+          }
+
+          return {
+            x: blueprint.x,
+            y: blueprint.y,
+          };
+        },
+      },
+    ],
+
+    compasses: [
+      {
+        condition: () => true,
+
+        findTarget: () => {
+          return {
+            x: 1000,
+            y: 100,
+          };
+        },
+      },
+    ],
+
+    messages: [
+      {
+        condition: () => {
+          if (
+            getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 50
+          ) {
+            return true;
+          }
+        },
+        x: 420,
+        y: 500,
+        text: "You win",
+        fontSize: 44,
+      },
+    ],
+  },
   //working
   "production-resources": {
     buildings: [
@@ -267,8 +352,8 @@ const scenarios: Record<string, Scenario> = {
       { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
     ],
     workers: [
-      { buildingId: "p0", x: 500, y: 500, profession: "production" },
-      { buildingId: "p0", x: 500, y: 500, profession: "building" },
+      { buildingId: "p0", profession: "production" },
+      { buildingId: "p0", profession: "building" },
     ],
     buildingTasks: [
       {
@@ -317,13 +402,14 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "smelter", type: "Gear", count: 5 },
       { buildingId: "meat-grinder", type: "Arrow", count: 5 },
     ],
-    workers: [{ buildingId: "p0", x: 400, y: 100, profession: "building" }],
+    workers: [{ buildingId: "p0", profession: "building" }],
   },
 };
 
 export function createTestBulding(
   buildingsLayer: Container,
   workersLayer: Container,
+  tutorials: Tutorials,
   stage: Container,
 ) {
   addBuildMenu(stage);
@@ -336,7 +422,7 @@ export function createTestBulding(
     throw new Error("Scenario not found: " + scenarioName);
   }
 
-  runScenario(scenario, buildingsLayer, workersLayer);
+  runScenario(scenario, buildingsLayer, workersLayer, tutorials);
 
   hideCrafts();
   setIsBuildMode(false);
@@ -349,6 +435,7 @@ function runScenario(
   scenario: Scenario,
   buildingsLayer: Container,
   workersLayer: Container,
+  tutorials: Tutorials,
 ) {
   const buildingsMap = new Map();
 
@@ -384,7 +471,13 @@ function runScenario(
 
   for (const worker of scenario.workers || []) {
     const newBuilding = buildingsMap.get(worker.buildingId);
-    addWorker(worker.x, worker.y, workersLayer, newBuilding, worker.profession);
+    addWorker(
+      newBuilding.x,
+      newBuilding.y,
+      workersLayer,
+      newBuilding,
+      worker.profession,
+    );
   }
 
   for (const task of scenario.deliveryTasks || []) {
@@ -405,6 +498,34 @@ function runScenario(
       blueprint.y,
       buildingsLayer,
       blueprint.buildingType,
+    );
+  }
+
+  for (const pointers of scenario.pointers || []) {
+    if (pointers.x && pointers.y) {
+      tutorials.addNewPointerByCoordinates(
+        pointers.condition,
+        pointers.x,
+        pointers.y,
+      );
+    } else if (pointers.findTarget) {
+      tutorials.addNewPointerByTarget(pointers.condition, pointers.findTarget);
+    }
+  }
+
+  for (const compass of scenario.compasses || []) {
+    if (compass.findTarget) {
+      tutorials.addNewCompass(compass.condition, compass.findTarget);
+    }
+  }
+
+  for (const message of scenario.messages || []) {
+    tutorials.addNewMessage(
+      message.condition,
+      message.x,
+      message.y,
+      message.text,
+      message.fontSize,
     );
   }
 }

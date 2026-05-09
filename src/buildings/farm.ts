@@ -16,6 +16,10 @@ export class Farm extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5);
     this.draw();
+    this.craft = {
+      ingridients: [],
+      result: "Meat",
+    };
     this.priorityForTasks = 5;
     this.generateProductionTask();
   }
@@ -130,10 +134,5 @@ export class Farm extends Building {
 
       this.antennas[i].position.set(x1, y1);
     }
-  }
-
-  override tryToDoProduction() {
-    const meat = new Meat();
-    return this.tryToAddResource(meat);
   }
 }
