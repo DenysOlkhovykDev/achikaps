@@ -46,7 +46,7 @@ export function moveWorld(
   worldLayer.pivot.set(ship.x, ship.y);
   worldLayer.position.set(centerX, centerY);
 
-  worldLayer.rotation -= vr / 100;
+  worldLayer.rotation -= vr / 200;
 
   worldLayer.scale.set(ship.m);
   buildingsLayer.scale.set(ship.m);

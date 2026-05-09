@@ -16,6 +16,11 @@ export function createTestWorld(worldLayer: Container, stage: Container) {
     .stroke({ width: 4, color: "#000000" })
     .fill("#bababa");
 
+  testCircle
+    .circle(1000, 100, 10)
+    .stroke({ width: 4, color: "#000000" })
+    .fill("#00ff00");
+
   worldLayer.addChild(testCircle);
 
   stage.addChild(worldLayer);

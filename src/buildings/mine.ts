@@ -16,6 +16,10 @@ export class Mine extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5);
     this.draw();
+    this.craft = {
+      ingridients: [],
+      result: "Iron",
+    };
     this.priorityForTasks = 5;
     this.generateProductionTask();
   }
@@ -91,10 +95,5 @@ export class Mine extends Building {
       if (this.antennasArmsAngle < -this.maxRotationAngle)
         this.rotationDirection = true;
     }
-  }
-
-  override tryToDoProduction() {
-    const perl = new Iron();
-    return this.tryToAddResource(perl);
   }
 }
