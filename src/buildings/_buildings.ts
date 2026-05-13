@@ -12,7 +12,7 @@ import { Platform } from "@buildings/platform";
 import { Factory } from "@buildings/factory";
 import { Mine } from "@buildings/mine";
 import { Farm } from "@buildings/farm";
-import { MeatGrinder } from "@buildings/meat-grinder";
+import { Grinder } from "@buildings/grinder";
 import { Junkuard } from "@buildings/junkuard";
 import { House } from "@buildings/house";
 import { Windmill } from "@buildings/windmill";
@@ -23,12 +23,12 @@ import { Blueprint } from "@buildings/blueprint";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
 
-const buildingMap: Record<string, BuildingConstructor> = {
+export const buildingMap: Record<string, BuildingConstructor> = {
   Platform,
   Factory,
   Mine,
   Farm,
-  MeatGrinder,
+  Grinder,
   Junkuard,
   House,
   Windmill,
@@ -54,7 +54,7 @@ export const buidingParameters = {
     maxLinkLength: 200,
     craft: [
       { type: "Iron", amount: 4 },
-      { type: "Perl", amount: 2 },
+      { type: "Perl", amount: 1 },
     ],
   },
   Mine: {
@@ -68,17 +68,46 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 3 },
-      { type: "Perl", amount: 1 },
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 3 },
     ],
   },
-  MeatGrinder: {
+  Grinder: {
     baseSize: 40,
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
       { type: "Iron", amount: 6 },
       { type: "Meat", amount: 1 },
+    ],
+  },
+  Laboratory: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 5 },
+      { type: "Meat", amount: 1 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  Smelter: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 5 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Engine: {
+    baseSize: 20,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Gum", amount: 3 },
+      { type: "Gear", amount: 3 },
+      { type: "Arrow", amount: 3 },
     ],
   },
   Junkuard: {
@@ -106,33 +135,6 @@ export const buidingParameters = {
     craft: [
       { type: "Iron", amount: 6 },
       { type: "Perl", amount: 1 },
-    ],
-  },
-  Laboratory: {
-    baseSize: 40,
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Meat", amount: 1 },
-      { type: "Iron", amount: 5 },
-    ],
-  },
-  Smelter: {
-    baseSize: 40,
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Meat", amount: 2 },
-      { type: "Iron", amount: 5 },
-    ],
-  },
-  Engine: {
-    baseSize: 20,
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Iron", amount: 3 },
-      { type: "Perl", amount: 3 },
     ],
   },
 };

@@ -6,11 +6,7 @@ export class MenuTrigger {
   private menu?: Menu;
 
   constructor(
-    private x: number,
-    private y: number,
     private items: MenuItem[],
-    private width: number,
-    private height: number,
     drawIcon: Graphics,
     private parent: Container,
   ) {
@@ -31,7 +27,7 @@ export class MenuTrigger {
       this.menu.menuHide();
       this.menu = undefined;
     } else {
-      this.menu = new Menu(this.items, this.x, this.y, this.width, this.height);
+      this.menu = new Menu(this.items);
       this.menu.menuShow(this.parent);
     }
   }
