@@ -1,7 +1,7 @@
 import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
 
-export class MeatGrinder extends Building {
+export class Grinder extends Building {
   numberOfBlades: number = 4;
   rotationSpeed: number = 0.05;
 

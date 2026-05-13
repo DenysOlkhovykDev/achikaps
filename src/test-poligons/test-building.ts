@@ -276,7 +276,7 @@ const scenarios: Record<string, Scenario> = {
         from: "p0",
         x: 300,
         y: 600,
-        buildingType: "MeatGrinder",
+        buildingType: "Grinder",
       },
     ],
   },
@@ -382,7 +382,7 @@ const scenarios: Record<string, Scenario> = {
       { from: "p4", id: "junkuard", type: "Junkuard", x: 280, y: 500 },
 
       { from: "p4", id: "p5", type: "Platform", x: 400, y: 600 },
-      { from: "p5", id: "meat-grinder", type: "MeatGrinder", x: 500, y: 600 },
+      { from: "p5", id: "grinder", type: "Grinder", x: 500, y: 600 },
 
       { from: "p5", id: "p6", type: "Platform", x: 400, y: 700 },
       { from: "p6", id: "engine", type: "Engine", x: 300, y: 700 },
@@ -400,7 +400,7 @@ const scenarios: Record<string, Scenario> = {
       { buildingId: "engine", type: "Battery", count: 3 },
       { buildingId: "laboratory", type: "Gum", count: 5 },
       { buildingId: "smelter", type: "Gear", count: 5 },
-      { buildingId: "meat-grinder", type: "Arrow", count: 5 },
+      { buildingId: "grinder", type: "Arrow", count: 5 },
     ],
     workers: [{ buildingId: "p0", profession: "building" }],
   },

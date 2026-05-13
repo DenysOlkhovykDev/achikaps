@@ -8,11 +8,6 @@ let buildingType = "";
 
 const menuData: MenuItem[] = [
   {
-    label: "Platform",
-    color: "#acacac",
-    onClick: () => setBuildingType("Platform"),
-  },
-  {
     label: "Factory",
     color: "#a8d0db",
     onClick: () => setBuildingType("Factory"),
@@ -28,24 +23,9 @@ const menuData: MenuItem[] = [
     onClick: () => setBuildingType("Farm"),
   },
   {
-    label: "Junkuard",
-    color: "#b7b697",
-    onClick: () => setBuildingType("Junkuard"),
-  },
-  {
-    label: "MeatGrinder",
+    label: "Grinder",
     color: "#c0ac9a",
-    onClick: () => setBuildingType("MeatGrinder"),
-  },
-  {
-    label: "House",
-    color: "#a4bc9a",
-    onClick: () => setBuildingType("House"),
-  },
-  {
-    label: "Windmill",
-    color: "#c5cade",
-    onClick: () => setBuildingType("Windmill"),
+    onClick: () => setBuildingType("Grinder"),
   },
   {
     label: "Laboratory",
@@ -54,8 +34,13 @@ const menuData: MenuItem[] = [
   },
   {
     label: "Smelter",
-    color: "#dba8a8",
+    color: "#aadba8",
     onClick: () => setBuildingType("Smelter"),
+  },
+  {
+    label: "Platform",
+    color: "#acacac",
+    onClick: () => setBuildingType("Platform"),
   },
   {
     label: "Engine",
@@ -75,7 +60,7 @@ export function addBuildMenu(container: Container) {
     .lineTo(x, y + 25)
     .stroke({ width: 16, color: "#00ff60" });
 
-  menuTrigger = new MenuTrigger(x, y, menuData, 200, 50, graphic, container);
+  menuTrigger = new MenuTrigger(menuData, graphic, container);
 }
 
 export function setIsBuildMode(type: boolean) {

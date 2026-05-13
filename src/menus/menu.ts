@@ -1,4 +1,8 @@
+import { buildingMap, buidingParameters } from "@buildings/_buildings";
 import { Container, Graphics, Text } from "pixi.js";
+import { Platform } from "@buildings/platform";
+import { Building } from "@buildings/building";
+import { createResource } from "@test-poligons/test-building";
 
 export interface MenuItem {
   label: string;
@@ -9,56 +13,151 @@ export interface MenuItem {
 export class Menu {
   container = new Container();
 
-  constructor(
-    private items: MenuItem[],
-    private x: number,
-    private y: number,
-    private width: number,
-    private height: number,
-  ) {
+  private columns = 3;
+  private gap = 10;
+
+  private width = 120;
+  private height = 120;
+
+  private x = 500;
+  private y = 980;
+
+  constructor(private items: MenuItem[]) {
     this.container.addChild(this.drawBackground());
 
     this.items.forEach((item, index) => {
       this.drawItem(item, index);
     });
 
-    this.container.x = this.x - this.width / 2;
-    this.container.y =
-      this.y - -1 * this.height - this.height * this.items.length;
+    const rows = Math.ceil(this.items.length / this.columns);
+
+    const totalWidth =
+      this.columns * this.width + (this.columns - 1) * this.gap;
+
+    const totalHeight = rows * this.height + (rows - 1) * this.gap;
+
+    this.container.x = this.x - totalWidth / 2;
+    this.container.y = this.y - totalHeight;
   }
 
   private drawBackground() {
+    const rows = Math.ceil(this.items.length / this.columns);
+
+    const bgWidth = this.columns * this.width + (this.columns - 1) * this.gap;
+
+    const bgHeight = rows * this.height + (rows - 1) * this.gap;
+
     return new Graphics()
-      .rect(-10, -10, this.width + 20, this.height * this.items.length + 10)
+      .roundRect(-10, -10, bgWidth + 20, bgHeight + 20, 10)
       .fill("#cfcbc8");
   }
 
   private drawItem(item: MenuItem, index: number) {
-    const yOffset = index * 50;
+    const column = index % this.columns;
+    const row = Math.floor(index / this.columns);
+
+    const xOffset = column * (this.width + this.gap);
+    const yOffset = row * (this.height + this.gap);
 
     const background = new Graphics()
-      .rect(0, yOffset, this.width, this.height - 10)
+      .roundRect(xOffset, yOffset, this.width, this.height, 8)
       .fill(item.color);
 
     background.eventMode = "static";
     background.cursor = "pointer";
 
-    const text = new Text({
-      text: item.label,
-      style: { fill: "#000", fontSize: 16 },
-    });
-
-    text.x = 10;
-    text.y = yOffset + 10;
-    text.eventMode = "none";
-
     background.on("pointerdown", (e) => {
       e.stopPropagation();
+
       item.onClick?.();
+
       this.menuHide();
     });
+    this.container.addChild(background);
 
-    this.container.addChild(background, text);
+    const text = new Text({
+      text: item.label,
+      style: {
+        fill: "#000000",
+        fontSize: 20,
+      },
+    });
+
+    text.anchor.set(0.5);
+
+    text.x = xOffset + this.width / 2;
+    text.y = yOffset + 18;
+
+    text.eventMode = "none";
+    this.container.addChild(text);
+
+    const BuildingClass = buildingMap[item.label] || Platform;
+    const building = new BuildingClass(
+      xOffset + this.width / 2,
+      yOffset + this.height / 2,
+    );
+
+    building.root.scale = 0.5;
+
+    this.drawBuildingRecipe(building, xOffset, yOffset);
+    this.drawCrafRecipe(building, xOffset, yOffset);
+
+    this.container.addChild(building.root);
+  }
+
+  private drawCrafRecipe(building: Building, x: number, y: number) {
+    if (building.craft) {
+      building.showCraft();
+
+      building.craftSign.position.set(
+        x + this.width / 2,
+        y + this.height * 1.35,
+      );
+
+      this.container.addChild(building.craftSign);
+    }
+  }
+
+  private drawBuildingRecipe(building: Building, x: number, y: number) {
+    const buildingRecipe =
+      buidingParameters[
+        building.constructor.name as keyof typeof buidingParameters
+      ].craft;
+
+    const buildingRecipeImage = new Container();
+
+    const background = new Graphics();
+    background
+      .rect(
+        x + this.width - 30,
+        y + this.height - 90,
+        30,
+        buildingRecipe.length * 15 + 5,
+      )
+      .fill("#c9c6bb")
+      .stroke({ width: 2, color: "#000000" });
+
+    this.container.addChild(background);
+
+    for (let i = 0; i < buildingRecipe.length; i++) {
+      const resource = createResource(buildingRecipe[i].type).graphic;
+
+      resource.position.set(x + this.width - 10, y + this.height - 80 + i * 15);
+
+      const text = new Text({
+        text: buildingRecipe[i].amount,
+        style: {
+          fill: "#000000",
+          fontSize: 14,
+        },
+        x: x + this.width - 27,
+        y: y + this.height - 88 + i * 15,
+      });
+
+      buildingRecipeImage.addChild(resource, text);
+    }
+
+    this.container.addChild(buildingRecipeImage);
   }
 
   menuShow(parent: Container) {
