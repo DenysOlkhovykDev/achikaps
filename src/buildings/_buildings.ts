@@ -2,7 +2,6 @@ import { Container } from "pixi.js";
 import { Building } from "@buildings/building";
 import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
-import { setIsBuildMode } from "@menus/build-menu";
 import { JobType, Task } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
 import { dashboard } from "@dashboard/_dashboard";
@@ -44,8 +43,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 2 },
-      { type: "Perl", amount: 2 },
+      { type: "Iron", amount: 1 },
+      { type: "Perl", amount: 1 },
     ],
   },
   Factory: {
@@ -53,7 +52,7 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 4 },
+      { type: "Iron", amount: 2 },
       { type: "Perl", amount: 1 },
     ],
   },
@@ -61,15 +60,15 @@ export const buidingParameters = {
     baseSize: 40,
     minLinkLength: 120,
     maxLinkLength: 200,
-    craft: [{ type: "Iron", amount: 5 }],
+    craft: [{ type: "Iron", amount: 3 }],
   },
   Farm: {
     baseSize: 40,
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 2 },
-      { type: "Perl", amount: 3 },
+      { type: "Iron", amount: 1 },
+      { type: "Perl", amount: 2 },
     ],
   },
   Grinder: {
@@ -77,7 +76,7 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 6 },
+      { type: "Iron", amount: 3 },
       { type: "Meat", amount: 1 },
     ],
   },
@@ -86,7 +85,7 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 5 },
+      { type: "Iron", amount: 2 },
       { type: "Meat", amount: 1 },
       { type: "Perl", amount: 1 },
     ],
@@ -96,7 +95,7 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 5 },
+      { type: "Iron", amount: 2 },
       { type: "Perl", amount: 2 },
     ],
   },
@@ -105,9 +104,9 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Gum", amount: 3 },
-      { type: "Gear", amount: 3 },
-      { type: "Arrow", amount: 3 },
+      { type: "Gum", amount: 1 },
+      { type: "Gear", amount: 1 },
+      { type: "Arrow", amount: 1 },
     ],
   },
   Junkuard: {
@@ -217,7 +216,6 @@ export function addBlueprint(
 
 export function select(node: Building) {
   selectedBuilding = buildings.indexOf(node);
-  setIsBuildMode(true);
   showCrafts();
 }
 

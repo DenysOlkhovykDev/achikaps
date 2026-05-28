@@ -3,6 +3,7 @@ import { Menu, MenuItem } from "@menus/menu";
 
 export class MenuTrigger {
   graphic = new Graphics();
+  isMenuActive: boolean = false;
   private menu?: Menu;
 
   constructor(
@@ -25,10 +26,12 @@ export class MenuTrigger {
   private toggleMenu() {
     if (this.menu) {
       this.menu.menuHide();
+      this.isMenuActive = false;
       this.menu = undefined;
     } else {
       this.menu = new Menu(this.items);
       this.menu.menuShow(this.parent);
+      this.isMenuActive = true;
     }
   }
 

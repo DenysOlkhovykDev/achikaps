@@ -102,6 +102,8 @@ export class Menu {
     this.drawBuildingRecipe(building, xOffset, yOffset);
     this.drawCrafRecipe(building, xOffset, yOffset);
 
+    building.root.eventMode = "none";
+
     this.container.addChild(building.root);
   }
 
@@ -113,6 +115,8 @@ export class Menu {
         x + this.width / 2,
         y + this.height * 1.35,
       );
+
+      building.craftSign.eventMode = "none";
 
       this.container.addChild(building.craftSign);
     }
@@ -129,7 +133,7 @@ export class Menu {
     const background = new Graphics();
     background
       .rect(
-        x + this.width - 30,
+        x + this.width - 31,
         y + this.height - 90,
         30,
         buildingRecipe.length * 15 + 5,
@@ -156,6 +160,8 @@ export class Menu {
 
       buildingRecipeImage.addChild(resource, text);
     }
+
+    buildingRecipeImage.eventMode = "none";
 
     this.container.addChild(buildingRecipeImage);
   }

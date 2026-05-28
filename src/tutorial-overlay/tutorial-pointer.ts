@@ -3,6 +3,9 @@ import { Graphics, Container } from "pixi.js";
 export type Pointer = {
   condition: Function;
 
+  debounce: number;
+  timeout: number;
+
   x?: number;
   y?: number;
 
@@ -38,7 +41,7 @@ export class TutorialPointer extends Container {
     this.graphics.rect(0, 0, width, height);
     this.graphics.fill({
       color: "#000000",
-      alpha: 0.1,
+      alpha: 0.15,
     });
 
     this.graphics.circle(x, y, radius).cut();

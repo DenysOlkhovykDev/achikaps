@@ -11,7 +11,7 @@ export class Laboratory extends Building {
   circles: number = 6;
 
   constructor(x: number, y: number) {
-    super(x, y, 9);
+    super(x, y, 4);
     this.draw();
     this.craft = {
       ingridients: [

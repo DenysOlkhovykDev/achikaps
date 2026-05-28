@@ -83,3 +83,7 @@ export function setBuildingType(type: string) {
 export function getBuildingType() {
   return buildingType;
 }
+
+export function getIsMenuActive() {
+  return menuTrigger.isMenuActive;
+}
