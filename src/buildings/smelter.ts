@@ -5,7 +5,7 @@ export class Smelter extends Building {
   rotationSpeed: number = 0.005;
 
   constructor(x: number, y: number) {
-    super(x, y, 9);
+    super(x, y, 4);
     this.draw();
     this.craft = {
       ingridients: [

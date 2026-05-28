@@ -1,5 +1,10 @@
 import { Container } from "pixi.js";
-import { addBuildMenu, setIsBuildMode } from "@menus/build-menu";
+import {
+  addBuildMenu,
+  getBuildingType,
+  getIsBuildMode,
+  getIsMenuActive,
+} from "@menus/build-menu";
 
 import { addWorker } from "@workers/_workers";
 import {
@@ -86,11 +91,146 @@ type Scenario = {
 };
 
 const scenarios: Record<string, Scenario> = {
-  default: {
+  "old-default": {
     buildings: [
       { from: "", id: "p0", type: "Platform", x: 300, y: 450 },
       { from: "p0", id: "p1", type: "Platform", x: 500, y: 350 },
       { from: "p0", id: "p2", type: "Platform", x: 500, y: 550 },
+    ],
+  },
+  default: {
+    buildings: [
+      { from: "", id: "p0", type: "Platform", x: 500, y: 400 },
+      { from: "p0", id: "factory", type: "Factory", x: 400, y: 350 },
+      { from: "p0", id: "farm", type: "Farm", x: 600, y: 350 },
+      { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
+      { from: "p0", id: "p1", type: "Platform", x: 500, y: 500 },
+      { from: "p1", id: "p2", type: "Platform", x: 500, y: 600 },
+    ],
+    workers: [
+      { buildingId: "p0", profession: "building" },
+      { buildingId: "p0", profession: "production" },
+      { buildingId: "p0", profession: "delivering" },
+    ],
+    buildingTasks: [
+      {
+        from: "p2",
+        x: 500,
+        y: 700,
+        buildingType: "Engine",
+      },
+    ],
+    pointers: [
+      {
+        condition: () => blueprints.length > 0,
+
+        findTarget: () => {
+          const blueprint = blueprints[0];
+
+          if (!blueprint) {
+            return;
+          }
+
+          return {
+            x: blueprint.x,
+            y: blueprint.y,
+          };
+        },
+      },
+      {
+        condition: () => {
+          return (
+            blueprints.length > 0 && blueprints[0].craftSign.children.length > 0
+          );
+        },
+
+        findTarget: () => {
+          const building = buildings[0];
+
+          if (!building) {
+            return;
+          }
+
+          return {
+            x: building.x,
+            y: building.y,
+          };
+        },
+      },
+      {
+        condition: () => {
+          return getIsBuildMode();
+        },
+        x: 500,
+        y: 950,
+      },
+      {
+        condition: () => {
+          return getIsMenuActive();
+        },
+        x: 500,
+        y: 800,
+      },
+      {
+        condition: () => {
+          return getBuildingType() !== "";
+        },
+        x: 600,
+        y: 500,
+      },
+      {
+        condition: () => {
+          const engines = buildings.filter(
+            (b) => b.constructor.name === "Engine",
+          );
+
+          return engines.length > 0;
+        },
+
+        findTarget: () => {
+          const engines = buildings.filter(
+            (b) => b.constructor.name === "Engine",
+          );
+
+          if (engines.length === 0) {
+            return;
+          }
+
+          return {
+            x: engines[0].x,
+            y: engines[0].y,
+          };
+        },
+      },
+    ],
+
+    compasses: [
+      {
+        condition: () => true,
+
+        findTarget: () => {
+          return {
+            x: 1000,
+            y: 100,
+          };
+        },
+      },
+    ],
+
+    messages: [
+      {
+        condition: () => {
+          if (
+            getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 50
+          ) {
+            return true;
+          }
+        },
+        x: 420,
+        y: 500,
+        text: "You win",
+        fontSize: 44,
+      },
     ],
   },
   "auto-construction-of-buildings": {
@@ -280,6 +420,7 @@ const scenarios: Record<string, Scenario> = {
       },
     ],
   },
+  // working
   "showing-pointers": {
     buildings: [
       { from: "", id: "p0", type: "Platform", x: 500, y: 500 },
@@ -410,10 +551,10 @@ export function createTestBulding(
   buildingsLayer: Container,
   workersLayer: Container,
   tutorials: Tutorials,
+  UIcontainer: Container,
   stage: Container,
 ) {
-  addBuildMenu(stage);
-  setIsBuildMode(false);
+  addBuildMenu(UIcontainer);
 
   const scenarioName = getScenarioName();
   const scenario = scenarios[scenarioName];
@@ -425,10 +566,10 @@ export function createTestBulding(
   runScenario(scenario, buildingsLayer, workersLayer, tutorials);
 
   hideCrafts();
-  setIsBuildMode(false);
 
   stage.addChild(buildingsLayer);
   stage.addChild(workersLayer);
+  stage.addChild(UIcontainer);
 }
 
 function runScenario(
