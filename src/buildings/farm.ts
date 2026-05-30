@@ -14,7 +14,7 @@ export class Farm extends Building {
   antennasOffset: number = 0;
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 5, "Farm");
     this.draw();
     this.craft = {
       ingridients: [],

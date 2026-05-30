@@ -180,17 +180,13 @@ const scenarios: Record<string, Scenario> = {
       },
       {
         condition: () => {
-          const engines = buildings.filter(
-            (b) => b.constructor.name === "Engine",
-          );
+          const engines = buildings.filter((b) => b.buildingType === "Engine");
 
           return engines.length > 0;
         },
 
         findTarget: () => {
-          const engines = buildings.filter(
-            (b) => b.constructor.name === "Engine",
-          );
+          const engines = buildings.filter((b) => b.buildingType === "Engine");
 
           if (engines.length === 0) {
             return;
@@ -674,19 +670,19 @@ function runScenario(
 export function createResource(type: string) {
   switch (type) {
     case "Iron":
-      return new Iron();
+      return new Iron("Iron");
     case "Meat":
-      return new Meat();
+      return new Meat("Meat");
     case "Perl":
-      return new Perl();
+      return new Perl("Perl");
     case "Battery":
-      return new Battery();
+      return new Battery("Battery");
     case "Gum":
-      return new Gum();
+      return new Gum("Gum");
     case "Gear":
-      return new Gear();
+      return new Gear("Gear");
     case "Arrow":
-      return new Arrow();
+      return new Arrow("Arrow");
     default:
       throw new Error("Unknown resource: " + type);
   }

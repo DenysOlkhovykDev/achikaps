@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import path from "path";
 
-export default defineConfig({
-  base: "/achikaps/",
+export default defineConfig(({ mode }) => ({
+  base: mode === "gh-pages" ? "/achikaps/" : "/",
 
   resolve: {
     alias: {
@@ -16,4 +16,4 @@ export default defineConfig({
       "@test-poligons": path.resolve(__dirname, "src/test-poligons"),
     },
   },
-});
+}));

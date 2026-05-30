@@ -15,7 +15,7 @@ export class Junkuard extends Building {
   particles: Particle[] = [];
 
   constructor(x: number, y: number) {
-    super(x, y, 20);
+    super(x, y, 20, "Junkuard");
     this.draw();
   }
 

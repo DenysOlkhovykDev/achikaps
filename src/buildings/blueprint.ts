@@ -20,7 +20,7 @@ export class Blueprint extends Building {
     y: number,
     public type: string,
   ) {
-    super(x, y, 10);
+    super(x, y, 10, "Blueprint");
     this.baseSize =
       buidingParameters[type as keyof typeof buidingParameters].baseSize;
     this.draw();

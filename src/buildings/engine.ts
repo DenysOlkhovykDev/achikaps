@@ -27,7 +27,7 @@ export class Engine extends Building {
   particles: Particle[] = [];
 
   constructor(x: number, y: number) {
-    super(x, y, 3);
+    super(x, y, 3, "Engine");
     this.draw();
   }
 

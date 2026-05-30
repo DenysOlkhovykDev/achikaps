@@ -12,7 +12,7 @@ export class Platform extends Building {
   }
 
   constructor(x: number, y: number) {
-    super(x, y, 10);
+    super(x, y, 10, "Platform");
     this.draw();
   }
 
