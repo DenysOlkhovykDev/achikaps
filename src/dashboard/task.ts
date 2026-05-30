@@ -63,7 +63,7 @@ export class Task {
     for (let i = 0; i < building.recources.length; i++) {
       const element = building.recources[i];
 
-      if (element.constructor.name === this.resource && !element.isReserved) {
+      if (element.resourceType === this.resource && !element.isReserved) {
         return i;
       }
     }

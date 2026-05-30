@@ -47,6 +47,7 @@ export abstract class Building {
     public x: number,
     public y: number,
     public inventorySize: number,
+    public buildingType: string,
   ) {
     this.visual = new Container();
     this.initEvents();
@@ -60,7 +61,7 @@ export abstract class Building {
 
     this.baseSize =
       buidingParameters[
-        this.constructor.name as keyof typeof buidingParameters
+        this.buildingType as keyof typeof buidingParameters
       ].baseSize;
   }
 
@@ -222,7 +223,7 @@ export abstract class Building {
     this.recources.push(resource);
     this.resourceContainer.addChild(resource.graphic);
 
-    const resourceName = resource.constructor.name;
+    const resourceName = resource.resourceType;
     const current = this.resourceList.get(resourceName) ?? 0;
 
     this.resourceList.set(resourceName, current + 1);
@@ -240,7 +241,7 @@ export abstract class Building {
   }
 
   takeResourceByIndex(resourceIndex: number): Resource {
-    const resourceName = this.recources[resourceIndex].constructor.name;
+    const resourceName = this.recources[resourceIndex].resourceType;
     const current = this.resourceList.get(resourceName) ?? 0;
 
     if (current > 1) {
@@ -265,7 +266,7 @@ export abstract class Building {
 
   takeResourceByName(resourceName: string) {
     const index = this.recources.findIndex(
-      (r) => r.constructor.name === resourceName,
+      (r) => r.resourceType === resourceName,
     );
 
     if (index !== -1) {

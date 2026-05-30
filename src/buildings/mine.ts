@@ -14,7 +14,7 @@ export class Mine extends Building {
   antennasArmsAngle: number = 0;
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 5, "Mine");
     this.draw();
     this.craft = {
       ingridients: [],

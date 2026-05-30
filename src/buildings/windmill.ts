@@ -13,7 +13,7 @@ export class Windmill extends Building {
   windmillBlades: Graphics = new Graphics();
 
   constructor(x: number, y: number) {
-    super(x, y, 10);
+    super(x, y, 10, "Windmill");
     this.draw();
   }
 

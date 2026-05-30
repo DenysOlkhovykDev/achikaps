@@ -4,7 +4,7 @@ export abstract class Resource {
   graphic: Graphics;
   isReserved: boolean;
 
-  constructor() {
+  constructor(public resourceType: string) {
     this.graphic = new Graphics();
     this.draw();
     this.graphic.x = 0;

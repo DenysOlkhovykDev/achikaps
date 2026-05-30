@@ -10,7 +10,7 @@ export class House extends Building {
   changeSizeDelay: number = 300;
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 5, "House");
     this.draw();
   }
 

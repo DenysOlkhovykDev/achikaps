@@ -124,9 +124,8 @@ export class Menu {
 
   private drawBuildingRecipe(building: Building, x: number, y: number) {
     const buildingRecipe =
-      buidingParameters[
-        building.constructor.name as keyof typeof buidingParameters
-      ].craft;
+      buidingParameters[building.buildingType as keyof typeof buidingParameters]
+        .craft;
 
     const buildingRecipeImage = new Container();
 

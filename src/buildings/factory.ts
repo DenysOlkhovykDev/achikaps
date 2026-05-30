@@ -11,7 +11,7 @@ export class Factory extends Building {
   satelites: Graphics = new Graphics();
 
   constructor(x: number, y: number) {
-    super(x, y, 5);
+    super(x, y, 5, "Factory");
     this.draw();
     this.craft = {
       ingridients: [],
