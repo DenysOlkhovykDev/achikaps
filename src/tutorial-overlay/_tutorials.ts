@@ -22,8 +22,6 @@ export class Tutorials {
   public addNewPointerByCoordinates(condition: Function, x: number, y: number) {
     this.pointers.push({
       condition,
-      debounce: 0,
-      timeout: 0,
       x,
       y,
     });
@@ -32,8 +30,6 @@ export class Tutorials {
   public addNewPointerByTarget(condition: Function, findTarget: Function) {
     this.pointers.push({
       condition,
-      debounce: 0,
-      timeout: 0,
       findTarget,
     });
   }
@@ -68,97 +64,81 @@ export class Tutorials {
   }
 
   public updatePointers() {
-    const activePointers = this.pointers.filter((p) => p.condition());
+    const activePointer = this.pointers.find((p) => p.condition());
 
-    if (activePointers.length === 0) {
+    if (!activePointer) {
       this.tutorialOverlay.update(undefined, undefined);
       return;
     }
 
-    for (const pointer of activePointers) {
-      let x = pointer.x;
-      let y = pointer.y;
+    let x = activePointer.x;
+    let y = activePointer.y;
 
-      if (pointer.findTarget) {
-        const target = pointer.findTarget();
+    if (activePointer.findTarget) {
+      const target = activePointer.findTarget();
 
-        if (!target) {
-          continue;
-        }
-
-        x = target.x;
-        y = target.y;
+      if (!target) {
+        return;
       }
 
-      if (
-        x === undefined ||
-        y === undefined ||
-        pointer.timeout >= 100 ||
-        pointer.debounce <= 25
-      ) {
-        if (pointer.debounce <= 25) {
-          pointer.debounce++;
-        }
-        this.tutorialOverlay.update();
-        continue;
-      }
-
-      pointer.timeout++;
-      this.tutorialOverlay.update(x, y);
+      x = target.x;
+      y = target.y;
     }
+
+    if (x === undefined || y === undefined) {
+      return;
+    }
+
+    this.tutorialOverlay.update(x, y);
   }
 
   public updateCompasses() {
-    const activeCompasses = this.compasses.filter((p) => p.condition());
+    const activeCompasses = this.compasses.find((p) => p.condition());
 
-    if (activeCompasses.length === 0) {
+    if (!activeCompasses) {
       this.compassOverlay.update(undefined, undefined);
       return;
     }
 
-    for (const compass of activeCompasses) {
-      let x = 0;
-      let y = 0;
+    let x = 0;
+    let y = 0;
 
-      if (compass.findTarget) {
-        const target = compass.findTarget();
+    if (activeCompasses.findTarget) {
+      const target = activeCompasses.findTarget();
 
-        if (!target) {
-          return;
-        }
-
-        x = target.x;
-        y = target.y;
-      }
-
-      if (x === undefined || y === undefined) {
+      if (!target) {
         return;
       }
 
-      const global = worldLayer.toGlobal({
-        x: x,
-        y: y,
-      });
-
-      this.compassOverlay.update(global.x, global.y);
+      x = target.x;
+      y = target.y;
     }
+
+    if (x === undefined || y === undefined) {
+      return;
+    }
+
+    const global = worldLayer.toGlobal({
+      x: x,
+      y: y,
+    });
+
+    this.compassOverlay.update(global.x, global.y);
   }
 
   public updateMessages() {
-    const activeMessages = this.messages.filter((p) => p.condition());
+    const activeMessages = this.messages.find((p) => p.condition());
 
-    if (activeMessages.length === 0) {
+    if (!activeMessages) {
       this.messagesOverlay.update(undefined, undefined, undefined);
       return;
     }
 
-    for (const message of activeMessages) {
-      this.messagesOverlay.update(
-        message.x,
-        message.y,
-        message.text,
-        message.fontSize,
-      );
-    }
+    this.messagesOverlay.update(
+      activeMessages.x,
+      activeMessages.y,
+      activeMessages.text,
+      activeMessages.fontSize,
+    );
   }
 }

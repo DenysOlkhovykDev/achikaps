@@ -69,15 +69,8 @@ app.stage.on("pointerdown", (event) => {
 const tutorials = new Tutorials();
 const buildingsLayer = new Container();
 const workersLayer = new Container();
-const UIcontainer = new Container();
 
-createTestBulding(
-  buildingsLayer,
-  workersLayer,
-  tutorials,
-  UIcontainer,
-  app.stage,
-);
+createTestBulding(buildingsLayer, workersLayer, tutorials, app.stage);
 
 export const worldLayer = new Container();
 createTestWorld(worldLayer, app.stage);

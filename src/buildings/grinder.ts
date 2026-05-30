@@ -8,7 +8,7 @@ export class Grinder extends Building {
   blades: Graphics[] = [];
 
   constructor(x: number, y: number) {
-    super(x, y, 4);
+    super(x, y, 9);
     this.draw();
     this.craft = {
       ingridients: [
