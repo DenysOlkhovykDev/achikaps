@@ -109,7 +109,7 @@ export class Menu {
 
   private drawCrafRecipe(building: Building, x: number, y: number) {
     if (building.craft) {
-      building.showCraft();
+      building.showCraft(true);
 
       building.craftSign.position.set(
         x + this.width / 2,
