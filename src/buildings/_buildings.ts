@@ -197,7 +197,7 @@ export function addBlueprint(
         if (task) {
           blueprint.tasks.push(task);
         }
-        blueprint.resources.push(craft[i].type);
+        blueprint.buildResources.push(craft[i].type);
       }
     }
 

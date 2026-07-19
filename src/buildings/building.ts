@@ -37,6 +37,7 @@ export abstract class Building {
   priorityForTasks: number = -1;
 
   craft: Craft | undefined;
+  craftGraphicAlpha: number = 0.45;
 
   shadowContainer: Container = new Container();
   selectShadowContainer: Container = new Container();
@@ -158,7 +159,7 @@ export abstract class Building {
 
   onClick(event: FederatedPointerEvent) {
     hideCrafts();
-    this.showCraft();
+    this.showCraft(false);
     setIsBuildMode(false);
     deSelectAllBuildings();
     this.makeRoundShadow(
@@ -229,6 +230,11 @@ export abstract class Building {
     this.resourceList.set(resourceName, current + 1);
 
     this.placeResource(resource);
+
+    if(this.craftSign.children.length > 0){
+      this.updateCraftSign();
+    }
+
     this.generateProductionTask();
 
     for (const fn of this.resourceListeners) {
@@ -320,16 +326,10 @@ export abstract class Building {
     };
   }
 
-  showCraft() {
+  showCraft(isStandart: boolean) {
     if (this.craft) {
-      this.craftSignElements = [];
-      for (let i = 0; i < this.craft.ingridients.length; i++) {
-        for (let j = 0; j < this.craft.ingridients[i].count; j++) {
-          this.craftSignElements.push(
-            createResource(this.craft.ingridients[i].resourceName).graphic,
-          );
-        }
-      }
+      this.prepareCraftSignElements(isStandart);
+
       const arrow = new Graphics();
 
       arrow
@@ -343,7 +343,9 @@ export abstract class Building {
 
       this.craftSignElements.push(arrow);
 
-      this.craftSignElements.push(createResource(this.craft.result).graphic);
+      const craftResult = createResource(this.craft.result).graphic
+      craftResult.alpha = isStandart ? 1 : this.craftGraphicAlpha;
+      this.craftSignElements.push(craftResult);
 
       this.drawCraftSign();
     }
@@ -351,6 +353,48 @@ export abstract class Building {
 
   hideCraftSign() {
     this.craftSign.removeChildren();
+  }
+
+  prepareCraftSignElements(isStandart: boolean){
+    if (this.craft) {
+
+      this.craftSignElements = [];
+      
+      const remeaningCraftIngredients = structuredClone(this.craft.ingridients)
+
+      for (let i = 0; i < remeaningCraftIngredients.length; i++) {
+        remeaningCraftIngredients[i].count = 0;
+      }
+
+      for (let i = 0; i < this.recources.length; i++) {
+        const craftIngredient = remeaningCraftIngredients.find((element) => element.resourceName === this.recources[i].resourceType);
+        if (craftIngredient) {
+          craftIngredient.count++;
+        }
+      }
+
+      for (let i = 0; i < this.craft.ingridients.length; i++) {
+        for (let j = 0; j < this.craft.ingridients[i].count; j++) {
+
+          if (remeaningCraftIngredients[i].count > 0) {
+            this.craftSignElements.push(
+              createResource(this.craft.ingridients[i].resourceName).graphic,
+            );
+            remeaningCraftIngredients[i].count--;  
+          }else{
+            const craftIngredient = createResource(this.craft.ingridients[i].resourceName).graphic
+            craftIngredient.alpha = isStandart ? 1 : this.craftGraphicAlpha;
+            this.craftSignElements.push(craftIngredient);
+          }
+          
+        }
+      }
+    }   
+  }
+
+  updateCraftSign(){
+    this.hideCraftSign();
+    this.showCraft(false);
   }
 
   drawCraftSign() {

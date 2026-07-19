@@ -13,7 +13,7 @@ export class Blueprint extends Building {
   redraws: number = 0;
 
   tasks: Task[] = [];
-  resources: string[] = [];
+  buildResources: string[] = [];
 
   constructor(
     x: number,
@@ -194,6 +194,11 @@ export class Blueprint extends Building {
         this.tasks.splice(index, 1);
       }
     }
+    
+    if(this.craftSign.children.length > 0){
+      this.updateCraftSign();
+    }
+
     this.blueprinToBuilding(container);
   }
 
@@ -201,7 +206,7 @@ export class Blueprint extends Building {
     if (this.tasks.length === 0) {
       select(this.links[0].from);
       addBuilding(this.x, this.y, container, this.type);
-      for (const resource of this.resources) {
+      for (const resource of this.buildResources) {
         if (resource) {
           this.links[0].from.takeResourceByName(resource);
         }
@@ -214,13 +219,38 @@ export class Blueprint extends Building {
   public unsubscribe?: () => void;
 
   showCraft() {
-    if (!this.resources) return;
+    if (!this.buildResources) return;
 
-    this.craftSignElements = [];
-    for (let i = 0; i < this.resources.length; i++) {
-      this.craftSignElements.push(createResource(this.resources[i]).graphic);
-    }
+    this.prepareBuildCraftSignElements();
 
     this.drawCraftSign();
   }
-}
+
+  prepareBuildCraftSignElements(){
+      this.craftSignElements = [];
+
+      const remeaningCraftIngredients = structuredClone(this.buildResources)
+
+      for (let i = 0; i < this.tasks.length; i++) {
+        const index = remeaningCraftIngredients.findIndex((element) => element === this.tasks[i].resource);
+        if (index !== -1) {
+          remeaningCraftIngredients.splice(index, 1);
+        }
+      }
+
+      for (let i = 0; i < this.buildResources.length; i++) {
+        const index = remeaningCraftIngredients.findIndex((element) => element === this.buildResources[i]);
+        
+        if (index !== -1) {
+          this.craftSignElements.push(createResource(this.buildResources[i]).graphic);  
+          remeaningCraftIngredients.splice(index, 1);
+        }
+        else{
+          const craftIngredient = createResource(this.buildResources[i]).graphic
+            craftIngredient.alpha = this.craftGraphicAlpha;
+            this.craftSignElements.push(craftIngredient);
+        }
+      }
+    }   
+  }
+
