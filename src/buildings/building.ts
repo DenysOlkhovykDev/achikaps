@@ -8,7 +8,7 @@ import {
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
-import { createResource } from "@test-poligons/test-building";
+import { createResource } from "@resources/_resources";
 import { setIsBuildMode } from "@menus/build-menu";
 
 type ResourceListener = (task: Task) => void;
@@ -231,7 +231,7 @@ export abstract class Building {
 
     this.placeResource(resource);
 
-    if(this.craftSign.children.length > 0){
+    if (this.craftSign.children.length > 0) {
       this.updateCraftSign();
     }
 
@@ -343,7 +343,7 @@ export abstract class Building {
 
       this.craftSignElements.push(arrow);
 
-      const craftResult = createResource(this.craft.result).graphic
+      const craftResult = createResource(this.craft.result).graphic;
       craftResult.alpha = isStandart ? 1 : this.craftGraphicAlpha;
       this.craftSignElements.push(craftResult);
 
@@ -355,19 +355,20 @@ export abstract class Building {
     this.craftSign.removeChildren();
   }
 
-  prepareCraftSignElements(isStandart: boolean){
+  prepareCraftSignElements(isStandart: boolean) {
     if (this.craft) {
-
       this.craftSignElements = [];
-      
-      const remeaningCraftIngredients = structuredClone(this.craft.ingridients)
+
+      const remeaningCraftIngredients = structuredClone(this.craft.ingridients);
 
       for (let i = 0; i < remeaningCraftIngredients.length; i++) {
         remeaningCraftIngredients[i].count = 0;
       }
 
       for (let i = 0; i < this.recources.length; i++) {
-        const craftIngredient = remeaningCraftIngredients.find((element) => element.resourceName === this.recources[i].resourceType);
+        const craftIngredient = remeaningCraftIngredients.find(
+          (element) => element.resourceName === this.recources[i].resourceType,
+        );
         if (craftIngredient) {
           craftIngredient.count++;
         }
@@ -375,24 +376,24 @@ export abstract class Building {
 
       for (let i = 0; i < this.craft.ingridients.length; i++) {
         for (let j = 0; j < this.craft.ingridients[i].count; j++) {
-
           if (remeaningCraftIngredients[i].count > 0) {
             this.craftSignElements.push(
               createResource(this.craft.ingridients[i].resourceName).graphic,
             );
-            remeaningCraftIngredients[i].count--;  
-          }else{
-            const craftIngredient = createResource(this.craft.ingridients[i].resourceName).graphic
+            remeaningCraftIngredients[i].count--;
+          } else {
+            const craftIngredient = createResource(
+              this.craft.ingridients[i].resourceName,
+            ).graphic;
             craftIngredient.alpha = isStandart ? 1 : this.craftGraphicAlpha;
             this.craftSignElements.push(craftIngredient);
           }
-          
         }
       }
-    }   
+    }
   }
 
-  updateCraftSign(){
+  updateCraftSign() {
     this.hideCraftSign();
     this.showCraft(false);
   }

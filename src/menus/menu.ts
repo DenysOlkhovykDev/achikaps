@@ -2,7 +2,7 @@ import { buildingMap, buidingParameters } from "@buildings/_buildings";
 import { Container, Graphics, Text } from "pixi.js";
 import { Platform } from "@buildings/platform";
 import { Building } from "@buildings/building";
-import { createResource } from "@test-poligons/test-building";
+import { createResource } from "@resources/_resources";
 
 export interface MenuItem {
   label: string;

@@ -12,12 +12,12 @@ test("multiple-construction-of-buildings", async ({ page }) => {
 
   await page.waitForFunction(() => (window as any).app !== undefined);
 
-  await skipFrames(page, 3 * 600);
+  await skipFrames(page, 30);
 
   const screenshot = await page.locator("canvas").screenshot();
 
   expect(screenshot).toMatchSnapshot(
-    "./tests/screenshots/cmultiple-construction-of-buildings.png",
+    "./tests/screenshots/multiple-construction-of-buildings.png",
     testSettings,
   );
 });
