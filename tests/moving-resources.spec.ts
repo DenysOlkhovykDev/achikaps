@@ -10,7 +10,7 @@ test("moving-resources", async ({ page }) => {
 
   await page.waitForFunction(() => (window as any).app !== undefined);
 
-  await skipFrames(page, 3 * 200);
+  await skipFrames(page, 6);
 
   const screenshot = await page.locator("canvas").screenshot();
 

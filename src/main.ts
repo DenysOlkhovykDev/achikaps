@@ -13,7 +13,7 @@ import {
   movingBlueprints,
   hideCrafts,
 } from "@buildings/_buildings";
-import { createTestBulding } from "./test-poligons/test-building";
+import { createTestBulding } from "./test-poligons/test-buildings";
 import { createTestWorld } from "@test-poligons/test-world";
 import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";

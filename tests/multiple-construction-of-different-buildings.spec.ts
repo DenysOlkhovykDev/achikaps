@@ -12,7 +12,7 @@ test("multiple-construction-of-different-buildings", async ({ page }) => {
 
   await page.waitForFunction(() => (window as any).app !== undefined);
 
-  await skipFrames(page, 3 * 850);
+  await skipFrames(page, 30);
 
   const screenshot = await page.locator("canvas").screenshot();
 

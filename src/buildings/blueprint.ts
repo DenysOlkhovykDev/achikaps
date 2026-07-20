@@ -7,7 +7,7 @@ import { addBuilding } from "@buildings/_buildings";
 import { deleteBlueprint } from "@buildings/_buildings";
 import { Task } from "@dashboard/task";
 import { setIsBuildMode } from "@menus/build-menu";
-import { createResource } from "@test-poligons/test-building";
+import { createResource } from "@resources/_resources";
 
 export class Blueprint extends Building {
   redraws: number = 0;
@@ -194,8 +194,8 @@ export class Blueprint extends Building {
         this.tasks.splice(index, 1);
       }
     }
-    
-    if(this.craftSign.children.length > 0){
+
+    if (this.craftSign.children.length > 0) {
       this.updateCraftSign();
     }
 
@@ -226,31 +226,35 @@ export class Blueprint extends Building {
     this.drawCraftSign();
   }
 
-  prepareBuildCraftSignElements(){
-      this.craftSignElements = [];
+  prepareBuildCraftSignElements() {
+    this.craftSignElements = [];
 
-      const remeaningCraftIngredients = structuredClone(this.buildResources)
+    const remeaningCraftIngredients = structuredClone(this.buildResources);
 
-      for (let i = 0; i < this.tasks.length; i++) {
-        const index = remeaningCraftIngredients.findIndex((element) => element === this.tasks[i].resource);
-        if (index !== -1) {
-          remeaningCraftIngredients.splice(index, 1);
-        }
+    for (let i = 0; i < this.tasks.length; i++) {
+      const index = remeaningCraftIngredients.findIndex(
+        (element) => element === this.tasks[i].resource,
+      );
+      if (index !== -1) {
+        remeaningCraftIngredients.splice(index, 1);
       }
+    }
 
-      for (let i = 0; i < this.buildResources.length; i++) {
-        const index = remeaningCraftIngredients.findIndex((element) => element === this.buildResources[i]);
-        
-        if (index !== -1) {
-          this.craftSignElements.push(createResource(this.buildResources[i]).graphic);  
-          remeaningCraftIngredients.splice(index, 1);
-        }
-        else{
-          const craftIngredient = createResource(this.buildResources[i]).graphic
-            craftIngredient.alpha = this.craftGraphicAlpha;
-            this.craftSignElements.push(craftIngredient);
-        }
+    for (let i = 0; i < this.buildResources.length; i++) {
+      const index = remeaningCraftIngredients.findIndex(
+        (element) => element === this.buildResources[i],
+      );
+
+      if (index !== -1) {
+        this.craftSignElements.push(
+          createResource(this.buildResources[i]).graphic,
+        );
+        remeaningCraftIngredients.splice(index, 1);
+      } else {
+        const craftIngredient = createResource(this.buildResources[i]).graphic;
+        craftIngredient.alpha = this.craftGraphicAlpha;
+        this.craftSignElements.push(craftIngredient);
       }
-    }   
+    }
   }
-
+}

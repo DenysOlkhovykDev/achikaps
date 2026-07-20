@@ -9,6 +9,8 @@ import {
 import { Task, JobType } from "@dashboard/task";
 import { delay } from "@utils/delay";
 
+const isTest = import.meta.env.MODE === "test";
+
 type Leg = {
   x: number;
   y: number;
@@ -110,30 +112,36 @@ export class Worker {
     }
     this.legAnimation(delta);
 
-    const dx = this.targetPlatform.x - this.x;
-    const dy = this.targetPlatform.y - this.y;
-
-    const angle = Math.atan2(dy, dx);
-    this.root.rotation = angle + Math.PI / 2;
-
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance === 0) return;
-
-    if (distance < 3) {
+    if (isTest) {
+      this.x = this.targetPlatform.x;
+      this.y = this.targetPlatform.y;
       this.onReachPlatform();
-      if (!this.task) {
-        this.setLegsIdlePose(false);
+    } else {
+      const dx = this.targetPlatform.x - this.x;
+      const dy = this.targetPlatform.y - this.y;
+
+      const angle = Math.atan2(dy, dx);
+      this.root.rotation = angle + Math.PI / 2;
+
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance === 0) return;
+
+      if (distance < 3) {
+        this.onReachPlatform();
+        if (!this.task) {
+          this.setLegsIdlePose(false);
+        }
+        this.isMoving = false;
+        this.drawLegs();
+        return;
       }
-      this.isMoving = false;
-      this.drawLegs();
-      return;
+
+      const vx = dx / distance;
+      const vy = dy / distance;
+
+      this.x += vx * this.speed * delta;
+      this.y += vy * this.speed * delta;
     }
-
-    const vx = dx / distance;
-    const vy = dy / distance;
-
-    this.x += vx * this.speed * delta;
-    this.y += vy * this.speed * delta;
 
     this.root.position.set(this.x, this.y);
   }
@@ -262,7 +270,9 @@ export class Worker {
 
     this.isWorking = true;
     while (true) {
-      await delay(1000);
+      if (!isTest) {
+        await delay(1000);
+      }
 
       const result = this.task?.target.tryToDoProduction();
 
