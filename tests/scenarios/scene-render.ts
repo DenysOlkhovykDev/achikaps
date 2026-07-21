@@ -36,7 +36,7 @@ export const sceneRender: Scenario = {
     { buildingId: "engine", type: "Battery", count: 3 },
     { buildingId: "laboratory", type: "Gum", count: 5 },
     { buildingId: "smelter", type: "Gear", count: 5 },
-    { buildingId: "grinder", type: "Arrow", count: 5 },
+    { buildingId: "grinder", type: "Truss", count: 5 },
   ],
   workers: [{ buildingId: "p0", profession: "building" }],
 };

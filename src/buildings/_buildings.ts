@@ -106,7 +106,7 @@ export const buidingParameters = {
     craft: [
       { type: "Gum", amount: 1 },
       { type: "Gear", amount: 1 },
-      { type: "Arrow", amount: 1 },
+      { type: "Truss", amount: 1 },
     ],
   },
   Junkuard: {
