@@ -15,7 +15,7 @@ export class Grinder extends Building {
         { resourceName: "Perl", count: 1 },
         { resourceName: "Meat", count: 2 },
       ],
-      result: "Arrow",
+      result: "Truss",
     };
     this.priorityForTasks = 5;
     this.generateDeliveryTasks();
