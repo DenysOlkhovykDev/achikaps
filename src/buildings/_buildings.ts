@@ -106,7 +106,7 @@ export const buidingParameters = {
     craft: [
       { type: "Gum", amount: 1 },
       { type: "Gear", amount: 1 },
-      { type: "Arrow", amount: 1 },
+      { type: "Truss", amount: 1 },
     ],
   },
   Junkuard: {
@@ -222,6 +222,10 @@ export function select(node: Building) {
 export function deSelectAllBuildings() {
   for (const building of buildings) {
     building.selectShadowContainer.removeChildren();
+  }
+
+  for (const blueprint of blueprints) {
+    blueprint.selectShadowContainer.removeChildren();
   }
 }
 
