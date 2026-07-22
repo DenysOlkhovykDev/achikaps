@@ -1,13 +1,15 @@
 import { Container } from "pixi.js";
 import { Building } from "@buildings/building";
 import { buidingParameters, select } from "@buildings/_buildings";
-import { getDistance } from "@utils/distance";
+import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
 import { addBuilding } from "@buildings/_buildings";
 import { deleteBlueprint } from "@buildings/_buildings";
 import { Task } from "@dashboard/task";
 import { setIsBuildMode } from "@menus/build-menu";
 import { createResource } from "@resources/_resources";
+import { app } from "../main";
+import { Graphics, Sprite } from "pixi.js";
 
 export class Blueprint extends Building {
   redraws: number = 0;
@@ -27,20 +29,29 @@ export class Blueprint extends Building {
   }
 
   draw() {
-    this.mainGraphic
+    this.createBaseTexture();
+  }
+
+  private createBaseTexture() {
+    const baseGraphics = new Graphics();
+
+    baseGraphics
       .circle(0, 0, this.baseSize)
       .fill({ color: 0xffffff, alpha: 0 });
 
-    this.drawDashedCircle(this.baseSize);
+    this.drawDashedCircle(baseGraphics, this.baseSize);
 
-    this.visual.addChild(this.mainGraphic);
+    this.contentContainer.addChild(baseGraphics);
   }
 
   animation(delta: number) {}
 
-  private drawDashedCircle(radius: number, dash = 8, gap = 6) {
-    const g = this.mainGraphic;
-
+  private drawDashedCircle(
+    baseGraphics: Graphics,
+    radius: number,
+    dash = 8,
+    gap = 6,
+  ) {
     const step = dash + gap;
     const circumference = 2 * Math.PI * radius;
     const count = Math.floor(circumference / step) + 1;
@@ -55,11 +66,11 @@ export class Blueprint extends Building {
       const x2 = Math.cos(endAngle) * radius;
       const y2 = Math.sin(endAngle) * radius;
 
-      g.moveTo(x1, y1);
-      g.lineTo(x2, y2);
+      baseGraphics.moveTo(x1, y1);
+      baseGraphics.lineTo(x2, y2);
     }
 
-    g.stroke({ width: 3 });
+    baseGraphics.stroke({ width: 3 });
   }
 
   private moveAwayFrom(x: number, y: number, delta: number, speed: number) {
@@ -140,12 +151,12 @@ export class Blueprint extends Building {
     this.checkLinksCollision(building, delta);
     if (prevRedraws === this.redraws) {
       this.redraws = 0;
-      if (this.mainGraphic.tint !== 0x000000) {
-        this.mainGraphic.tint = "#000000";
+      if (this.contentContainer.tint !== 0x000000) {
+        this.contentContainer.tint = "#000000";
       }
     } else {
-      if (this.mainGraphic.tint !== 0xff0000) {
-        this.mainGraphic.tint = "#ff0000";
+      if (this.contentContainer.tint !== 0xff0000) {
+        this.contentContainer.tint = "#ff0000";
       }
     }
   }

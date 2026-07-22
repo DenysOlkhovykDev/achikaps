@@ -1,8 +1,17 @@
+import { Graphics, Sprite } from "pixi.js";
+import { app } from "../main";
 import { Building } from "@buildings/building";
+import {
+  getRadialPoint,
+  makeBasicCircle,
+  makeRoundShadow,
+} from "@utils/basic-graphic";
 
 export class Smelter extends Building {
-  numberOfChemnies: number = 3;
-  rotationSpeed: number = 0.005;
+  buildingParams = {
+    amountOfChemnies: 4,
+    rotationSpeed: 0.005,
+  };
 
   constructor(x: number, y: number) {
     super(x, y, 4, "Smelter");
@@ -20,14 +29,26 @@ export class Smelter extends Building {
   }
 
   draw() {
-    this.makeBasicCircle(this.baseSize, "#dec6a4", true);
+    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
-    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    this.createBaseTexture();
 
-    this.drawChimneyPart(-1, 15, 20, "#000000");
-    this.drawChimneyPart(-1, 14, 16, "#dec6a4");
-    this.drawChimneyPart(0, 6, 6, "#da6563");
-    this.drawChimneyPart(6, 14, 6, "#000000");
+    const base = new Sprite(Smelter.baseTexture);
+    base.anchor.set(0.5);
+    this.contentContainer.addChild(base);
+  }
+
+  private createBaseTexture() {
+    if (Smelter.baseTexture) return;
+
+    const baseGraphics = new Graphics();
+
+    makeBasicCircle(baseGraphics, this.baseSize, "#dec6a4", true);
+
+    this.makeChimneyPart(baseGraphics, -1, 15, 20, "#000000");
+    this.makeChimneyPart(baseGraphics, -1, 14, 16, "#dec6a4");
+    this.makeChimneyPart(baseGraphics, 0, 6, 6, "#da6563");
+    this.makeChimneyPart(baseGraphics, 6, 14, 6, "#000000");
 
     const segments = 3;
     const step = (Math.PI * 2) / segments;
@@ -37,37 +58,48 @@ export class Smelter extends Building {
       const startAngle = i * step + gap;
       const endAngle = (i + 1) * step - gap;
 
-      this.mainGraphic
+      baseGraphics
         .moveTo(0, 0)
         .arc(0, 0, this.baseSize, startAngle, endAngle)
         .fill("#d4b58d");
     }
 
-    this.makeBasicCircle(this.baseSize - 8, "#dec6a4", false);
+    makeBasicCircle(baseGraphics, this.baseSize - 8, "#dec6a4", false);
 
-    this.makeBasicCircle(this.baseSize - 18, "#dbb39e", true);
+    makeBasicCircle(baseGraphics, this.baseSize - 18, "#dbb39e", true);
 
-    this.visual.addChild(this.mainGraphic);
+    Smelter.baseTexture = app.renderer.generateTexture({
+      target: baseGraphics,
+    });
   }
 
-  private drawChimneyPart(
+  private makeChimneyPart(
+    baseGraphics: Graphics,
     start: number,
     end: number,
     width: number,
     color: string,
   ) {
-    for (let i = 0; i < this.numberOfChemnies; i++) {
-      const { x: x1, y: y1 } = this.getRadialPoint(i, 3, this.baseSize + start);
+    for (let i = 0; i < this.buildingParams.amountOfChemnies; i++) {
+      const { x: x1, y: y1 } = getRadialPoint(
+        i,
+        this.buildingParams.amountOfChemnies,
+        this.baseSize + start,
+      );
 
-      const { x: x2, y: y2 } = this.getRadialPoint(i, 3, this.baseSize + end);
+      const { x: x2, y: y2 } = getRadialPoint(
+        i,
+        this.buildingParams.amountOfChemnies,
+        this.baseSize + end,
+      );
 
-      this.mainGraphic.moveTo(x1, y1).lineTo(x2, y2);
+      baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
     }
 
-    this.mainGraphic.stroke({ width: width, color: color });
+    baseGraphics.stroke({ width: width, color: color });
   }
 
   animation(delta: number) {
-    this.mainGraphic.rotation += this.rotationSpeed * delta;
+    this.contentContainer.rotation += this.buildingParams.rotationSpeed * delta;
   }
 }

@@ -1,14 +1,21 @@
-import { Graphics } from "pixi.js";
+import { Graphics, Sprite } from "pixi.js";
+import { app } from "../main";
 import { Building } from "@buildings/building";
+import {
+  getRadialPoint,
+  makeBasicCircle,
+  makeRoundShadow,
+} from "@utils/basic-graphic";
 
 export class Laboratory extends Building {
-  numberOfSatelites: number = 8;
-  sateliteSize: number = 5;
-  rotationSpeed: number = 0.05;
-
   satelites: Graphics[] = [];
+  satelitesParams = {
+    amount: 8,
+    size: 5,
+    rotationSpeed: 0.05,
+  };
 
-  circles: number = 6;
+  amountOfDecorativeCircles: number = 6;
 
   constructor(x: number, y: number) {
     super(x, y, 4, "Laboratory");
@@ -26,61 +33,83 @@ export class Laboratory extends Building {
   }
 
   draw() {
-    for (let i = 0; i < this.numberOfSatelites; i++) {
+    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+
+    this.createSatelites();
+
+    this.createBaseTexture();
+
+    const base = new Sprite(Laboratory.baseTexture);
+    base.anchor.set(0.5);
+    this.contentContainer.addChild(base);
+  }
+
+  private createSatelites() {
+    for (let i = 0; i < this.satelitesParams.amount; i++) {
       this.satelites[i] = new Graphics();
 
-      const { x: cx, y: cy } = this.getRadialPoint(
+      const { x: cx, y: cy } = getRadialPoint(
         i,
-        this.numberOfSatelites,
+        this.satelitesParams.amount,
         this.baseSize - 5,
       );
 
       this.satelites[i].position.set(cx, cy);
 
       for (let j = 0; j < 3; j++) {
-        const { x, y } = this.getRadialPoint(j, 3, 10);
+        const { x, y } = getRadialPoint(j, 3, 10);
 
         this.satelites[i]
           .moveTo(x, y)
-          .circle(x, y, this.sateliteSize)
+          .circle(x, y, this.satelitesParams.size)
           .fill("#000000");
       }
 
-      this.visual.addChild(this.satelites[i]);
+      this.contentContainer.addChild(this.satelites[i]);
     }
-
-    this.makeBasicCircle(this.baseSize, "#cc92c3", true);
-
-    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
-
-    this.visual.addChild(this.mainGraphic);
-
-    this.drawCircles();
   }
 
-  private drawCircles() {
-    this.mainGraphic.circle(0, 0, 8).fill("#b762ac");
+  private createBaseTexture() {
+    if (Laboratory.baseTexture) return;
 
-    for (let i = 0; i < this.circles; i++) {
-      const { x, y } = this.getRadialPoint(
+    const baseGraphics = new Graphics();
+
+    makeBasicCircle(baseGraphics, this.baseSize, "#cc92c3", true);
+
+    this.makeDecorativeCircles(baseGraphics);
+
+    Laboratory.baseTexture = app.renderer.generateTexture({
+      target: baseGraphics,
+    });
+  }
+
+  private makeDecorativeCircles(baseGraphics: Graphics) {
+    baseGraphics.circle(0, 0, 8).fill("#b762ac");
+
+    for (let i = 0; i < this.amountOfDecorativeCircles; i++) {
+      const { x, y } = getRadialPoint(
         i * 2 - 1,
-        this.circles * 2,
+        this.amountOfDecorativeCircles * 2,
         this.baseSize - 24,
       );
 
-      this.mainGraphic.circle(x, y, 6).fill("#b762ac");
+      baseGraphics.circle(x, y, 6).fill("#b762ac");
     }
 
-    for (let i = 0; i < this.circles; i++) {
-      const { x, y } = this.getRadialPoint(i, this.circles, this.baseSize - 12);
+    for (let i = 0; i < this.amountOfDecorativeCircles; i++) {
+      const { x, y } = getRadialPoint(
+        i,
+        this.amountOfDecorativeCircles,
+        this.baseSize - 12,
+      );
 
-      this.mainGraphic.circle(x, y, 8).fill("#b762ac");
+      baseGraphics.circle(x, y, 8).fill("#b762ac");
     }
   }
 
   animation(delta: number) {
-    for (let i = 0; i < this.numberOfSatelites; i++) {
-      this.satelites[i].rotation += this.rotationSpeed * delta;
+    for (let i = 0; i < this.satelitesParams.amount; i++) {
+      this.satelites[i].rotation += this.satelitesParams.rotationSpeed * delta;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { getDistance } from "@utils/distance";
+import { getDistance } from "@utils/basic-geometry";
 import { Graphics, Container } from "pixi.js";
 
 export type Compass = {

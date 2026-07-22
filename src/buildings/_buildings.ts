@@ -14,7 +14,6 @@ import { Farm } from "@buildings/farm";
 import { Grinder } from "@buildings/grinder";
 import { Junkuard } from "@buildings/junkuard";
 import { House } from "@buildings/house";
-import { Windmill } from "@buildings/windmill";
 import { Laboratory } from "@buildings/laboratory";
 import { Smelter } from "@buildings/smelter";
 import { Engine } from "@buildings/engine";
@@ -30,7 +29,6 @@ export const buildingMap: Record<string, BuildingConstructor> = {
   Grinder,
   Junkuard,
   House,
-  Windmill,
   Laboratory,
   Smelter,
   Engine,

@@ -1,17 +1,22 @@
-import { Graphics } from "pixi.js";
+import { Graphics, Sprite } from "pixi.js";
+import { app } from "../main";
 import { Building } from "@buildings/building";
-import { Iron } from "@resources/iron";
+import {
+  getRadialPoint,
+  makeBasicCircle,
+  makeRoundShadow,
+} from "@utils/basic-graphic";
 
 export class Mine extends Building {
-  numberOfAntennas: number = 4;
-  antennaArmsSize: number = 7;
-  rotationSpeed: number = 0.005;
-  maxRotationAngle: number = 0.25;
-
-  antennaArms: Graphics[] = [];
-
-  rotationDirection: boolean = true;
-  antennasArmsAngle: number = 0;
+  antennaArmsGraphics: Graphics[] = [];
+  antennasParams = {
+    amount: 4,
+    armSize: 7,
+    rotationSpeed: 0.005,
+    maxRotationAngle: 0.25,
+    armsAngle: 0,
+    isClockwise: true,
+  };
 
   constructor(x: number, y: number) {
     super(x, y, 5, "Mine");
@@ -25,75 +30,97 @@ export class Mine extends Building {
   }
 
   draw() {
-    this.makeBasicCircle(this.baseSize, "#aaa84c", true);
+    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
-    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    this.createAntennaArms();
 
-    for (let i = 0; i < this.numberOfAntennas; i++) {
-      this.drawAntena(i);
+    this.createBaseTexture();
+
+    const base = new Sprite(Mine.baseTexture);
+    base.anchor.set(0.5);
+    this.contentContainer.addChild(base);
+  }
+
+  private createBaseTexture() {
+    if (Mine.baseTexture) return;
+
+    const baseGraphics = new Graphics();
+
+    this.createAntennasBases(baseGraphics);
+
+    makeBasicCircle(baseGraphics, this.baseSize, "#aaa84c", true);
+
+    Mine.baseTexture = app.renderer.generateTexture({
+      target: baseGraphics,
+    });
+  }
+
+  private createAntennasBases(baseGraphics: Graphics) {
+    for (let i = 0; i < this.antennasParams.amount; i++) {
+      const { x: x1, y: y1 } = getRadialPoint(
+        i,
+        this.antennasParams.amount,
+        this.baseSize,
+      );
+      const { x: x2, y: y2 } = getRadialPoint(
+        i,
+        this.antennasParams.amount,
+        this.baseSize + 10,
+      );
+
+      baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
     }
-    this.mainGraphic.stroke({ width: 3, color: "#000000" });
-
-    this.visual.addChild(this.mainGraphic);
   }
 
-  private drawAntena(i: number) {
-    const { x: x1, y: y1 } = this.getRadialPoint(
-      i,
-      this.numberOfAntennas,
-      this.baseSize,
-    );
-    const { x: x2, y: y2 } = this.getRadialPoint(
-      i,
-      this.numberOfAntennas,
-      this.baseSize + 10,
-    );
+  private createAntennaArms() {
+    for (let i = 0; i < this.antennasParams.amount; i++) {
+      const { x, y } = getRadialPoint(
+        i,
+        this.antennasParams.amount,
+        this.baseSize + 10,
+      );
+      const { angle } = getRadialPoint(i, this.antennasParams.amount, 1);
 
-    this.mainGraphic.moveTo(x1, y1).lineTo(x2, y2);
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
 
-    const { angle } = this.getRadialPoint(i, this.numberOfAntennas, 1);
+      const xRight = -sin * this.antennasParams.armSize;
+      const yRight = cos * this.antennasParams.armSize;
 
-    this.antennaArms[i] = this.createPerpendicular(x2, y2, angle);
-  }
+      const xLeft = sin * this.antennasParams.armSize;
+      const yLeft = -cos * this.antennasParams.armSize;
 
-  private createPerpendicular(x: number, y: number, angle: number) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
+      const perpendicular = new Graphics();
 
-    const xRight = -sin * this.antennaArmsSize;
-    const yRight = cos * this.antennaArmsSize;
+      perpendicular.position.set(x, y);
 
-    const xLeft = sin * this.antennaArmsSize;
-    const yLeft = -cos * this.antennaArmsSize;
+      perpendicular
+        .lineTo(xRight, yRight)
+        .lineTo(xLeft, yLeft)
+        .stroke({ width: 3, color: "#000000" });
 
-    const perpendicular = new Graphics();
+      this.contentContainer.addChild(perpendicular);
 
-    perpendicular.position.set(x, y);
-
-    perpendicular
-      .lineTo(xRight, yRight)
-      .lineTo(xLeft, yLeft)
-      .stroke({ width: 3, color: "#000000" });
-
-    this.visual.addChild(perpendicular);
-
-    return perpendicular;
+      this.antennaArmsGraphics[i] = perpendicular;
+    }
   }
 
   animation(delta: number) {
-    for (let i = 0; i < this.numberOfAntennas; i++) {
-      const direction = this.rotationDirection ? 1 : -1;
+    for (let i = 0; i < this.antennasParams.amount; i++) {
+      const direction = this.antennasParams.isClockwise ? 1 : -1;
 
-      for (let i = 0; i < this.numberOfAntennas; i++) {
-        this.antennaArms[i].rotation += this.rotationSpeed * direction * delta;
+      for (let i = 0; i < this.antennasParams.amount; i++) {
+        this.antennaArmsGraphics[i].rotation +=
+          this.antennasParams.rotationSpeed * direction * delta;
       }
 
-      this.antennasArmsAngle += this.rotationSpeed * direction * delta;
+      this.antennasParams.armsAngle +=
+        this.antennasParams.rotationSpeed * direction * delta;
 
-      if (this.antennasArmsAngle > this.maxRotationAngle)
-        this.rotationDirection = false;
-      if (this.antennasArmsAngle < -this.maxRotationAngle)
-        this.rotationDirection = true;
+      if (this.antennasParams.armsAngle > this.antennasParams.maxRotationAngle)
+        this.antennasParams.isClockwise = false;
+      if (this.antennasParams.armsAngle < -this.antennasParams.maxRotationAngle)
+        this.antennasParams.isClockwise = true;
     }
   }
 }

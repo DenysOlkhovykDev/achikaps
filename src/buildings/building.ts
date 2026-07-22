@@ -1,4 +1,4 @@
-import { Graphics, FederatedPointerEvent, Container, Triangle } from "pixi.js";
+import { Graphics, FederatedPointerEvent, Container, Texture } from "pixi.js";
 import { Resource } from "@resources/resource";
 import {
   buidingParameters,
@@ -10,6 +10,7 @@ import { Task, JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
 import { setIsBuildMode } from "@menus/build-menu";
+import { makeRoundShadow } from "@utils/basic-graphic";
 
 type ResourceListener = (task: Task) => void;
 
@@ -20,27 +21,29 @@ type Craft = {
 
 export abstract class Building {
   root: Container = new Container();
-  mainGraphic: Graphics = new Graphics();
+
+  shadowContainer: Container = new Container();
+  selectShadowContainer: Container = new Container();
+
+  contentContainer: Container;
+  static baseTexture: Texture;
+
+  resourceContainer: Container = new Container();
 
   craftSign: Container = new Container();
   craftSignElements: Graphics[] = [];
 
   baseSize: number = 0;
 
-  visual: Container;
   links: Road[] = [];
 
   resourceList: Map<string, number> = new Map<string, number>();
   recources: Resource[] = [];
-  resourceContainer: Container = new Container();
 
   priorityForTasks: number = -1;
 
   craft: Craft | undefined;
   craftGraphicAlpha: number = 0.45;
-
-  shadowContainer: Container = new Container();
-  selectShadowContainer: Container = new Container();
 
   private resourceListeners: ResourceListener[] = [];
 
@@ -50,13 +53,15 @@ export abstract class Building {
     public inventorySize: number,
     public buildingType: string,
   ) {
-    this.visual = new Container();
+    this.contentContainer = new Container();
     this.initEvents();
 
     this.root.x = this.x;
     this.root.y = this.y;
 
-    this.root.addChild(this.visual);
+    this.root.addChild(this.shadowContainer);
+    this.root.addChild(this.selectShadowContainer);
+    this.root.addChild(this.contentContainer);
     this.root.addChild(this.resourceContainer);
     this.root.addChild(this.craftSign);
 
@@ -162,11 +167,7 @@ export abstract class Building {
     this.showCraft(false);
     setIsBuildMode(false);
     deSelectAllBuildings();
-    this.makeRoundShadow(
-      this.baseSize + 1,
-      "#00ff00",
-      this.selectShadowContainer,
-    );
+    makeRoundShadow(this.baseSize + 1, "#00ff00", this.selectShadowContainer);
     event.stopPropagation();
   }
 
@@ -281,49 +282,6 @@ export abstract class Building {
     }
 
     return false;
-  }
-
-  makeRoundShadow(radius: number, color: string, shadowContainer: Container) {
-    const shadow = new Graphics();
-
-    shadow.circle(0, 0, radius + 2).stroke({ width: 1, color: color });
-
-    shadow.alpha = 0.6;
-
-    const shadow2 = new Graphics();
-
-    shadow2.circle(0, 0, radius + 3).stroke({ width: 1, color: color });
-
-    shadow2.alpha = 0.3;
-
-    const shadow3 = new Graphics();
-
-    shadow3.circle(0, 0, radius + 4).stroke({ width: 1, color: color });
-
-    shadow3.alpha = 0.1;
-
-    shadowContainer.addChildAt(shadow, 0);
-    shadowContainer.addChildAt(shadow2, 0);
-    shadowContainer.addChildAt(shadow3, 0);
-    this.visual.addChildAt(shadowContainer, 0);
-  }
-
-  makeBasicCircle(size: number, color: string, isStroke: boolean) {
-    this.mainGraphic.circle(0, 0, size);
-    if (isStroke) {
-      this.mainGraphic.stroke({ width: 3, color: "#000000" });
-    }
-    this.mainGraphic.fill(color);
-  }
-
-  getRadialPoint(i: number, count: number, radius: number) {
-    const angle = (Math.PI * 2 * i) / count;
-
-    return {
-      angle,
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius,
-    };
   }
 
   showCraft(isStandart: boolean) {

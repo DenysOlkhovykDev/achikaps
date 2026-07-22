@@ -1,5 +1,8 @@
-import { Graphics } from "pixi.js";
+import { Graphics, Sprite } from "pixi.js";
+import { app } from "../main";
 import { Building } from "@buildings/building";
+import { makeBasicCircle, makeRoundShadow } from "@utils/basic-graphic";
+import { getRandomDelay } from "@utils/delay";
 
 type Particle = {
   gfx: Graphics;
@@ -10,9 +13,8 @@ type Particle = {
 };
 
 export class Junkuard extends Building {
-  numberOfParticles: number = 4;
-
   particles: Particle[] = [];
+  amountOfParticles: number = 4;
 
   constructor(x: number, y: number) {
     super(x, y, 20, "Junkuard");
@@ -20,13 +22,31 @@ export class Junkuard extends Building {
   }
 
   draw() {
-    this.makeBasicCircle(this.baseSize, "#cac8a5", true);
+    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
-    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    this.createBaseTexture();
 
-    this.visual.addChild(this.mainGraphic);
+    const base = new Sprite(Junkuard.baseTexture);
+    base.anchor.set(0.5);
+    this.contentContainer.addChild(base);
 
-    for (let i = 0; i < this.numberOfParticles; i++) {
+    this.createParticles();
+  }
+
+  private createBaseTexture() {
+    if (Junkuard.baseTexture) return;
+
+    const baseGraphics = new Graphics();
+
+    makeBasicCircle(baseGraphics, this.baseSize, "#cac8a5", true);
+
+    Junkuard.baseTexture = app.renderer.generateTexture({
+      target: baseGraphics,
+    });
+  }
+
+  private createParticles() {
+    for (let i = 0; i < this.amountOfParticles; i++) {
       const particle = new Graphics().circle(0, 0, 20).fill("#000000");
 
       this.particles.push({
@@ -34,9 +54,9 @@ export class Junkuard extends Building {
         angle: Math.random() * Math.PI * 2,
         speed: 1.3,
         scale: 1,
-        delay: this.getRandomDelay(),
+        delay: getRandomDelay(32, 64),
       });
-      this.visual.addChildAt(particle, 0);
+      this.contentContainer.addChildAt(particle, 0);
     }
   }
 
@@ -64,12 +84,8 @@ export class Junkuard extends Building {
 
     particle.angle = Math.random() * Math.PI * 2;
     particle.scale = 1;
-    particle.delay = this.getRandomDelay();
+    particle.delay = getRandomDelay(32, 64);
 
     particle.gfx.scale.set(1);
-  }
-
-  private getRandomDelay() {
-    return 32 + Math.random() * 64;
   }
 }
