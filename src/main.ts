@@ -19,7 +19,7 @@ import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";
 import { Tutorials } from "./tutorial-overlay/_tutorials";
 
-const app = new Application();
+export const app = new Application();
 
 await app.init({
   width: 1000,

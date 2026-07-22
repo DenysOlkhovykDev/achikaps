@@ -1,6 +1,6 @@
 import { blueprints } from "@buildings/_buildings";
 import { Scenario } from "@test-poligons/test-buildings";
-import { getDistance } from "@utils/distance";
+import { getDistance } from "@utils/basic-geometry";
 import { worldLayer } from "../../src/main";
 
 export const showingPointers: Scenario = {

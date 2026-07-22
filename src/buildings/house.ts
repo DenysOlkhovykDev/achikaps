@@ -1,13 +1,25 @@
+import { Graphics, Sprite } from "pixi.js";
+import { app } from "../main";
 import { Building } from "@buildings/building";
+import {
+  makeAntennas,
+  makeBasicCircle,
+  makeRoundShadow,
+} from "@utils/basic-graphic";
 
 export class House extends Building {
-  totalNumberOfAntennas: number = 3;
-  numberOfAntennas: number = 3;
-  antennasAngleOffset: number = Math.PI / 4;
+  antennasGraphics: Graphics[] = [];
+  antennasParams = {
+    totalAmount: 3,
+    currentAmount: 3,
+    angleOffset: Math.PI / 4,
+  };
 
-  movingDirection: boolean = true;
-  size: number = 1;
-  changeSizeDelay: number = 300;
+  buildingParams = {
+    changeSizeDelay: 300,
+    isGrowing: true,
+    buildingSize: 1,
+  };
 
   constructor(x: number, y: number) {
     super(x, y, 5, "House");
@@ -15,53 +27,61 @@ export class House extends Building {
   }
 
   draw() {
-    this.drawAntennas();
+    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
-    this.makeBasicCircle(this.baseSize, "#72ac4a", true);
+    makeAntennas(
+      this.contentContainer,
+      this.antennasGraphics,
+      this.antennasParams.angleOffset,
+      this.baseSize,
+      this.antennasParams.totalAmount,
+      this.antennasParams.currentAmount,
+    );
 
-    this.makeBasicCircle(this.baseSize - 18, "#5b8937", false);
+    this.createBaseTexture();
 
-    this.makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
-    this.visual.addChild(this.mainGraphic);
+    const base = new Sprite(House.baseTexture);
+    base.anchor.set(0.5);
+    this.contentContainer.addChild(base);
   }
 
-  private drawAntennas() {
-    for (let i = 0; i < this.numberOfAntennas; i++) {
-      const { angle } = this.getRadialPoint(i, this.totalNumberOfAntennas, 1);
+  private createBaseTexture() {
+    if (House.baseTexture) return;
 
-      const cos = Math.cos(angle + this.antennasAngleOffset);
-      const sin = Math.sin(angle + this.antennasAngleOffset);
+    const baseGraphics = new Graphics();
 
-      const x1 = cos * (this.baseSize - 5);
-      const y1 = sin * (this.baseSize - 5);
+    makeBasicCircle(baseGraphics, this.baseSize, "#72ac4a", true);
 
-      const x2 = cos * (this.baseSize + 18);
-      const y2 = sin * (this.baseSize + 18);
+    makeBasicCircle(baseGraphics, this.baseSize - 18, "#5b8937", false);
 
-      this.mainGraphic
-        .moveTo(x1, y1)
-        .lineTo(x2, y2)
-        .stroke({ width: 4, color: "#000000" })
-        .circle(x2, y2, 4)
-        .fill("#000000");
+    House.baseTexture = app.renderer.generateTexture({
+      target: baseGraphics,
+    });
+  }
+
+  private updateAntennasVisibility() {
+    for (let i = 0; i < this.antennasGraphics.length; i++) {
+      this.antennasGraphics[i].visible = i < this.antennasParams.currentAmount;
     }
   }
 
   animation(delta: number) {
-    if (this.changeSizeDelay <= 0) {
-      const direction = this.movingDirection ? 1 : -1;
-      this.size += 0.01 * delta * direction;
-      if (this.size > 1.1) {
-        this.movingDirection = false;
+    if (this.buildingParams.changeSizeDelay <= 0) {
+      const direction = this.buildingParams.isGrowing ? 1 : -1;
+      this.buildingParams.buildingSize += 0.01 * delta * direction;
+      if (this.buildingParams.buildingSize > 1.1) {
+        this.buildingParams.isGrowing = false;
+        // this.antennasParams.currentAmount--;
+        // this.updateAntennasVisibility();
       }
-      if (this.size <= 1) {
-        this.movingDirection = true;
-        this.changeSizeDelay = 300;
+      if (this.buildingParams.buildingSize <= 1) {
+        this.buildingParams.isGrowing = true;
+        this.buildingParams.changeSizeDelay = 300;
       }
 
-      this.mainGraphic.scale.set(this.size);
+      this.contentContainer.scale.set(this.buildingParams.buildingSize);
     } else {
-      this.changeSizeDelay -= delta;
+      this.buildingParams.changeSizeDelay -= delta;
     }
   }
 }

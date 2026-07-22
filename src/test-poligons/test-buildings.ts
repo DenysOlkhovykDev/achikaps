@@ -21,7 +21,7 @@ import { addTask, dashboard } from "@dashboard/_dashboard";
 
 import { Tutorials } from "../tutorial-overlay/_tutorials";
 import { worldLayer } from "../main";
-import { getDistance } from "@utils/distance";
+import { getDistance } from "@utils/basic-geometry";
 import { createResource } from "@resources/_resources";
 
 import { autoConstructionOfBuildings } from "../../tests/scenarios/auto-construction-of-buildings";

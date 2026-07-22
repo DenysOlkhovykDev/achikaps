@@ -1,6 +1,5 @@
 import { Graphics } from "pixi.js";
 import { Building } from "@buildings/building";
-import { getDistance } from "@utils/distance";
 
 export class BlueprintRoad {
   graphic: Graphics;
