@@ -31,7 +31,7 @@ export abstract class Building {
   resourceContainer: Container = new Container();
 
   craftSign: Container = new Container();
-  craftSignElements: Graphics[] = [];
+  craftSignElements: Container[] = [];
 
   baseSize: number = 0;
 
@@ -187,24 +187,24 @@ export abstract class Building {
       const isValid = this.recources.every((other) => {
         if (other === res) return true;
 
-        const dx = other.graphic.x - x;
-        const dy = other.graphic.y - y;
+        const dx = other.root.x - x;
+        const dy = other.root.y - y;
 
         return Math.sqrt(dx * dx + dy * dy) > minDist;
       });
 
       if (isValid) {
-        res.graphic.x = x;
-        res.graphic.y = y;
-        res.graphic.rotation = Math.random() * Math.PI * 2;
+        res.root.x = x;
+        res.root.y = y;
+        res.root.rotation = Math.random() * Math.PI * 2;
         return;
       }
 
       tries++;
     }
     if (tries >= 50) {
-      res.graphic.x = 0;
-      res.graphic.y = 0;
+      res.root.x = 0;
+      res.root.y = 0;
     }
   }
 
@@ -223,7 +223,7 @@ export abstract class Building {
     if (this.recources.length >= this.inventorySize) return false;
 
     this.recources.push(resource);
-    this.resourceContainer.addChild(resource.graphic);
+    this.resourceContainer.addChild(resource.root);
 
     const resourceName = resource.resourceType;
     const current = this.resourceList.get(resourceName) ?? 0;
@@ -259,7 +259,7 @@ export abstract class Building {
 
     const [res] = this.recources.splice(resourceIndex, 1);
 
-    this.resourceContainer.removeChild(res.graphic);
+    this.resourceContainer.removeChild(res.root);
 
     if (
       this.recources.length < this.inventorySize &&
@@ -301,7 +301,7 @@ export abstract class Building {
 
       this.craftSignElements.push(arrow);
 
-      const craftResult = createResource(this.craft.result).graphic;
+      const craftResult = createResource(this.craft.result).root;
       craftResult.alpha = isStandart ? 1 : this.craftGraphicAlpha;
       this.craftSignElements.push(craftResult);
 
@@ -336,13 +336,13 @@ export abstract class Building {
         for (let j = 0; j < this.craft.ingridients[i].count; j++) {
           if (remeaningCraftIngredients[i].count > 0) {
             this.craftSignElements.push(
-              createResource(this.craft.ingridients[i].resourceName).graphic,
+              createResource(this.craft.ingridients[i].resourceName).root,
             );
             remeaningCraftIngredients[i].count--;
           } else {
             const craftIngredient = createResource(
               this.craft.ingridients[i].resourceName,
-            ).graphic;
+            ).root;
             craftIngredient.alpha = isStandart ? 1 : this.craftGraphicAlpha;
             this.craftSignElements.push(craftIngredient);
           }

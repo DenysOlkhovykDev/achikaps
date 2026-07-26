@@ -290,10 +290,10 @@ export class Worker {
       this.resourceIndex = undefined;
 
       if (this.inventory) {
-        this.root.addChild(this.inventory.graphic);
+        this.root.addChild(this.inventory.root);
 
-        this.inventory.graphic.x = 0;
-        this.inventory.graphic.y = 16;
+        this.inventory.root.x = 0;
+        this.inventory.root.y = 16;
       }
 
       if (this.task) {
@@ -304,7 +304,7 @@ export class Worker {
     }
 
     if (this.inventory) {
-      this.root.removeChild(this.inventory.graphic);
+      this.root.removeChild(this.inventory.root);
       if (this.task) {
         this.currentPlatform.tryToAddResource(this.inventory, this.task);
       }

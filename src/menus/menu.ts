@@ -143,7 +143,7 @@ export class Menu {
     this.container.addChild(background);
 
     for (let i = 0; i < buildingRecipe.length; i++) {
-      const resource = createResource(buildingRecipe[i].type).graphic;
+      const resource = createResource(buildingRecipe[i].type).root;
 
       resource.position.set(x + this.width - 10, y + this.height - 80 + i * 15);
 
