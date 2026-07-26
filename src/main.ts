@@ -100,10 +100,10 @@ app.stage.addChild(joystick);
 tutorials.init(app.stage);
 
 app.ticker.add((delta) => {
-  const dt = 1;
+  const deltaTime = isTest ? 1 : delta.deltaTime;
 
   const angle = moveWorld(
-    dt,
+    deltaTime,
     worldLayer,
     buildingsLayer,
     workersLayer,
@@ -111,13 +111,13 @@ app.ticker.add((delta) => {
     joystick.inputY,
   );
 
-  moveWorkers(dt);
+  moveWorkers(deltaTime);
 
   if (!isTest) {
-    animations(dt, angle);
+    animations(deltaTime, angle);
   }
 
-  movingBlueprints(dt);
+  movingBlueprints(deltaTime);
 
   tutorials.updateTutorials();
 });
