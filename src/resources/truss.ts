@@ -1,4 +1,6 @@
 import { Resource } from "@resources/resource";
+import { Graphics, Sprite } from "pixi.js";
+import { app } from "../main";
 
 const leftSide = -6;
 const rightSide = 6;
@@ -9,31 +11,47 @@ const rightJoin = 3;
 
 export class Truss extends Resource {
   protected draw() {
-    this.graphic
+    this.createBaseTexture();
+    
+    const base = new Sprite(Truss.baseTexture);
+    base.anchor.set(0.5);
+    this.root.addChild(base);
+  }
+
+  protected createBaseTexture(): void {
+    if (Truss.baseTexture) return;
+
+    const baseGraphics = new Graphics();
+
+    baseGraphics
       .moveTo(rightSide, topSide)
       .lineTo(rightJoin, bottomSide)
       .lineTo(leftJoin, topSide)
       .lineTo(leftSide, bottomSide)
       .stroke({ width: 1.5, color: "#000000" });
 
-    this.graphic
+    baseGraphics
       .moveTo(leftSide - 1, topSide)
       .lineTo(rightSide + 1, topSide)
       .stroke({ width: 4, color: "#000000" });
 
-    this.graphic
+    baseGraphics
       .moveTo(leftSide, topSide)
       .lineTo(rightSide, topSide)
       .stroke({ width: 2, color: "#d1b453" });
 
-    this.graphic
+    baseGraphics
       .moveTo(leftSide - 1, bottomSide)
       .lineTo(rightSide + 1, bottomSide)
       .stroke({ width: 4, color: "#000000" });
 
-    this.graphic
+    baseGraphics
       .moveTo(leftSide, bottomSide)
       .lineTo(rightSide, bottomSide)
       .stroke({ width: 2, color: "#d1b453" });
+
+    Truss.baseTexture = app.renderer.generateTexture({
+      target: baseGraphics,
+    });
   }
 }

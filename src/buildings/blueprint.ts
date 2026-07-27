@@ -258,11 +258,11 @@ export class Blueprint extends Building {
 
       if (index !== -1) {
         this.craftSignElements.push(
-          createResource(this.buildResources[i]).graphic,
+          createResource(this.buildResources[i]).root,
         );
         remeaningCraftIngredients.splice(index, 1);
       } else {
-        const craftIngredient = createResource(this.buildResources[i]).graphic;
+        const craftIngredient = createResource(this.buildResources[i]).root;
         craftIngredient.alpha = this.craftGraphicAlpha;
         this.craftSignElements.push(craftIngredient);
       }

@@ -1,14 +1,16 @@
-import { Graphics } from "pixi.js";
+import { Graphics, Texture, Container } from "pixi.js";
 
 export abstract class Resource {
-  graphic: Graphics;
+  root: Container;
   isReserved: boolean;
 
+  static baseTexture: Texture;
+
   constructor(public resourceType: string) {
-    this.graphic = new Graphics();
+    this.root = new Container();
     this.draw();
-    this.graphic.x = 0;
-    this.graphic.y = 0;
+    this.root.x = 0;
+    this.root.y = 0;
     this.isReserved = false;
   }
 
