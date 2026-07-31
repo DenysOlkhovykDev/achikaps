@@ -2,28 +2,37 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
+import { getRadialLine, getRadialPoint } from "@utils/basic-geometry";
 
 export class Mine extends Building {
-  antennaArmsGraphics: Graphics[] = [];
-  antennasParams = {
-    amount: 4,
-    armSize: 7,
-    rotationSpeed: 0.005,
-    maxRotationAngle: 0.25,
-    armsAngle: 0,
-    isClockwise: true,
+  kelpLeavesGraphics: Graphics[] = [];
+  kelpTrunksGraphics: Graphics = new Graphics();
+  kelpsParams = {
+    amount: 8,
+    leavesSize: 8,
+    leafSegments: 7,
+    movingSpeed: 0.05,
+    maxAmplitude: 1.55,
+    kelpTime: 0,
   };
+
+  private kelpLeavesPoints: {
+    xRight: number;
+    yRight: number;
+    xLeft: number;
+    yLeft: number;
+  }[] = [];
 
   constructor(x: number, y: number) {
     super(x, y, 5, "Mine");
     this.draw();
     this.craft = {
       ingridients: [],
-      result: "Iron",
+      result: "Organic",
     };
     this.priorityForTasks = 5;
     this.generateProductionTask();
@@ -32,12 +41,11 @@ export class Mine extends Building {
   draw() {
     makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
 
-    this.createAntennaArms();
+    this.createKelpLeaves();
 
     this.createBaseTexture();
 
     const base = new Sprite(Mine.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
@@ -46,81 +54,145 @@ export class Mine extends Building {
 
     const baseGraphics = new Graphics();
 
-    this.createAntennasBases(baseGraphics);
+    this.createKelpTrunks(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#aaa84c", true);
+    makeBasicCircle(baseGraphics, this.baseSize, "#a3791f", true);
+    makeBasicCircle(baseGraphics, this.baseSize - 2, "#c1bf4e", false);
 
-    Mine.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    this.createDecorativePlant(baseGraphics);
+
+    Mine.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
-  private createAntennasBases(baseGraphics: Graphics) {
-    for (let i = 0; i < this.antennasParams.amount; i++) {
-      const { x: x1, y: y1 } = getRadialPoint(
+  private createKelpLeaves() {
+    for (let i = 0; i < this.kelpsParams.amount; i++) {
+      const { angle, x, y } = getRadialPoint(
         i,
-        this.antennasParams.amount,
-        this.baseSize,
+        this.kelpsParams.amount,
+        this.baseSize + 5,
       );
-      const { x: x2, y: y2 } = getRadialPoint(
-        i,
-        this.antennasParams.amount,
-        this.baseSize + 10,
-      );
-
-      baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
-    }
-  }
-
-  private createAntennaArms() {
-    for (let i = 0; i < this.antennasParams.amount; i++) {
-      const { x, y } = getRadialPoint(
-        i,
-        this.antennasParams.amount,
-        this.baseSize + 10,
-      );
-      const { angle } = getRadialPoint(i, this.antennasParams.amount, 1);
 
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
 
-      const xRight = -sin * this.antennasParams.armSize;
-      const yRight = cos * this.antennasParams.armSize;
+      this.kelpLeavesPoints[i] = {
+        xRight: -sin * this.kelpsParams.leavesSize,
+        yRight: cos * this.kelpsParams.leavesSize,
+        xLeft: sin * this.kelpsParams.leavesSize,
+        yLeft: -cos * this.kelpsParams.leavesSize,
+      };
 
-      const xLeft = sin * this.antennasParams.armSize;
-      const yLeft = -cos * this.antennasParams.armSize;
+      const graphics = new Graphics();
+      graphics.position.set(x, y);
 
-      const perpendicular = new Graphics();
+      this.contentContainer.addChild(graphics);
+      this.kelpLeavesGraphics[i] = graphics;
+    }
+    this.animation(0);
+  }
 
-      perpendicular.position.set(x, y);
+  private createKelpTrunks(baseGraphics: Graphics) {
+    for (let i = 0; i < this.kelpsParams.amount; i++) {
+      const line = getRadialLine(
+        i,
+        this.kelpsParams.amount,
+        this.baseSize,
+        this.baseSize + 8,
+      );
 
-      perpendicular
-        .lineTo(xRight, yRight)
-        .lineTo(xLeft, yLeft)
-        .stroke({ width: 3, color: "#000000" });
+      baseGraphics
+        .moveTo(line.startX, line.startY)
+        .lineTo(line.endX, line.endY)
+        .stroke({ width: 4, color: "#34612c", cap: "round" });
+    }
+  }
 
-      this.contentContainer.addChild(perpendicular);
+  private createDecorativePlant(baseGraphics: Graphics) {
+    makeBasicCircle(baseGraphics, this.baseSize - 18, "#77c06a", false);
 
-      this.antennaArmsGraphics[i] = perpendicular;
+    for (let i = 0; i < 5; i++) {
+      const { x: x1, y: y1 } = getRadialPoint(
+        i * 5 - 1,
+        5 * 5,
+        this.baseSize - 20,
+      );
+
+      baseGraphics.circle(x1, y1, 8).fill("#67a75c");
+
+      const { x: x2, y: y2 } = getRadialPoint(
+        i * 5 + 1,
+        5 * 5,
+        this.baseSize - 20,
+      );
+
+      baseGraphics.circle(x2, y2, 8).fill("#67a75c");
+
+      baseGraphics
+        .moveTo(0, 0)
+        .lineTo(x1, y1)
+        .lineTo(x2, y2)
+        .closePath()
+        .fill("#67a75c");
     }
   }
 
   animation(delta: number) {
-    for (let i = 0; i < this.antennasParams.amount; i++) {
-      const direction = this.antennasParams.isClockwise ? 1 : -1;
+    this.kelpsParams.kelpTime += delta * this.kelpsParams.movingSpeed;
 
-      for (let i = 0; i < this.antennasParams.amount; i++) {
-        this.antennaArmsGraphics[i].rotation +=
-          this.antennasParams.rotationSpeed * direction * delta;
-      }
+    for (let i = 0; i < this.kelpsParams.amount; i++) {
+      this.kelpLeavesGraphics[i].clear();
 
-      this.antennasParams.armsAngle +=
-        this.antennasParams.rotationSpeed * direction * delta;
+      this.makeLeaf(
+        this.kelpLeavesGraphics[i],
+        i,
+        this.kelpLeavesPoints[i].xRight,
+        this.kelpLeavesPoints[i].yRight,
+      );
+      this.makeLeaf(
+        this.kelpLeavesGraphics[i],
+        i,
+        this.kelpLeavesPoints[i].xLeft,
+        this.kelpLeavesPoints[i].yLeft,
+      );
 
-      if (this.antennasParams.armsAngle > this.antennasParams.maxRotationAngle)
-        this.antennasParams.isClockwise = false;
-      if (this.antennasParams.armsAngle < -this.antennasParams.maxRotationAngle)
-        this.antennasParams.isClockwise = true;
+      this.kelpLeavesGraphics[i].stroke({
+        width: 4,
+        color: "#559c48",
+        cap: "round",
+        join: "round",
+      });
+    }
+  }
+
+  private makeLeaf(
+    leafGraphics: Graphics,
+    index: number,
+    endX: number,
+    endY: number,
+  ) {
+    const length = Math.hypot(endX, endY);
+
+    const dx = endX / length;
+    const dy = endY / length;
+
+    const nx = -dy;
+    const ny = dx;
+
+    leafGraphics.moveTo(0, 0);
+
+    for (let j = 1; j <= this.kelpsParams.leafSegments; j++) {
+      const t = j / this.kelpsParams.leafSegments;
+
+      const px = dx * length * t;
+      const py = dy * length * t;
+
+      const localAmplitude = this.kelpsParams.maxAmplitude * t * t;
+
+      const offset =
+        Math.sin(this.kelpsParams.kelpTime + t * Math.PI * 2 + index * 0.35) *
+        localAmplitude;
+
+      leafGraphics.lineTo(px + nx * offset, py + ny * offset);
     }
   }
 }

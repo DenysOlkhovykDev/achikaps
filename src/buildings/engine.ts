@@ -3,12 +3,12 @@ import { showJoystick } from "../main";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRandomDelay } from "@utils/delay";
-import { getRandomCoordinate } from "@utils/basic-geometry";
+import { getRadialPoint, getRandomCoordinate } from "@utils/basic-geometry";
 
 type Particle = {
   gfx: Graphics;
@@ -37,7 +37,7 @@ export class Engine extends Building {
   amountOfParticles: number = 4;
 
   constructor(x: number, y: number) {
-    super(x, y, 3, "Engine");
+    super(x, y, 1, "Engine");
     this.draw();
   }
 
@@ -54,7 +54,6 @@ export class Engine extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Engine.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
 
     for (let i = 0; i < this.amountOfParticles; i++) {
@@ -107,9 +106,7 @@ export class Engine extends Building {
 
     this.makeDecorativePropellerBlades(baseGraphics);
 
-    Engine.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Engine.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   private makeDecorativePropellerBlades(baseGraphics: Graphics) {

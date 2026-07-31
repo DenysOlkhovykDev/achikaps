@@ -3,26 +3,27 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
-export class Gum extends Resource {
+export class Metal extends Resource {
   protected draw() {
     this.createBaseTexture();
 
-    const base = new Sprite(Gum.baseTexture);
+    const base = new Sprite(Metal.baseTexture);
     this.root.addChild(base);
   }
 
   protected createBaseTexture(): void {
-    if (Gum.baseTexture) return;
+    if (Metal.baseTexture) return;
 
     const baseGraphics = new Graphics();
 
     baseGraphics
-      .circle(-3.5, 0, 2.5)
-      .circle(3.5, 0, 2.5)
-      .rect(-2, -1, 4, 2)
+      .moveTo(0, -4)
+      .lineTo(5, 5)
+      .lineTo(-5, 5)
+      .closePath()
       .stroke({ width: 3, color: "#000000" })
-      .fill("#da315b");
+      .fill("#d15a53");
 
-    Gum.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Metal.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 }

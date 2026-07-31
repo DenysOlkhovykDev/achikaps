@@ -41,8 +41,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 1 },
-      { type: "Perl", amount: 1 },
+      { type: "Organic", amount: 1 },
+      { type: "Water", amount: 1 },
     ],
   },
   Factory: {
@@ -50,23 +50,23 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 2 },
-      { type: "Perl", amount: 1 },
+      { type: "Organic", amount: 2 },
+      { type: "Water", amount: 1 },
     ],
   },
   Mine: {
     baseSize: 40,
     minLinkLength: 120,
     maxLinkLength: 200,
-    craft: [{ type: "Iron", amount: 3 }],
+    craft: [{ type: "Organic", amount: 3 }],
   },
   Farm: {
     baseSize: 40,
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 1 },
-      { type: "Perl", amount: 2 },
+      { type: "Organic", amount: 1 },
+      { type: "Water", amount: 2 },
     ],
   },
   Grinder: {
@@ -74,8 +74,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 3 },
-      { type: "Meat", amount: 1 },
+      { type: "Organic", amount: 3 },
+      { type: "Metal", amount: 1 },
     ],
   },
   Laboratory: {
@@ -83,9 +83,9 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 2 },
-      { type: "Meat", amount: 1 },
-      { type: "Perl", amount: 1 },
+      { type: "Organic", amount: 2 },
+      { type: "Metal", amount: 1 },
+      { type: "Water", amount: 1 },
     ],
   },
   Smelter: {
@@ -93,8 +93,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 2 },
-      { type: "Perl", amount: 2 },
+      { type: "Organic", amount: 2 },
+      { type: "Water", amount: 2 },
     ],
   },
   Engine: {
@@ -112,8 +112,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 5 },
-      { type: "Perl", amount: 2 },
+      { type: "Organic", amount: 5 },
+      { type: "Water", amount: 2 },
     ],
   },
   House: {
@@ -121,8 +121,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 1 },
-      { type: "Perl", amount: 5 },
+      { type: "Organic", amount: 1 },
+      { type: "Water", amount: 5 },
     ],
   },
   Windmill: {
@@ -130,8 +130,8 @@ export const buidingParameters = {
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Iron", amount: 6 },
-      { type: "Perl", amount: 1 },
+      { type: "Organic", amount: 6 },
+      { type: "Water", amount: 1 },
     ],
   },
 };

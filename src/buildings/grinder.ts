@@ -2,10 +2,11 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
+import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Grinder extends Building {
   bladesGraphics: Graphics[] = [];
@@ -19,8 +20,8 @@ export class Grinder extends Building {
     this.draw();
     this.craft = {
       ingridients: [
-        { resourceName: "Perl", count: 1 },
-        { resourceName: "Meat", count: 2 },
+        { resourceName: "Water", count: 1 },
+        { resourceName: "Metal", count: 2 },
       ],
       result: "Truss",
     };
@@ -37,7 +38,6 @@ export class Grinder extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Grinder.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
@@ -45,13 +45,13 @@ export class Grinder extends Building {
     for (let i = 0; i < this.bladesParams.amount; i++) {
       this.bladesGraphics[i] = new Graphics();
 
-      const { x: x1, y: y1 } = getRadialPoint(
+      const { x, y } = getRadialPoint(
         i,
         this.bladesParams.amount,
         this.baseSize + 4,
       );
 
-      this.bladesGraphics[i].position.set(x1, y1);
+      this.bladesGraphics[i].position.set(x, y);
 
       this.bladesGraphics[i]
         .moveTo(0, 0)
@@ -101,9 +101,7 @@ export class Grinder extends Building {
     makeBasicCircle(baseGraphics, this.baseSize - 12, "#846c5b", false);
     makeBasicCircle(baseGraphics, this.baseSize - 14, "#ce9e81", false);
 
-    Grinder.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Grinder.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   private makeBladeConnectors(baseGraphics: Graphics) {

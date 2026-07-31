@@ -3,7 +3,11 @@ import { Building } from "@buildings/building";
 import { select, showCrafts } from "@buildings/_buildings";
 import { setIsBuildMode } from "@menus/build-menu";
 import { app } from "../main";
-import { makeBasicCircle, makeRoundShadow } from "@utils/basic-graphic";
+import {
+  generateTextureFromOrigin,
+  makeBasicCircle,
+  makeRoundShadow,
+} from "@utils/basic-graphic";
 
 export class Platform extends Building {
   onClick(event: FederatedPointerEvent) {
@@ -24,7 +28,6 @@ export class Platform extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Platform.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
@@ -35,9 +38,7 @@ export class Platform extends Building {
 
     makeBasicCircle(baseGraphics, this.baseSize, "#acacac", true);
 
-    Platform.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Platform.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   animation(delta: number) {}

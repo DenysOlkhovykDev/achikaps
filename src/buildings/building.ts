@@ -173,7 +173,7 @@ export abstract class Building {
 
   placeResource(res: Resource) {
     const radius = this.baseSize - 8;
-    const minDist = 12;
+    const minDist = 15;
 
     let tries = 0;
 
@@ -205,6 +205,7 @@ export abstract class Building {
     if (tries >= 50) {
       res.root.x = 0;
       res.root.y = 0;
+      res.root.rotation = Math.random() * Math.PI * 2;
     }
   }
 

@@ -1,4 +1,34 @@
-import { Graphics, Container } from "pixi.js";
+import {
+  Graphics,
+  Container,
+  Rectangle,
+  type Renderer,
+  type Texture,
+} from "pixi.js";
+import { getRadialPoint } from "@utils/basic-geometry";
+
+export function generateTextureFromOrigin(
+  renderer: Renderer,
+  target: Container,
+): Texture {
+  const bounds = target.getLocalBounds();
+
+  const left = Math.floor(bounds.minX);
+  const top = Math.floor(bounds.minY);
+  const right = Math.ceil(bounds.maxX);
+  const bottom = Math.ceil(bounds.maxY);
+  const width = Math.max(right - left, 1);
+  const height = Math.max(bottom - top, 1);
+
+  return renderer.generateTexture({
+    target,
+    frame: new Rectangle(left, top, width, height),
+    defaultAnchor: {
+      x: -left / width,
+      y: -top / height,
+    },
+  });
+}
 
 export function makeRoundShadow(
   radius: number,
@@ -74,14 +104,4 @@ export function makeAntennas(
 
     contentContainer.addChild(antennasGraphics[i]);
   }
-}
-
-export function getRadialPoint(i: number, count: number, radius: number) {
-  const angle = (Math.PI * 2 * i) / count;
-
-  return {
-    angle,
-    x: Math.cos(angle) * radius,
-    y: Math.sin(angle) * radius,
-  };
 }

@@ -2,13 +2,14 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
+import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Laboratory extends Building {
-  satelites: Graphics[] = [];
+  satelitesGraphics: Graphics[] = [];
   satelitesParams = {
     amount: 8,
     size: 5,
@@ -22,8 +23,8 @@ export class Laboratory extends Building {
     this.draw();
     this.craft = {
       ingridients: [
-        { resourceName: "Iron", count: 1 },
-        { resourceName: "Perl", count: 2 },
+        { resourceName: "Organic", count: 1 },
+        { resourceName: "Water", count: 2 },
       ],
       result: "Gum",
     };
@@ -40,13 +41,12 @@ export class Laboratory extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Laboratory.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
   private createSatelites() {
     for (let i = 0; i < this.satelitesParams.amount; i++) {
-      this.satelites[i] = new Graphics();
+      this.satelitesGraphics[i] = new Graphics();
 
       const { x: cx, y: cy } = getRadialPoint(
         i,
@@ -54,18 +54,19 @@ export class Laboratory extends Building {
         this.baseSize - 5,
       );
 
-      this.satelites[i].position.set(cx, cy);
+      this.satelitesGraphics[i].position.set(cx, cy);
 
       for (let j = 0; j < 3; j++) {
         const { x, y } = getRadialPoint(j, 3, 10);
 
-        this.satelites[i]
+        this.satelitesGraphics[i]
           .moveTo(x, y)
           .circle(x, y, this.satelitesParams.size)
-          .fill("#000000");
+          .fill("#861e38")
+          .stroke({ width: 2, color: "#000000" });
       }
 
-      this.contentContainer.addChild(this.satelites[i]);
+      this.contentContainer.addChild(this.satelitesGraphics[i]);
     }
   }
 
@@ -78,9 +79,10 @@ export class Laboratory extends Building {
 
     this.makeDecorativeCircles(baseGraphics);
 
-    Laboratory.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Laboratory.baseTexture = generateTextureFromOrigin(
+      app.renderer,
+      baseGraphics,
+    );
   }
 
   private makeDecorativeCircles(baseGraphics: Graphics) {
@@ -109,7 +111,8 @@ export class Laboratory extends Building {
 
   animation(delta: number) {
     for (let i = 0; i < this.satelitesParams.amount; i++) {
-      this.satelites[i].rotation += this.satelitesParams.rotationSpeed * delta;
+      this.satelitesGraphics[i].rotation +=
+        this.satelitesParams.rotationSpeed * delta;
     }
   }
 }

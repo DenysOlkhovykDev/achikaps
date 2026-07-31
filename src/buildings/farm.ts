@@ -2,12 +2,16 @@ import { Graphics, Triangle, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeAntennas,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
-import { rotatePoint } from "@utils/basic-geometry";
+import {
+  getRadialPoint,
+  getRadialLine,
+  rotatePoint,
+} from "@utils/basic-geometry";
 
 export class Farm extends Building {
   antennasGraphics: Graphics[] = [];
@@ -19,7 +23,7 @@ export class Farm extends Building {
   };
 
   spikeParams = {
-    amount: 8,
+    amount: 4,
     shape: new Triangle(-10, 0, 6, 10, 6, -10),
   };
 
@@ -28,7 +32,7 @@ export class Farm extends Building {
     this.draw();
     this.craft = {
       ingridients: [],
-      result: "Meat",
+      result: "Metal",
     };
     this.priorityForTasks = 5;
     this.generateProductionTask();
@@ -48,7 +52,6 @@ export class Farm extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Farm.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
@@ -57,60 +60,103 @@ export class Farm extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#c08484", true);
+    makeBasicCircle(baseGraphics, this.baseSize, "#b06667", true);
 
     this.makeSpikes(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#c08484", false);
+    makeBasicCircle(baseGraphics, this.baseSize, "#965859", false);
 
-    makeBasicCircle(baseGraphics, this.baseSize - 10, "#c08484", false);
+    makeBasicCircle(baseGraphics, this.baseSize - 5, "#c08484", false);
 
-    baseGraphics.stroke({ width: 4, color: "#b06667" });
+    this.makeDecorativeTriangles(baseGraphics);
 
-    Farm.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Farm.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   private makeSpikes(baseGraphics: Graphics) {
     for (let i = 0; i < this.spikeParams.amount; i++) {
       const {
-        angle,
-        x: cx,
-        y: cy,
-      } = getRadialPoint(i, this.spikeParams.amount, this.baseSize);
-
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-
-      const p1 = rotatePoint(
-        this.spikeParams.shape.x,
-        this.spikeParams.shape.y,
-        cos,
-        sin,
+        startX: sx,
+        startY: sy,
+        endX: ex,
+        endY: ey,
+      } = getRadialLine(
+        i * 10 + 4,
+        this.spikeParams.amount * 10,
+        this.baseSize - 1,
+        this.baseSize + 8,
       );
-      const p2 = rotatePoint(
-        this.spikeParams.shape.x2,
-        this.spikeParams.shape.y2,
-        cos,
-        sin,
-      );
-      const p3 = rotatePoint(
-        this.spikeParams.shape.x3,
-        this.spikeParams.shape.y3,
-        cos,
-        sin,
+
+      const { x: x1, y: y1 } = getRadialPoint(
+        i * 10 + 1,
+        this.spikeParams.amount * 10,
+        this.baseSize,
       );
 
       baseGraphics
-        .moveTo(cx + p1.x, cy + p1.y)
-        .lineTo(cx + p2.x, cy + p2.y)
-        .lineTo(cx + p3.x, cy + p3.y)
+        .moveTo(sx, sy)
+        .lineTo(ex, ey)
+        .lineTo(x1, y1)
         .closePath()
-        .fill("#c08484");
+        .fill("#b06667");
+
+      baseGraphics.stroke({ width: 2, color: "#000000" });
+
+      const {
+        startX: sx2,
+        startY: sy2,
+        endX: ex2,
+        endY: ey2,
+      } = getRadialLine(
+        i * 10 + 6,
+        this.spikeParams.amount * 10,
+        this.baseSize - 1,
+        this.baseSize + 8,
+      );
+
+      const { x: x2, y: y2 } = getRadialPoint(
+        i * 10 + 9,
+        this.spikeParams.amount * 10,
+        this.baseSize,
+      );
+
+      baseGraphics
+        .moveTo(sx2, sy2)
+        .lineTo(ex2, ey2)
+        .lineTo(x2, y2)
+        .closePath()
+        .fill("#b06667");
 
       baseGraphics.stroke({ width: 2, color: "#000000" });
     }
+  }
+
+  private makeDecorativeTriangles(baseGraphics: Graphics) {
+    const points = [];
+    for (let i = 0; i < 3; i++) {
+      const { x, y } = getRadialPoint(i * 2 - 1, 3 * 2, this.baseSize - 7);
+      points.push({ x, y });
+    }
+
+    baseGraphics
+      .moveTo(points[0].x, points[0].y)
+      .lineTo(points[1].x, points[1].y)
+      .lineTo(points[2].x, points[2].y)
+      .closePath()
+      .fill("#b06667");
+
+    const points2 = [];
+    for (let i = 0; i < 3; i++) {
+      const { x, y } = getRadialPoint(i, 3, this.baseSize - 21);
+      points2.push({ x, y });
+    }
+
+    baseGraphics
+      .moveTo(points2[0].x, points2[0].y)
+      .lineTo(points2[1].x, points2[1].y)
+      .lineTo(points2[2].x, points2[2].y)
+      .closePath()
+      .fill("#c08484");
   }
 
   animation(delta: number) {
@@ -118,9 +164,9 @@ export class Farm extends Building {
 
     this.antennasParams.offsetFromCenter += 0.1 * delta * direction;
 
-    if (this.antennasParams.offsetFromCenter > 2)
+    if (this.antennasParams.offsetFromCenter > -2)
       this.antennasParams.movingDirection = false;
-    if (this.antennasParams.offsetFromCenter < -2)
+    if (this.antennasParams.offsetFromCenter < -12)
       this.antennasParams.movingDirection = true;
 
     for (let i = 0; i < this.antennasParams.amount; i++) {
