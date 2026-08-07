@@ -1,7 +1,11 @@
 import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
-import { makeBasicCircle, makeRoundShadow } from "@utils/basic-graphic";
+import {
+  generateTextureFromOrigin,
+  makeBasicCircle,
+  makeRoundShadow,
+} from "@utils/basic-graphic";
 import { getRandomDelay } from "@utils/delay";
 
 type Particle = {
@@ -27,7 +31,6 @@ export class Junkuard extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Junkuard.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
 
     this.createParticles();
@@ -40,9 +43,10 @@ export class Junkuard extends Building {
 
     makeBasicCircle(baseGraphics, this.baseSize, "#cac8a5", true);
 
-    Junkuard.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Junkuard.baseTexture = generateTextureFromOrigin(
+      app.renderer,
+      baseGraphics,
+    );
   }
 
   private createParticles() {

@@ -2,6 +2,7 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
+  generateTextureFromOrigin,
   makeAntennas,
   makeBasicCircle,
   makeRoundShadow,
@@ -41,7 +42,6 @@ export class House extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(House.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
@@ -54,9 +54,7 @@ export class House extends Building {
 
     makeBasicCircle(baseGraphics, this.baseSize - 18, "#5b8937", false);
 
-    House.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    House.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   private updateAntennasVisibility() {

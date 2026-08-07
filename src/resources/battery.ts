@@ -1,19 +1,19 @@
 import { Resource } from "@resources/resource";
-import { Graphics, Sprite} from "pixi.js";
+import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
+import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 export class Battery extends Resource {
-protected draw() {
+  protected draw() {
     this.createBaseTexture();
-    
+
     const base = new Sprite(Battery.baseTexture);
-    base.anchor.set(0.5);
     this.root.addChild(base);
   }
 
   protected createBaseTexture(): void {
     if (Battery.baseTexture) return;
-    
+
     const baseGraphics = new Graphics();
 
     baseGraphics
@@ -30,8 +30,6 @@ protected draw() {
       .lineTo(1, 0)
       .stroke({ width: 1, color: "#000000" });
 
-    Battery.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Battery.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 }

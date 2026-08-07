@@ -2,16 +2,18 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
+import { getRadialPoint, getRadialLine } from "@utils/basic-geometry";
 
 export class Factory extends Building {
-  satelitesGraphics: Graphics = new Graphics();
-  sateliteParams = {
-    amount: 5,
-    size: 5,
+  gridsGraphics: Graphics = new Graphics();
+  gridsParams = {
+    amount: 3,
+    sizes: [6.5, 12, 12],
+    angleOffsets: { small: 1.05, medium: 0.5 },
     rotationSpeed: 0.005,
   };
 
@@ -20,7 +22,7 @@ export class Factory extends Building {
     this.draw();
     this.craft = {
       ingridients: [],
-      result: "Perl",
+      result: "Water",
     };
     this.priorityForTasks = 5;
     this.genProductionTask();
@@ -34,24 +36,60 @@ export class Factory extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Factory.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
   private createSatelites() {
-    for (let i = 0; i < this.sateliteParams.amount; i++) {
-      const { x, y } = getRadialPoint(
-        i,
-        this.sateliteParams.amount,
-        this.baseSize + 10,
+    for (let i = 0; i < this.gridsParams.amount; i++) {
+      const small = getRadialLine(
+        i * 4 + 2,
+        this.gridsParams.amount * 4,
+        this.baseSize,
+        this.baseSize + this.gridsParams.sizes[0],
       );
 
-      this.satelitesGraphics
-        .moveTo(0, 0)
-        .circle(x, y, this.sateliteParams.size)
-        .fill("#000000");
+      const medium = getRadialLine(
+        i * 4 + 1,
+        this.gridsParams.amount * 4,
+        this.baseSize,
+        this.baseSize + this.gridsParams.sizes[1],
+      );
+
+      const large = getRadialLine(
+        i * 4,
+        this.gridsParams.amount * 4,
+        this.baseSize,
+        this.baseSize + this.gridsParams.sizes[2],
+      );
+
+      this.gridsGraphics
+        .moveTo(small.startX, small.startY)
+        .lineTo(small.endX, small.endY)
+        .moveTo(medium.startX, medium.startY)
+        .lineTo(medium.endX, medium.endY)
+        .moveTo(large.startX, large.startY)
+        .lineTo(large.endX, large.endY)
+        .moveTo(small.endX, small.endY)
+        .arc(
+          0,
+          0,
+          this.baseSize + this.gridsParams.sizes[0],
+          small.angle,
+          small.angle - this.gridsParams.angleOffsets.small,
+          true,
+        )
+        .moveTo(medium.endX, medium.endY)
+        .arc(
+          0,
+          0,
+          this.baseSize + this.gridsParams.sizes[1],
+          medium.angle,
+          medium.angle - this.gridsParams.angleOffsets.medium,
+          true,
+        )
+        .stroke({ width: 3, color: "#173b67", cap: "round" });
     }
-    this.contentContainer.addChild(this.satelitesGraphics);
+    this.contentContainer.addChild(this.gridsGraphics);
   }
 
   private createBaseTexture() {
@@ -61,30 +99,28 @@ export class Factory extends Building {
 
     makeBasicCircle(baseGraphics, this.baseSize, "#a8d0db", true);
 
-    const segments = 4;
-    const step = (Math.PI * 2) / segments;
-    const gap = 0.35;
-
-    for (let i = 0; i < segments; i++) {
-      const startAngle = i * step + gap;
-      const endAngle = (i + 1) * step - gap;
-
-      baseGraphics
-        .moveTo(0, 0)
-        .arc(0, 0, this.baseSize, startAngle, endAngle)
-        .fill("#73b8b6");
+    const points = [];
+    for (let i = 0; i < 3; i++) {
+      const { x, y } = getRadialPoint(i, 3, this.baseSize - 16);
+      points.push({ x, y });
     }
 
-    makeBasicCircle(baseGraphics, this.baseSize - 8, "#a8d0db", false);
+    baseGraphics
+      .moveTo(points[0].x, points[0].y)
+      .lineTo(points[1].x, points[1].y)
+      .lineTo(points[2].x, points[2].y)
+      .closePath();
+    baseGraphics.stroke({ width: 8, color: "#6ba6de", cap: "round" });
 
-    Factory.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    for (let i = 0; i < 3; i++) {
+      baseGraphics.circle(points[i].x, points[i].y, 12).fill("#81bcf3");
+    }
+
+    Factory.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   animation(delta: number) {
-    this.satelitesGraphics.rotation -=
-      this.sateliteParams.rotationSpeed * delta;
+    this.gridsGraphics.rotation -= this.gridsParams.rotationSpeed * delta;
   }
 
   genProductionTask() {

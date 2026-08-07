@@ -1,6 +1,6 @@
-import { Iron } from "@resources/iron";
-import { Meat } from "@resources/meat";
-import { Perl } from "@resources/perl";
+import { Organic } from "@resources/organic";
+import { Metal } from "@resources/metal";
+import { Water } from "@resources/water";
 import { Battery } from "@resources/battery";
 import { Gum } from "@resources/gum";
 import { Gear } from "@resources/gear";
@@ -8,12 +8,12 @@ import { Truss } from "@resources/truss";
 
 export function createResource(type: string) {
   switch (type) {
-    case "Iron":
-      return new Iron("Iron");
-    case "Meat":
-      return new Meat("Meat");
-    case "Perl":
-      return new Perl("Perl");
+    case "Organic":
+      return new Organic("Organic");
+    case "Metal":
+      return new Metal("Metal");
+    case "Water":
+      return new Water("Water");
     case "Battery":
       return new Battery("Battery");
     case "Gum":

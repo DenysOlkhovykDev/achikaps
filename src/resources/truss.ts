@@ -1,6 +1,7 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
+import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 const leftSide = -6;
 const rightSide = 6;
@@ -12,9 +13,8 @@ const rightJoin = 3;
 export class Truss extends Resource {
   protected draw() {
     this.createBaseTexture();
-    
+
     const base = new Sprite(Truss.baseTexture);
-    base.anchor.set(0.5);
     this.root.addChild(base);
   }
 
@@ -50,8 +50,6 @@ export class Truss extends Resource {
       .lineTo(rightSide, bottomSide)
       .stroke({ width: 2, color: "#d1b453" });
 
-    Truss.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Truss.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 }

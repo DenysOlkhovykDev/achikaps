@@ -2,10 +2,11 @@ import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
-  getRadialPoint,
+  generateTextureFromOrigin,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
+import { getRadialLine } from "@utils/basic-geometry";
 
 export class Smelter extends Building {
   buildingParams = {
@@ -18,8 +19,8 @@ export class Smelter extends Building {
     this.draw();
     this.craft = {
       ingridients: [
-        { resourceName: "Meat", count: 1 },
-        { resourceName: "Iron", count: 2 },
+        { resourceName: "Metal", count: 1 },
+        { resourceName: "Organic", count: 2 },
       ],
       result: "Gear",
     };
@@ -34,7 +35,6 @@ export class Smelter extends Building {
     this.createBaseTexture();
 
     const base = new Sprite(Smelter.baseTexture);
-    base.anchor.set(0.5);
     this.contentContainer.addChild(base);
   }
 
@@ -68,9 +68,7 @@ export class Smelter extends Building {
 
     makeBasicCircle(baseGraphics, this.baseSize - 18, "#dbb39e", true);
 
-    Smelter.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Smelter.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 
   private makeChimneyPart(
@@ -81,19 +79,16 @@ export class Smelter extends Building {
     color: string,
   ) {
     for (let i = 0; i < this.buildingParams.amountOfChemnies; i++) {
-      const { x: x1, y: y1 } = getRadialPoint(
+      const line = getRadialLine(
         i,
         this.buildingParams.amountOfChemnies,
         this.baseSize + start,
-      );
-
-      const { x: x2, y: y2 } = getRadialPoint(
-        i,
-        this.buildingParams.amountOfChemnies,
         this.baseSize + end,
       );
 
-      baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
+      baseGraphics
+        .moveTo(line.startX, line.startY)
+        .lineTo(line.endX, line.endY);
     }
 
     baseGraphics.stroke({ width: width, color: color });

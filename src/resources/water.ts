@@ -1,28 +1,26 @@
 import { Resource } from "@resources/resource";
-import { Graphics, Sprite} from "pixi.js";
+import { Graphics, Sprite } from "pixi.js";
 import { app } from "../main";
+import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
-export class Iron extends Resource {
+export class Water extends Resource {
   protected draw() {
     this.createBaseTexture();
-    
-    const base = new Sprite(Iron.baseTexture);
-    base.anchor.set(0.5);
+
+    const base = new Sprite(Water.baseTexture);
     this.root.addChild(base);
   }
 
   protected createBaseTexture(): void {
-    if (Iron.baseTexture) return;
-    
+    if (Water.baseTexture) return;
+
     const baseGraphics = new Graphics();
 
     baseGraphics
-      .rect(-5, -5, 10, 10)
+      .circle(0, 0, 5)
       .stroke({ width: 3, color: "#000000" })
       .fill("#5bd5d3");
 
-    Iron.baseTexture = app.renderer.generateTexture({
-      target: baseGraphics,
-    });
+    Water.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
 }
