@@ -1,4 +1,5 @@
 import { Container, Graphics, Text } from "pixi.js";
+import { FaunaSystem } from "../world/fauna";
 
 type Point = { x: number; y: number };
 
@@ -231,12 +232,19 @@ function drawDistantWorld(layer: Container) {
 
 export class WorldScenery {
   private beacon?: AnimatedBeacon;
+  private fauna?: FaunaSystem;
 
   setBeacon(rings: Graphics[]) {
     this.beacon = { rings, phase: 0 };
   }
 
+  setFauna(fauna: FaunaSystem) {
+    this.fauna = fauna;
+  }
+
   update(delta: number) {
+    this.fauna?.update(delta);
+
     if (!this.beacon) return;
 
     this.beacon.phase += delta * 0.035;
@@ -350,6 +358,10 @@ export function createWorld(
       scenery.setBeacon(beaconRings);
     }
   }
+
+  const fauna = new FaunaSystem();
+  worldLayer.addChild(fauna.root);
+  scenery.setFauna(fauna);
 
   return scenery;
 }

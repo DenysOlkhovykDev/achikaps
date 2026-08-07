@@ -25,6 +25,8 @@ and use it to explore the world.
   parallax feedback rather than an instant start/stop.
 - Explore a generated archipelago and follow the compass to the destination
   beacon.
+- The archipelago is inhabited by animated sky fish, air octopuses, flying
+  turtles, cloud rays, lantern whales, and kite crabs.
 
 ## Local development
 
@@ -60,6 +62,7 @@ npx playwright install chromium
 - `src/workers` — worker movement and job execution.
 - `src/dashboard` — task scheduling and route selection.
 - `src/combat` — combat targets, weapon targeting, projectiles, and damage.
+- `src/world` — generated scenery and the animated aerial fauna system.
 - `src/tutorial-overlay` — pointers, compass, and messages.
 - `tests/scenarios` — deterministic visual gameplay scenarios.
 
