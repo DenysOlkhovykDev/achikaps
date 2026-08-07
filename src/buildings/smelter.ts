@@ -17,7 +17,7 @@ export class Smelter extends Building {
     super(x, y, 4, "Smelter");
     this.draw();
     this.craft = {
-      ingridients: [
+      ingredients: [
         { resourceName: "Meat", count: 1 },
         { resourceName: "Iron", count: 2 },
       ],

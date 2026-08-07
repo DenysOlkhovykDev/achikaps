@@ -1,10 +1,11 @@
 import { Container, Graphics } from "pixi.js";
 import { MenuTrigger } from "@menus/menu-trigger";
 import { MenuItem } from "@menus/menu";
+import { BuildingType } from "@buildings/_buildings";
 
 let isBuildMode = false;
 let menuTrigger: MenuTrigger;
-let buildingType = "";
+let buildingType: BuildingType | "" = "";
 
 const menuData: MenuItem[] = [
   {
@@ -47,6 +48,76 @@ const menuData: MenuItem[] = [
     color: "#a8b1db",
     onClick: () => setBuildingType("Engine"),
   },
+  {
+    label: "Windmill",
+    color: "#88b9ac",
+    onClick: () => setBuildingType("Windmill"),
+  },
+  {
+    label: "Recycler",
+    color: "#8fb7a0",
+    onClick: () => setBuildingType("Recycler"),
+  },
+  {
+    label: "Glassworks",
+    color: "#7fb9c4",
+    onClick: () => setBuildingType("Glassworks"),
+  },
+  {
+    label: "Workshop",
+    color: "#b88ca5",
+    onClick: () => setBuildingType("Workshop"),
+  },
+  {
+    label: "ArmorPress",
+    color: "#806c78",
+    onClick: () => setBuildingType("ArmorPress"),
+  },
+  {
+    label: "Forge",
+    color: "#9b6845",
+    onClick: () => setBuildingType("Forge"),
+  },
+  {
+    label: "Collector",
+    color: "#8099a4",
+    onClick: () => setBuildingType("Collector"),
+  },
+  {
+    label: "Loom",
+    color: "#9684b4",
+    onClick: () => setBuildingType("Loom"),
+  },
+  {
+    label: "Cannon",
+    color: "#687980",
+    onClick: () => setBuildingType("Cannon"),
+  },
+  {
+    label: "MachineGun",
+    color: "#596a71",
+    onClick: () => setBuildingType("MachineGun"),
+  },
+  {
+    label: "Saw",
+    color: "#71858b",
+    onClick: () => setBuildingType("Saw"),
+  },
+  {
+    label: "Manipulator",
+    color: "#d29d45",
+    onClick: () => setBuildingType("Manipulator"),
+  },
+  {
+    label: "House",
+    color: "#72ac4a",
+    onClick: () => setBuildingType("House"),
+  },
+  {
+    label: "Junkyard",
+    color: "#cac8a5",
+    onClick: () => setBuildingType("Junkyard"),
+  },
 ];
 
 export function addBuildMenu(container: Container) {
@@ -76,7 +147,7 @@ export function getIsBuildMode() {
   return isBuildMode;
 }
 
-export function setBuildingType(type: string) {
+export function setBuildingType(type: BuildingType | "") {
   buildingType = type;
 }
 

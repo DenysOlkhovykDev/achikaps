@@ -1,25 +1,28 @@
 import { Graphics, FederatedPointerEvent, Container, Texture } from "pixi.js";
 import { Resource } from "@resources/resource";
 import {
-  buidingParameters,
+  buildingParameters,
+  BuildingKind,
   deSelectAllBuildings,
   hideCrafts,
 } from "@buildings/_buildings";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
-import { addTask } from "@dashboard/_dashboard";
+import { addTask, deleteTasksForTarget } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
 import { setIsBuildMode } from "@menus/build-menu";
 import { makeRoundShadow } from "@utils/basic-graphic";
+import { ResourceType } from "@resources/resource-types";
+import { CombatTarget, CombatTeam } from "@combat/combat";
 
 type ResourceListener = (task: Task) => void;
 
 type Craft = {
-  ingridients: { resourceName: string; count: number }[];
-  result: string;
+  ingredients: { resourceName: ResourceType; count: number }[];
+  result: ResourceType;
 };
 
-export abstract class Building {
+export abstract class Building implements CombatTarget {
   root: Container = new Container();
 
   shadowContainer: Container = new Container();
@@ -32,15 +35,20 @@ export abstract class Building {
 
   craftSign: Container = new Container();
   craftSignElements: Container[] = [];
+  healthBar = new Graphics();
 
   baseSize: number = 0;
 
   links: Road[] = [];
 
-  resourceList: Map<string, number> = new Map<string, number>();
-  recources: Resource[] = [];
+  resourceList = new Map<ResourceType, number>();
+  resources: Resource[] = [];
 
   priorityForTasks: number = -1;
+
+  maxHealth = 100;
+  health = this.maxHealth;
+  team: CombatTeam = "player";
 
   craft: Craft | undefined;
   craftGraphicAlpha: number = 0.45;
@@ -51,7 +59,7 @@ export abstract class Building {
     public x: number,
     public y: number,
     public inventorySize: number,
-    public buildingType: string,
+    public buildingType: BuildingKind,
   ) {
     this.contentContainer = new Container();
     this.initEvents();
@@ -64,11 +72,9 @@ export abstract class Building {
     this.root.addChild(this.contentContainer);
     this.root.addChild(this.resourceContainer);
     this.root.addChild(this.craftSign);
+    this.root.addChild(this.healthBar);
 
-    this.baseSize =
-      buidingParameters[
-        this.buildingType as keyof typeof buidingParameters
-      ].baseSize;
+    this.baseSize = buildingParameters[this.buildingType].baseSize;
   }
 
   protected initEvents() {
@@ -82,13 +88,48 @@ export abstract class Building {
 
   public abstract animation(delta: number, movingAngle?: number): void;
 
+  get isAlive() {
+    return this.health > 0;
+  }
+
+  takeDamage(amount: number) {
+    if (!this.isAlive || amount <= 0) return;
+
+    this.health = Math.max(0, this.health - amount);
+    this.root.alpha = this.health === 0
+      ? 0.22
+      : 0.65 + (this.health / this.maxHealth) * 0.35;
+    this.drawHealthBar();
+
+    if (!this.isAlive) {
+      this.root.eventMode = "none";
+      deleteTasksForTarget(this);
+    }
+  }
+
+  private drawHealthBar() {
+    this.healthBar.clear();
+    if (this.health >= this.maxHealth) return;
+
+    const width = Math.max(42, this.baseSize * 1.25);
+    const ratio = this.health / this.maxHealth;
+    const color = ratio > 0.55 ? "#49bd68" : ratio > 0.25 ? "#efad43" : "#dd5656";
+    const y = -this.baseSize - 18;
+
+    this.healthBar
+      .roundRect(-width / 2, y, width, 7, 3)
+      .fill({ color: "#17201e", alpha: 0.7 })
+      .roundRect(-width / 2 + 1, y + 1, (width - 2) * ratio, 5, 2)
+      .fill(color);
+  }
+
   protected generateProductionTask() {
     if (this.checkIsEnoughResourceswForCraft()) {
       addTask(this, JobType.production, this.priorityForTasks);
     }
   }
 
-  protected generateDeliveryTask(resourceName: string, count: number) {
+  protected generateDeliveryTask(resourceName: ResourceType, count: number) {
     addTask(
       this,
       JobType.delivering,
@@ -100,23 +141,25 @@ export abstract class Building {
 
   protected generateDeliveryTasks() {
     if (this.craft) {
-      let neededSpace = 0;
-      for (let i = 0; i < this.craft?.ingridients.length; i++) {
-        neededSpace += this.craft?.ingridients[i].count;
+      let missingResources = 0;
+      for (const ingredient of this.craft.ingredients) {
+        const storedResources = this.getAvailableResourceCount(
+          ingredient.resourceName,
+        );
+        missingResources += Math.max(ingredient.count - storedResources, 0);
       }
-      let actualSpace = 0;
-      for (const resource of this.resourceList) {
-        actualSpace += resource[1];
-      }
+
+      const availableSpace = this.inventorySize - this.resources.length;
+
       if (
         !this.checkIsEnoughResourceswForCraft() &&
-        this.inventorySize - actualSpace > neededSpace
+        availableSpace >= missingResources
       ) {
-        for (let i = 0; i < this.craft?.ingridients.length; i++) {
-          for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
+        for (const ingredient of this.craft.ingredients) {
+          for (let count = 1; count <= ingredient.count; count++) {
             this.generateDeliveryTask(
-              this.craft?.ingridients[i].resourceName,
-              1,
+              ingredient.resourceName,
+              count,
             );
           }
         }
@@ -125,11 +168,13 @@ export abstract class Building {
   }
 
   public tryToDoProduction(): boolean {
+    if (!this.isAlive) return false;
+
     if (this.craft) {
       if (this.checkIsEnoughResourceswForCraft()) {
-        for (let i = 0; i < this.craft?.ingridients.length; i++) {
-          for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
-            this.takeResourceByName(this.craft?.ingridients[i].resourceName);
+        for (let i = 0; i < this.craft.ingredients.length; i++) {
+          for (let j = 0; j < this.craft.ingredients[i].count; j++) {
+            this.takeResourceByName(this.craft.ingredients[i].resourceName);
           }
         }
         const newResource = createResource(this.craft?.result);
@@ -144,11 +189,12 @@ export abstract class Building {
   public checkIsEnoughResourceswForCraft() {
     if (this.craft) {
       let isEnoughResources = true;
-      for (let i = 0; i < this.craft?.ingridients.length; i++) {
-        const countOfResources =
-          this.resourceList.get(this.craft?.ingridients[i].resourceName) ?? 0;
+      for (let i = 0; i < this.craft.ingredients.length; i++) {
+        const countOfResources = this.getAvailableResourceCount(
+          this.craft.ingredients[i].resourceName,
+        );
 
-        if (countOfResources < this.craft?.ingridients[i].count) {
+        if (countOfResources < this.craft.ingredients[i].count) {
           isEnoughResources = false;
         }
       }
@@ -184,7 +230,7 @@ export abstract class Building {
       const x = Math.cos(angle) * r;
       const y = Math.sin(angle) * r;
 
-      const isValid = this.recources.every((other) => {
+      const isValid = this.resources.every((other) => {
         if (other === res) return true;
 
         const dx = other.root.x - x;
@@ -220,9 +266,10 @@ export abstract class Building {
   }
 
   tryToAddResource(resource: Resource, task?: Task) {
-    if (this.recources.length >= this.inventorySize) return false;
+    if (!this.isAlive) return false;
+    if (this.resources.length >= this.inventorySize) return false;
 
-    this.recources.push(resource);
+    this.resources.push(resource);
     this.resourceContainer.addChild(resource.root);
 
     const resourceName = resource.resourceType;
@@ -248,7 +295,7 @@ export abstract class Building {
   }
 
   takeResourceByIndex(resourceIndex: number): Resource {
-    const resourceName = this.recources[resourceIndex].resourceType;
+    const resourceName = this.resources[resourceIndex].resourceType;
     const current = this.resourceList.get(resourceName) ?? 0;
 
     if (current > 1) {
@@ -257,12 +304,13 @@ export abstract class Building {
       this.resourceList.delete(resourceName);
     }
 
-    const [res] = this.recources.splice(resourceIndex, 1);
+    const [res] = this.resources.splice(resourceIndex, 1);
+    res.isReserved = false;
 
     this.resourceContainer.removeChild(res.root);
 
     if (
-      this.recources.length < this.inventorySize &&
+      this.resources.length < this.inventorySize &&
       this.priorityForTasks > -1
     ) {
       this.generateProductionTask();
@@ -271,9 +319,28 @@ export abstract class Building {
     return res;
   }
 
-  takeResourceByName(resourceName: string) {
-    const index = this.recources.findIndex(
-      (r) => r.resourceType === resourceName,
+  takeResource(resource: Resource): Resource | undefined {
+    const index = this.resources.indexOf(resource);
+
+    if (index === -1) {
+      resource.isReserved = false;
+      return undefined;
+    }
+
+    return this.takeResourceByIndex(index);
+  }
+
+  getAvailableResourceCount(resourceName: ResourceType): number {
+    return this.resources.filter(
+      (resource) =>
+        resource.resourceType === resourceName && !resource.isReserved,
+    ).length;
+  }
+
+  takeResourceByName(resourceName: ResourceType) {
+    const index = this.resources.findIndex(
+      (resource) =>
+        resource.resourceType === resourceName && !resource.isReserved,
     );
 
     if (index !== -1) {
@@ -284,9 +351,9 @@ export abstract class Building {
     return false;
   }
 
-  showCraft(isStandart: boolean) {
+  showCraft(isStandard: boolean) {
     if (this.craft) {
-      this.prepareCraftSignElements(isStandart);
+      this.prepareCraftSignElements(isStandard);
 
       const arrow = new Graphics();
 
@@ -302,7 +369,7 @@ export abstract class Building {
       this.craftSignElements.push(arrow);
 
       const craftResult = createResource(this.craft.result).root;
-      craftResult.alpha = isStandart ? 1 : this.craftGraphicAlpha;
+      craftResult.alpha = isStandard ? 1 : this.craftGraphicAlpha;
       this.craftSignElements.push(craftResult);
 
       this.drawCraftSign();
@@ -313,37 +380,37 @@ export abstract class Building {
     this.craftSign.removeChildren();
   }
 
-  prepareCraftSignElements(isStandart: boolean) {
+  prepareCraftSignElements(isStandard: boolean) {
     if (this.craft) {
       this.craftSignElements = [];
 
-      const remeaningCraftIngredients = structuredClone(this.craft.ingridients);
+      const remainingCraftIngredients = structuredClone(this.craft.ingredients);
 
-      for (let i = 0; i < remeaningCraftIngredients.length; i++) {
-        remeaningCraftIngredients[i].count = 0;
+      for (let i = 0; i < remainingCraftIngredients.length; i++) {
+        remainingCraftIngredients[i].count = 0;
       }
 
-      for (let i = 0; i < this.recources.length; i++) {
-        const craftIngredient = remeaningCraftIngredients.find(
-          (element) => element.resourceName === this.recources[i].resourceType,
+      for (let i = 0; i < this.resources.length; i++) {
+        const craftIngredient = remainingCraftIngredients.find(
+          (element) => element.resourceName === this.resources[i].resourceType,
         );
         if (craftIngredient) {
           craftIngredient.count++;
         }
       }
 
-      for (let i = 0; i < this.craft.ingridients.length; i++) {
-        for (let j = 0; j < this.craft.ingridients[i].count; j++) {
-          if (remeaningCraftIngredients[i].count > 0) {
+      for (let i = 0; i < this.craft.ingredients.length; i++) {
+        for (let j = 0; j < this.craft.ingredients[i].count; j++) {
+          if (remainingCraftIngredients[i].count > 0) {
             this.craftSignElements.push(
-              createResource(this.craft.ingridients[i].resourceName).root,
+              createResource(this.craft.ingredients[i].resourceName).root,
             );
-            remeaningCraftIngredients[i].count--;
+            remainingCraftIngredients[i].count--;
           } else {
             const craftIngredient = createResource(
-              this.craft.ingridients[i].resourceName,
+              this.craft.ingredients[i].resourceName,
             ).root;
-            craftIngredient.alpha = isStandart ? 1 : this.craftGraphicAlpha;
+            craftIngredient.alpha = isStandard ? 1 : this.craftGraphicAlpha;
             this.craftSignElements.push(craftIngredient);
           }
         }

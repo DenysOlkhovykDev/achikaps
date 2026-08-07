@@ -3,38 +3,70 @@ import { Building } from "@buildings/building";
 import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
 import { JobType, Task } from "@dashboard/task";
-import { addTask } from "@dashboard/_dashboard";
-import { dashboard } from "@dashboard/_dashboard";
-import { Resource } from "@resources/resource";
+import { addTask, deleteTask } from "@dashboard/_dashboard";
 
 import { Platform } from "@buildings/platform";
 import { Factory } from "@buildings/factory";
 import { Mine } from "@buildings/mine";
 import { Farm } from "@buildings/farm";
 import { Grinder } from "@buildings/grinder";
-import { Junkuard } from "@buildings/junkuard";
+import { Junkyard } from "@buildings/junkuard";
 import { House } from "@buildings/house";
 import { Laboratory } from "@buildings/laboratory";
 import { Smelter } from "@buildings/smelter";
 import { Engine } from "@buildings/engine";
+import { Windmill } from "@buildings/windmill";
+import { Recycler } from "@buildings/recycler";
+import { Glassworks } from "@buildings/glassworks";
+import { Workshop } from "@buildings/workshop";
+import { ArmorPress } from "@buildings/armor-press";
+import { Forge } from "@buildings/forge";
+import { Collector } from "@buildings/assembler";
+import { Loom } from "@buildings/loom";
+import { Cannon } from "@buildings/cannon";
+import { MachineGun } from "@buildings/machine-gun";
+import { Saw } from "@buildings/saw";
+import { Manipulator } from "@buildings/manipulator";
 import { Blueprint } from "@buildings/blueprint";
+import { ResourceType } from "@resources/resource-types";
+import { registerCombatTarget } from "@combat/combat";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
+type BuildingParameters = {
+  baseSize: number;
+  minLinkLength: number;
+  maxLinkLength: number;
+  craft: { type: ResourceType; amount: number }[];
+};
 
-export const buildingMap: Record<string, BuildingConstructor> = {
+export const buildingMap = {
   Platform,
   Factory,
   Mine,
   Farm,
   Grinder,
-  Junkuard,
+  Junkyard,
   House,
   Laboratory,
   Smelter,
   Engine,
-};
+  Windmill,
+  Recycler,
+  Glassworks,
+  Workshop,
+  ArmorPress,
+  Forge,
+  Collector,
+  Loom,
+  Cannon,
+  MachineGun,
+  Saw,
+  Manipulator,
+} satisfies Record<string, BuildingConstructor>;
 
-export const buidingParameters = {
+export type BuildingType = keyof typeof buildingMap;
+
+export const buildingParameters = {
   Blueprint: { baseSize: 0, minLinkLength: 120, maxLinkLength: 200, craft: [] },
   Platform: {
     baseSize: 40,
@@ -105,9 +137,10 @@ export const buidingParameters = {
       { type: "Gum", amount: 1 },
       { type: "Gear", amount: 1 },
       { type: "Truss", amount: 1 },
+      { type: "Battery", amount: 1 },
     ],
   },
-  Junkuard: {
+  Junkyard: {
     baseSize: 60,
     minLinkLength: 120,
     maxLinkLength: 200,
@@ -134,7 +167,112 @@ export const buidingParameters = {
       { type: "Perl", amount: 1 },
     ],
   },
-};
+  Recycler: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 3 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Glassworks: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Workshop: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  ArmorPress: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 3 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  Forge: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 4 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Collector: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 3 },
+    ],
+  },
+  Loom: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Cannon: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 3 },
+      { type: "ArmorPlate", amount: 2 },
+      { type: "Joint", amount: 2 },
+    ],
+  },
+  MachineGun: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 2 },
+      { type: "PlasticBar", amount: 2 },
+      { type: "Joint", amount: 2 },
+    ],
+  },
+  Saw: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 2 },
+      { type: "Joint", amount: 2 },
+      { type: "Fabric", amount: 1 },
+    ],
+  },
+  Manipulator: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 1 },
+      { type: "Joint", amount: 2 },
+      { type: "Gear", amount: 1 },
+    ],
+  },
+} satisfies Record<string, BuildingParameters>;
+
+export type BuildingKind = keyof typeof buildingParameters;
 
 export const buildings: Building[] = [];
 export const blueprints: Blueprint[] = [];
@@ -144,12 +282,13 @@ export function addBuilding(
   x: number,
   y: number,
   container: Container,
-  buildingType: string,
+  buildingType: BuildingType,
 ) {
-  const BuildingClass = buildingMap[buildingType] || Platform;
+  const BuildingClass = buildingMap[buildingType];
   const building = new BuildingClass(x, y);
 
   buildings.push(building);
+  registerCombatTarget(building);
   container.addChild(building.root);
 
   if (buildings.length > 1) {
@@ -171,7 +310,7 @@ export function addBlueprint(
   x: number,
   y: number,
   container: Container,
-  buildingType: string,
+  buildingType: BuildingType,
 ) {
   const blueprint = new Blueprint(x, y, buildingType);
 
@@ -186,12 +325,17 @@ export function addBlueprint(
     blueprint.addLinkedBuilding(line);
 
     container.addChildAt(line.graphic, 0);
-    const craft =
-      buidingParameters[buildingType as keyof typeof buidingParameters].craft;
+    const craft = buildingParameters[buildingType].craft;
 
     for (let i = 0; i < craft.length; i++) {
       for (let j = 0; j < craft[i].amount; j++) {
-        const task = addTask(from, JobType.building, 5, craft[i].type, 1);
+        const task = addTask(
+          from,
+          JobType.building,
+          5,
+          craft[i].type,
+          j + 1,
+        );
         if (task) {
           blueprint.tasks.push(task);
         }
@@ -206,7 +350,7 @@ export function addBlueprint(
     });
 
     blueprint.unsubscribe = unsubscribe;
-    blueprint.blueprinToBuilding(container);
+    blueprint.blueprintToBuilding(container);
   }
 
   return blueprint;
@@ -245,7 +389,9 @@ export function hideCrafts() {
 
 export function animations(delta: number, movingAngle?: number) {
   for (const building of buildings) {
-    building.animation(delta, movingAngle);
+    if (building.isAlive) {
+      building.animation(delta, movingAngle);
+    }
   }
 }
 
@@ -265,28 +411,26 @@ export function movingBlueprints(delta: number) {
 
   for (let i = blueprints.length - 1; i >= 0; i--) {
     if (blueprints[i].redraws > 5000) {
-      for (const link of blueprints[i].links) {
-        link.graphic.destroy();
-      }
-      blueprints[i].root.destroy();
-      blueprints.splice(i, 1);
+      deleteBlueprint(blueprints[i]);
     }
   }
 }
 
 export function deleteBlueprint(blueprint: Blueprint) {
   blueprint.unsubscribe?.();
-  let index = -1;
-  for (let i = 0; i < blueprints.length; i++) {
-    if (blueprints[i] === blueprint) {
-      index = i;
-    }
+  blueprint.unsubscribe = undefined;
+
+  for (const task of blueprint.tasks) {
+    deleteTask(task);
   }
+  blueprint.tasks = [];
+
   for (const link of blueprint.links) {
     link.graphic.destroy();
   }
   blueprint.root.destroy();
 
+  const index = blueprints.indexOf(blueprint);
   if (index !== -1) {
     blueprints.splice(index, 1);
   }

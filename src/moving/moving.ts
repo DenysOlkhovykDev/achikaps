@@ -1,60 +1,140 @@
 import { Container } from "pixi.js";
 
-let centerX = 1000 / 2;
-let centerY = 1000 / 2;
+const VIEWPORT_SIZE = 1000;
+const VIEWPORT_CENTER = VIEWPORT_SIZE / 2;
+const MAX_FORWARD_SPEED = 3.4;
+const MAX_REVERSE_SPEED = 1.9;
+const MAX_TURN_SPEED = 0.014;
 
 const ship = {
   x: 0,
   y: 0,
-  m: 1,
-  speed: 2,
+  velocityX: 0,
+  velocityY: 0,
+  angularVelocity: 0,
+  visualOffsetX: 0,
+  visualOffsetY: 0,
+  visualBank: 0,
+  scale: 1,
 };
+
+export type MotionState = {
+  movementAngle?: number;
+  speed: number;
+  speedRatio: number;
+  thrust: number;
+  turn: number;
+};
+
+function approach(current: number, target: number, response: number) {
+  return current + (target - current) * response;
+}
 
 export function moveWorld(
   delta: number,
   worldLayer: Container,
+  distantWorldLayer: Container,
   buildingsLayer: Container,
   workersLayer: Container,
-  vr: number,
-  vy: number,
-) {
-  // if (keys.has("w") || keys.has("ц")) vy -= 1;
-  // if (keys.has("s") || keys.has("і")) vy += 1;
-  // if (keys.has("a") || keys.has("ф")) vx -= 1;
-  // if (keys.has("d") || keys.has("в")) vx += 1;
-  // if (keys.has("q") || keys.has("й")) ship.m += 0.001;
-  // if (keys.has("e") || keys.has("у")) ship.m -= 0.001;
+  turnInput: number,
+  thrustInput: number,
+): MotionState {
+  // A large delta after returning to a background tab should not teleport the ship.
+  const frameDelta = Math.min(Math.max(delta, 0), 3);
+  const thrust = Math.max(-1, Math.min(1, thrustInput));
+  const turn = Math.max(-1, Math.min(1, turnInput));
 
-  let vx = 0;
-  const length = Math.hypot(vx, vy);
-  if (length > 0) {
-    vx /= length;
-    vy /= length;
-  }
+  const turnResponse = 1 - Math.exp(-0.12 * frameDelta);
+  ship.angularVelocity = approach(
+    ship.angularVelocity,
+    turn * MAX_TURN_SPEED,
+    turnResponse,
+  );
+  worldLayer.rotation -= ship.angularVelocity * frameDelta;
 
-  const angle = -worldLayer.rotation;
+  const heading = -worldLayer.rotation;
+  const forwardX = Math.sin(heading);
+  const forwardY = -Math.cos(heading);
+  const requestedSpeed =
+    -thrust * (thrust < 0 ? MAX_FORWARD_SPEED : MAX_REVERSE_SPEED);
 
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
+  const targetVelocityX = forwardX * requestedSpeed;
+  const targetVelocityY = forwardY * requestedSpeed;
+  const accelerationResponse = 1 - Math.exp(-0.075 * frameDelta);
+  const coastingResponse = 1 - Math.exp(-0.025 * frameDelta);
+  const velocityResponse = Math.abs(thrust) > 0.02
+    ? accelerationResponse
+    : coastingResponse;
 
-  const worldVx = vx * cos - vy * sin;
-  const worldVy = vx * sin + vy * cos;
+  ship.velocityX = approach(
+    ship.velocityX,
+    targetVelocityX,
+    velocityResponse,
+  );
+  ship.velocityY = approach(
+    ship.velocityY,
+    targetVelocityY,
+    velocityResponse,
+  );
 
-  ship.x += worldVx * ship.speed * delta;
-  ship.y += worldVy * ship.speed * delta;
+  ship.x += ship.velocityX * frameDelta;
+  ship.y += ship.velocityY * frameDelta;
 
   worldLayer.pivot.set(ship.x, ship.y);
-  worldLayer.position.set(centerX, centerY);
+  worldLayer.position.set(VIEWPORT_CENTER, VIEWPORT_CENTER);
+  worldLayer.scale.set(ship.scale);
 
-  worldLayer.rotation -= vr / 200;
+  // Distant specks move more slowly than islands, which adds a clear depth cue.
+  distantWorldLayer.pivot.set(ship.x * 0.28, ship.y * 0.28);
+  distantWorldLayer.position.set(VIEWPORT_CENTER, VIEWPORT_CENTER);
+  distantWorldLayer.rotation = worldLayer.rotation * 0.22;
+  distantWorldLayer.scale.set(ship.scale);
 
-  worldLayer.scale.set(ship.m);
-  buildingsLayer.scale.set(ship.m);
-  workersLayer.scale.set(ship.m);
+  const cos = Math.cos(worldLayer.rotation);
+  const sin = Math.sin(worldLayer.rotation);
+  const screenVelocityX = ship.velocityX * cos - ship.velocityY * sin;
+  const screenVelocityY = ship.velocityX * sin + ship.velocityY * cos;
+  const visualResponse = 1 - Math.exp(-0.1 * frameDelta);
 
-  centerX = (1000 / 2) * ship.m;
-  centerY = (1000 / 2) * ship.m;
+  // The colony is the player's ship. A little camera lag and banking makes it
+  // feel like a moving body instead of a UI pinned over a scrolling backdrop.
+  ship.visualOffsetX = approach(
+    ship.visualOffsetX,
+    screenVelocityX * 4.2,
+    visualResponse,
+  );
+  ship.visualOffsetY = approach(
+    ship.visualOffsetY,
+    screenVelocityY * 4.2,
+    visualResponse,
+  );
+  ship.visualBank = approach(
+    ship.visualBank,
+    turn * 0.018,
+    visualResponse,
+  );
 
-  if (vy === 0 && vx === 0) return undefined;
-  return Math.atan2(vy, vx);
+  for (const layer of [buildingsLayer, workersLayer]) {
+    layer.pivot.set(VIEWPORT_CENTER, VIEWPORT_CENTER);
+    layer.position.set(
+      VIEWPORT_CENTER + ship.visualOffsetX,
+      VIEWPORT_CENTER + ship.visualOffsetY,
+    );
+    layer.rotation = ship.visualBank;
+    layer.scale.set(ship.scale);
+  }
+
+  const speed = Math.hypot(ship.velocityX, ship.velocityY);
+  const movementAngle =
+    speed > 0.06
+      ? Math.atan2(screenVelocityY, screenVelocityX)
+      : undefined;
+
+  return {
+    movementAngle,
+    speed,
+    speedRatio: Math.min(speed / MAX_FORWARD_SPEED, 1),
+    thrust,
+    turn,
+  };
 }

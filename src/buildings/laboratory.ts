@@ -21,7 +21,7 @@ export class Laboratory extends Building {
     super(x, y, 4, "Laboratory");
     this.draw();
     this.craft = {
-      ingridients: [
+      ingredients: [
         { resourceName: "Iron", count: 1 },
         { resourceName: "Perl", count: 2 },
       ],

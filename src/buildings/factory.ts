@@ -19,7 +19,7 @@ export class Factory extends Building {
     super(x, y, 5, "Factory");
     this.draw();
     this.craft = {
-      ingridients: [],
+      ingredients: [],
       result: "Perl",
     };
     this.priorityForTasks = 5;

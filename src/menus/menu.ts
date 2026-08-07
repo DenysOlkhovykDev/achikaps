@@ -1,11 +1,15 @@
-import { buildingMap, buidingParameters } from "@buildings/_buildings";
+import {
+  buildingMap,
+  buildingParameters,
+  BuildingType,
+} from "@buildings/_buildings";
 import { Container, Graphics, Text } from "pixi.js";
-import { Platform } from "@buildings/platform";
 import { Building } from "@buildings/building";
 import { createResource } from "@resources/_resources";
+import { deleteTasksForTarget } from "@dashboard/_dashboard";
 
 export interface MenuItem {
-  label: string;
+  label: BuildingType;
   color: string;
   onClick?: () => void;
 }
@@ -13,11 +17,11 @@ export interface MenuItem {
 export class Menu {
   container = new Container();
 
-  private columns = 3;
-  private gap = 10;
+  private columns = 5;
+  private gap = 8;
 
-  private width = 120;
-  private height = 120;
+  private width = 112;
+  private height = 104;
 
   private x = 500;
   private y = 980;
@@ -37,7 +41,7 @@ export class Menu {
     const totalHeight = rows * this.height + (rows - 1) * this.gap;
 
     this.container.x = this.x - totalWidth / 2;
-    this.container.y = this.y - totalHeight;
+    this.container.y = this.y - totalHeight - 35;
   }
 
   private drawBackground() {
@@ -79,25 +83,30 @@ export class Menu {
       text: item.label,
       style: {
         fill: "#000000",
-        fontSize: 20,
+        fontSize: item.label.length > 9 ? 10 : 14,
+        fontWeight: "600",
       },
     });
 
     text.anchor.set(0.5);
 
-    text.x = xOffset + this.width / 2;
-    text.y = yOffset + 18;
+    text.x = xOffset + this.width / 2 - 5;
+    text.y = yOffset + 13;
 
     text.eventMode = "none";
     this.container.addChild(text);
 
-    const BuildingClass = buildingMap[item.label] || Platform;
+    const BuildingClass = buildingMap[item.label];
     const building = new BuildingClass(
       xOffset + this.width / 2,
-      yOffset + this.height / 2,
+      yOffset + this.height / 2 + 3,
     );
 
-    building.root.scale = 0.5;
+    // Preview constructors draw the real building, but their production tasks
+    // must never leak into the live dashboard.
+    deleteTasksForTarget(building);
+
+    building.root.scale = 0.4;
 
     this.drawBuildingRecipe(building, xOffset, yOffset);
     this.drawCrafRecipe(building, xOffset, yOffset);
@@ -123,9 +132,7 @@ export class Menu {
   }
 
   private drawBuildingRecipe(building: Building, x: number, y: number) {
-    const buildingRecipe =
-      buidingParameters[building.buildingType as keyof typeof buidingParameters]
-        .craft;
+    const buildingRecipe = buildingParameters[building.buildingType].craft;
 
     const buildingRecipeImage = new Container();
 

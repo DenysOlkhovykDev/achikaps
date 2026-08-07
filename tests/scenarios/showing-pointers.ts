@@ -48,13 +48,8 @@ export const showingPointers: Scenario = {
 
   messages: [
     {
-      condition: () => {
-        if (
-          getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 5000
-        ) {
-          return true;
-        }
-      },
+      condition: () =>
+        getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 5000,
       x: 420,
       y: 500,
       text: "You win",

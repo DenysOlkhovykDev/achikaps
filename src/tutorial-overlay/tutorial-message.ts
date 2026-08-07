@@ -1,7 +1,8 @@
 import { Graphics, Container, Text, TextStyle } from "pixi.js";
+import { TutorialCondition } from "./tutorial-pointer";
 
 export type Message = {
-  condition: Function;
+  condition: TutorialCondition;
 
   x: number;
   y: number;
@@ -12,11 +13,18 @@ export type Message = {
 
 export class TutorialMessage extends Container {
   private graphics = new Graphics();
+  private textObject = new Text({
+    text: "",
+    style: new TextStyle({
+      fill: "#ffffff",
+      fontSize: 24,
+    }),
+  });
 
   constructor() {
     super();
 
-    this.addChild(this.graphics);
+    this.addChild(this.graphics, this.textObject);
 
     this.eventMode = "none";
   }
@@ -41,16 +49,8 @@ export class TutorialMessage extends Container {
       alpha: 0.5,
     });
 
-    const textObject = new Text({
-      text: text,
-      style: new TextStyle({
-        fill: "#ffffff",
-        fontSize: fontSize,
-      }),
-    });
-
-    this.addChild(textObject);
-
-    textObject.position.set(x, y);
+    this.textObject.text = text;
+    this.textObject.style.fontSize = fontSize ?? 24;
+    this.textObject.position.set(x, y);
   }
 }

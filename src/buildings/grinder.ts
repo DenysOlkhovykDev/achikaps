@@ -18,7 +18,7 @@ export class Grinder extends Building {
     super(x, y, 4, "Grinder");
     this.draw();
     this.craft = {
-      ingridients: [
+      ingredients: [
         { resourceName: "Perl", count: 1 },
         { resourceName: "Meat", count: 2 },
       ],

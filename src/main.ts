@@ -5,17 +5,20 @@ import {
   getBuildingType,
   setBuildingType,
 } from "@menus/build-menu";
-import { moveWorkers } from "@workers/_workers";
+import { moveWorkers, workers } from "@workers/_workers";
 import {
   addBuilding,
   addBlueprint,
   animations,
   movingBlueprints,
   hideCrafts,
+  buildings,
+  blueprints,
 } from "@buildings/_buildings";
-import { createTestBulding } from "./test-poligons/test-buildings";
-import { createTestWorld } from "@test-poligons/test-world";
+import { createTestBuildings } from "./test-poligons/test-buildings";
+import { createWorld } from "@test-poligons/test-world";
 import { moveWorld } from "./moving/moving";
+import { MotionEffects } from "./moving/motion-effects";
 import { Joystick } from "./joystick/joystick";
 import { Tutorials } from "./tutorial-overlay/_tutorials";
 
@@ -29,7 +32,9 @@ await app.init({
   antialias: false,
 });
 
-(window as any).app = app;
+window.app = app;
+app.canvas.setAttribute("aria-label", "Achikaps game world");
+app.canvas.setAttribute("role", "img");
 document.body.appendChild(app.canvas);
 app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
@@ -37,6 +42,8 @@ app.stage.hitArea = app.screen;
 const isTest = import.meta.env.MODE === "test";
 
 if (isTest) {
+  document.body.classList.add("test-mode");
+
   let seed = 123;
 
   Math.random = () => {
@@ -55,10 +62,21 @@ window.addEventListener("keyup", (e) => {
   keys.delete(e.key.toLowerCase());
 });
 
+window.addEventListener("blur", () => {
+  keys.clear();
+});
+
 app.stage.on("pointerdown", (event) => {
-  const { x, y } = event.global;
-  if (getIsBuildMode() && getBuildingType() !== "") {
-    addBlueprint(x, y, buildingsLayer, getBuildingType());
+  const buildingType = getBuildingType();
+
+  if (getIsBuildMode() && buildingType !== "") {
+    const worldPosition = buildingsLayer.toLocal(event.global);
+    addBlueprint(
+      worldPosition.x,
+      worldPosition.y,
+      buildingsLayer,
+      buildingType,
+    );
     setBuildingType("");
   }
   setIsBuildMode(false);
@@ -67,11 +85,19 @@ app.stage.on("pointerdown", (event) => {
 });
 
 const tutorials = new Tutorials();
-const buildingsLayer = new Container();
+export const worldLayer = new Container();
+const distantWorldLayer = new Container();
+export const buildingsLayer = new Container();
 const workersLayer = new Container();
 const UIcontainer = new Container();
+const worldScenery = createWorld(distantWorldLayer, worldLayer);
+const motionEffects = new MotionEffects();
 
-createTestBulding(
+app.stage.addChild(distantWorldLayer);
+app.stage.addChild(worldLayer);
+app.stage.addChild(motionEffects);
+
+createTestBuildings(
   buildingsLayer,
   workersLayer,
   tutorials,
@@ -79,8 +105,9 @@ createTestBulding(
   app.stage,
 );
 
-export const worldLayer = new Container();
-createTestWorld(worldLayer, app.stage);
+if (isTest) {
+  window.gameDebug = { buildings, blueprints, workers };
+}
 
 const joystick = new Joystick();
 
@@ -101,20 +128,29 @@ tutorials.init(app.stage);
 
 app.ticker.add((delta) => {
   const deltaTime = isTest ? 1 : delta.deltaTime;
+  const keyboardX =
+    Number(keys.has("d") || keys.has("arrowright")) -
+    Number(keys.has("a") || keys.has("arrowleft"));
+  const keyboardY =
+    Number(keys.has("s") || keys.has("arrowdown")) -
+    Number(keys.has("w") || keys.has("arrowup"));
 
-  const angle = moveWorld(
+  const motion = moveWorld(
     deltaTime,
     worldLayer,
+    distantWorldLayer,
     buildingsLayer,
     workersLayer,
-    joystick.inputX,
-    joystick.inputY,
+    joystick.inputX || keyboardX,
+    joystick.inputY || keyboardY,
   );
 
   moveWorkers(deltaTime);
 
   if (!isTest) {
-    animations(deltaTime, angle);
+    animations(deltaTime, motion.movementAngle);
+    motionEffects.update(deltaTime, motion);
+    worldScenery.update(deltaTime);
   }
 
   movingBlueprints(deltaTime);

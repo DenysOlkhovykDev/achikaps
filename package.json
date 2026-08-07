@@ -1,13 +1,15 @@
 {
   "name": "achikaps",
   "version": "1.0.0",
-  "description": "",
+  "description": "A PixiJS resource-management game prototype inspired by Achikaps",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
     "dev:test": "vite --mode test",
     "test": "playwright test",
+    "typecheck": "tsc --noEmit",
     "build": "vite build",
+    "check": "npm run typecheck && npm run build",
     "build:gh-pages": "vite build --mode gh-pages",
     "deploy": "npm run build:gh-pages && gh-pages -d dist"
 },

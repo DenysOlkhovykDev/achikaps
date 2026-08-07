@@ -12,12 +12,12 @@ type Particle = {
   delay: number;
 };
 
-export class Junkuard extends Building {
+export class Junkyard extends Building {
   particles: Particle[] = [];
   amountOfParticles: number = 4;
 
   constructor(x: number, y: number) {
-    super(x, y, 20, "Junkuard");
+    super(x, y, 20, "Junkyard");
     this.draw();
   }
 
@@ -26,7 +26,7 @@ export class Junkuard extends Building {
 
     this.createBaseTexture();
 
-    const base = new Sprite(Junkuard.baseTexture);
+    const base = new Sprite(Junkyard.baseTexture);
     base.anchor.set(0.5);
     this.contentContainer.addChild(base);
 
@@ -34,13 +34,13 @@ export class Junkuard extends Building {
   }
 
   private createBaseTexture() {
-    if (Junkuard.baseTexture) return;
+    if (Junkyard.baseTexture) return;
 
     const baseGraphics = new Graphics();
 
     makeBasicCircle(baseGraphics, this.baseSize, "#cac8a5", true);
 
-    Junkuard.baseTexture = app.renderer.generateTexture({
+    Junkyard.baseTexture = app.renderer.generateTexture({
       target: baseGraphics,
     });
   }

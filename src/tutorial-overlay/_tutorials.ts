@@ -1,7 +1,12 @@
 import { Container } from "pixi.js";
-import { TutorialPointer, Pointer } from "./tutorial-pointer";
+import {
+  TutorialPointer,
+  Pointer,
+  TutorialCondition,
+  TutorialTargetFinder,
+} from "./tutorial-pointer";
 import { Compass, TutorialCompass } from "./tutorial-compass";
-import { worldLayer } from "../main";
+import { buildingsLayer, worldLayer } from "../main";
 import { Message, TutorialMessage } from "./tutorial-message";
 
 export class Tutorials {
@@ -19,7 +24,11 @@ export class Tutorials {
     stage.addChild(this.messagesOverlay);
   }
 
-  public addNewPointerByCoordinates(condition: Function, x: number, y: number) {
+  public addNewPointerByCoordinates(
+    condition: TutorialCondition,
+    x: number,
+    y: number,
+  ) {
     this.pointers.push({
       condition,
       debounce: 0,
@@ -29,7 +38,10 @@ export class Tutorials {
     });
   }
 
-  public addNewPointerByTarget(condition: Function, findTarget: Function) {
+  public addNewPointerByTarget(
+    condition: TutorialCondition,
+    findTarget: TutorialTargetFinder,
+  ) {
     this.pointers.push({
       condition,
       debounce: 0,
@@ -38,7 +50,10 @@ export class Tutorials {
     });
   }
 
-  public addNewCompass(condition: Function, findTarget: Function) {
+  public addNewCompass(
+    condition: TutorialCondition,
+    findTarget: TutorialTargetFinder,
+  ) {
     this.compasses.push({
       condition,
       findTarget,
@@ -46,7 +61,7 @@ export class Tutorials {
   }
 
   public addNewMessage(
-    condition: Function,
+    condition: TutorialCondition,
     x: number,
     y: number,
     text: string,
@@ -104,7 +119,10 @@ export class Tutorials {
       }
 
       pointer.timeout++;
-      this.tutorialOverlay.update(x, y);
+      const position = pointer.findTarget
+        ? buildingsLayer.toGlobal({ x, y })
+        : { x, y };
+      this.tutorialOverlay.update(position.x, position.y);
     }
   }
 

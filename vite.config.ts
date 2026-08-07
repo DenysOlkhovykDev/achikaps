@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
       "@roads": path.resolve(__dirname, "src/roads"),
       "@utils": path.resolve(__dirname, "src/utils"),
       "@test-poligons": path.resolve(__dirname, "src/test-poligons"),
+      "@combat": path.resolve(__dirname, "src/combat"),
     },
   },
 }));

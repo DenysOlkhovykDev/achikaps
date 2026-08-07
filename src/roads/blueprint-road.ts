@@ -25,10 +25,14 @@ export class BlueprintRoad {
     const dy = to.y - from.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
+    if (distance === 0) {
+      return;
+    }
+
     const dirX = dx / distance;
     const dirY = dy / distance;
 
-    const effectiveDistance = distance - to.baseSize;
+    const effectiveDistance = Math.max(distance - to.baseSize, 0);
 
     const step = dash + gap;
     const count = Math.floor(effectiveDistance / step) + 1;

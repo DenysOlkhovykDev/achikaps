@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    "skipLibCheck": true,
     "types": ["node"],
     "paths": {
       "@buildings/*": ["./src/buildings/*"],
@@ -14,6 +15,7 @@
       "@roads/*": ["./src/roads/*"],
       "@utils/*": ["./src/utils/*"],
       "@test-poligons/*": ["./src/test-poligons/*"],
+      "@combat/*": ["./src/combat/*"],
     }
   }
 }

@@ -23,6 +23,14 @@ import { Tutorials } from "../tutorial-overlay/_tutorials";
 import { worldLayer } from "../main";
 import { getDistance } from "@utils/basic-geometry";
 import { createResource } from "@resources/_resources";
+import {
+  TutorialCondition,
+  TutorialTargetFinder,
+} from "../tutorial-overlay/tutorial-pointer";
+import { WorkerProfession } from "@workers/worker";
+import { ResourceType } from "@resources/resource-types";
+import { BuildingType } from "@buildings/_buildings";
+import { CombatTeam } from "@combat/combat";
 
 import { autoConstructionOfBuildings } from "../../tests/scenarios/auto-construction-of-buildings";
 import { collisionBlueprints } from "../../tests/scenarios/collision-blueprints";
@@ -35,6 +43,8 @@ import { multipleConstructionOfDifferentBuildings } from "../../tests/scenarios/
 import { productionResources } from "../../tests/scenarios/production-resources";
 import { sceneRender } from "../../tests/scenarios/scene-render";
 import { showingPointers } from "../../tests/scenarios/showing-pointers";
+import { newContentShowcase } from "../../tests/scenarios/new-content-showcase";
+import { laboratoryConstruction } from "../../tests/scenarios/laboratory-construction";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -45,26 +55,27 @@ export type Scenario = {
   buildings: {
     from: string;
     id: string;
-    type: string;
+    type: BuildingType;
     x: number;
     y: number;
+    team?: CombatTeam;
   }[];
 
   resources?: {
     buildingId: string;
-    type: string;
+    type: ResourceType;
     count: number;
   }[];
 
   workers?: {
     buildingId: string;
-    profession: string;
+    profession: WorkerProfession;
   }[];
 
   deliveryTasks?: {
     target: string;
     priority: number;
-    resource: string;
+    resource: ResourceType;
     count: number;
   }[];
 
@@ -72,23 +83,23 @@ export type Scenario = {
     from: string;
     x: number;
     y: number;
-    buildingType: string;
+    buildingType: BuildingType;
   }[];
 
   pointers?: {
-    condition: Function;
+    condition: TutorialCondition;
     x?: number;
     y?: number;
-    findTarget?: Function;
+    findTarget?: TutorialTargetFinder;
   }[];
 
   compasses?: {
-    condition: Function;
-    findTarget?: Function;
+    condition: TutorialCondition;
+    findTarget?: TutorialTargetFinder;
   }[];
 
   messages?: {
-    condition: Function;
+    condition: TutorialCondition;
     x: number;
     y: number;
     text: string;
@@ -214,13 +225,8 @@ const scenarios: Record<string, Scenario> = {
 
     messages: [
       {
-        condition: () => {
-          if (
-            getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 50
-          ) {
-            return true;
-          }
-        },
+        condition: () =>
+          getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 50,
         x: 420,
         y: 500,
         text: "You win",
@@ -240,9 +246,11 @@ const scenarios: Record<string, Scenario> = {
   "showing-pointers": showingPointers,
   "production-resources": productionResources,
   "scene-render": sceneRender,
+  "new-content-showcase": newContentShowcase,
+  "laboratory-construction": laboratoryConstruction,
 };
 
-export function createTestBulding(
+export function createTestBuildings(
   buildingsLayer: Container,
   workersLayer: Container,
   tutorials: Tutorials,
@@ -284,6 +292,9 @@ function runScenario(
         building.type,
       );
       buildingsMap.set(building.id, newBuilding);
+      if (building.team) {
+        newBuilding.team = building.team;
+      }
     } else {
       select(buildingsMap.get(building.from));
       const newBuilding = addBuilding(
@@ -293,6 +304,9 @@ function runScenario(
         building.type,
       );
       buildingsMap.set(building.id, newBuilding);
+      if (building.team) {
+        newBuilding.team = building.team;
+      }
     }
   }
 

@@ -27,7 +27,7 @@ export class Farm extends Building {
     super(x, y, 5, "Farm");
     this.draw();
     this.craft = {
-      ingridients: [],
+      ingredients: [],
       result: "Meat",
     };
     this.priorityForTasks = 5;
