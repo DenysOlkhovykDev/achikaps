@@ -8,11 +8,12 @@ import {
 } from "@buildings/_buildings";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
-import { addTask } from "@dashboard/_dashboard";
+import { addTask, deleteTasksForTarget } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
 import { setIsBuildMode } from "@menus/build-menu";
 import { makeRoundShadow } from "@utils/basic-graphic";
 import { ResourceType } from "@resources/resource-types";
+import { CombatTarget, CombatTeam } from "@combat/combat";
 
 type ResourceListener = (task: Task) => void;
 
@@ -21,7 +22,7 @@ type Craft = {
   result: ResourceType;
 };
 
-export abstract class Building {
+export abstract class Building implements CombatTarget {
   root: Container = new Container();
 
   shadowContainer: Container = new Container();
@@ -34,6 +35,7 @@ export abstract class Building {
 
   craftSign: Container = new Container();
   craftSignElements: Container[] = [];
+  healthBar = new Graphics();
 
   baseSize: number = 0;
 
@@ -43,6 +45,10 @@ export abstract class Building {
   resources: Resource[] = [];
 
   priorityForTasks: number = -1;
+
+  maxHealth = 100;
+  health = this.maxHealth;
+  team: CombatTeam = "player";
 
   craft: Craft | undefined;
   craftGraphicAlpha: number = 0.45;
@@ -66,6 +72,7 @@ export abstract class Building {
     this.root.addChild(this.contentContainer);
     this.root.addChild(this.resourceContainer);
     this.root.addChild(this.craftSign);
+    this.root.addChild(this.healthBar);
 
     this.baseSize = buildingParameters[this.buildingType].baseSize;
   }
@@ -80,6 +87,41 @@ export abstract class Building {
   protected abstract draw(): void;
 
   public abstract animation(delta: number, movingAngle?: number): void;
+
+  get isAlive() {
+    return this.health > 0;
+  }
+
+  takeDamage(amount: number) {
+    if (!this.isAlive || amount <= 0) return;
+
+    this.health = Math.max(0, this.health - amount);
+    this.root.alpha = this.health === 0
+      ? 0.22
+      : 0.65 + (this.health / this.maxHealth) * 0.35;
+    this.drawHealthBar();
+
+    if (!this.isAlive) {
+      this.root.eventMode = "none";
+      deleteTasksForTarget(this);
+    }
+  }
+
+  private drawHealthBar() {
+    this.healthBar.clear();
+    if (this.health >= this.maxHealth) return;
+
+    const width = Math.max(42, this.baseSize * 1.25);
+    const ratio = this.health / this.maxHealth;
+    const color = ratio > 0.55 ? "#49bd68" : ratio > 0.25 ? "#efad43" : "#dd5656";
+    const y = -this.baseSize - 18;
+
+    this.healthBar
+      .roundRect(-width / 2, y, width, 7, 3)
+      .fill({ color: "#17201e", alpha: 0.7 })
+      .roundRect(-width / 2 + 1, y + 1, (width - 2) * ratio, 5, 2)
+      .fill(color);
+  }
 
   protected generateProductionTask() {
     if (this.checkIsEnoughResourceswForCraft()) {
@@ -126,6 +168,8 @@ export abstract class Building {
   }
 
   public tryToDoProduction(): boolean {
+    if (!this.isAlive) return false;
+
     if (this.craft) {
       if (this.checkIsEnoughResourceswForCraft()) {
         for (let i = 0; i < this.craft.ingredients.length; i++) {
@@ -222,6 +266,7 @@ export abstract class Building {
   }
 
   tryToAddResource(resource: Resource, task?: Task) {
+    if (!this.isAlive) return false;
     if (this.resources.length >= this.inventorySize) return false;
 
     this.resources.push(resource);

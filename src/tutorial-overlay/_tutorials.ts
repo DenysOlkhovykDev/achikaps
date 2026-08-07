@@ -6,7 +6,7 @@ import {
   TutorialTargetFinder,
 } from "./tutorial-pointer";
 import { Compass, TutorialCompass } from "./tutorial-compass";
-import { worldLayer } from "../main";
+import { buildingsLayer, worldLayer } from "../main";
 import { Message, TutorialMessage } from "./tutorial-message";
 
 export class Tutorials {
@@ -119,7 +119,10 @@ export class Tutorials {
       }
 
       pointer.timeout++;
-      this.tutorialOverlay.update(x, y);
+      const position = pointer.findTarget
+        ? buildingsLayer.toGlobal({ x, y })
+        : { x, y };
+      this.tutorialOverlay.update(position.x, position.y);
     }
   }
 

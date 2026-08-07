@@ -16,8 +16,20 @@ import { Laboratory } from "@buildings/laboratory";
 import { Smelter } from "@buildings/smelter";
 import { Engine } from "@buildings/engine";
 import { Windmill } from "@buildings/windmill";
+import { Recycler } from "@buildings/recycler";
+import { Glassworks } from "@buildings/glassworks";
+import { Workshop } from "@buildings/workshop";
+import { ArmorPress } from "@buildings/armor-press";
+import { Forge } from "@buildings/forge";
+import { Collector } from "@buildings/assembler";
+import { Loom } from "@buildings/loom";
+import { Cannon } from "@buildings/cannon";
+import { MachineGun } from "@buildings/machine-gun";
+import { Saw } from "@buildings/saw";
+import { Manipulator } from "@buildings/manipulator";
 import { Blueprint } from "@buildings/blueprint";
 import { ResourceType } from "@resources/resource-types";
+import { registerCombatTarget } from "@combat/combat";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
 type BuildingParameters = {
@@ -39,6 +51,17 @@ export const buildingMap = {
   Smelter,
   Engine,
   Windmill,
+  Recycler,
+  Glassworks,
+  Workshop,
+  ArmorPress,
+  Forge,
+  Collector,
+  Loom,
+  Cannon,
+  MachineGun,
+  Saw,
+  Manipulator,
 } satisfies Record<string, BuildingConstructor>;
 
 export type BuildingType = keyof typeof buildingMap;
@@ -144,6 +167,109 @@ export const buildingParameters = {
       { type: "Perl", amount: 1 },
     ],
   },
+  Recycler: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 3 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Glassworks: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Workshop: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  ArmorPress: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 3 },
+      { type: "Perl", amount: 1 },
+    ],
+  },
+  Forge: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 4 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Collector: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 3 },
+    ],
+  },
+  Loom: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Iron", amount: 2 },
+      { type: "Perl", amount: 2 },
+    ],
+  },
+  Cannon: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 3 },
+      { type: "ArmorPlate", amount: 2 },
+      { type: "Joint", amount: 2 },
+    ],
+  },
+  MachineGun: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 2 },
+      { type: "PlasticBar", amount: 2 },
+      { type: "Joint", amount: 2 },
+    ],
+  },
+  Saw: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 2 },
+      { type: "Joint", amount: 2 },
+      { type: "Fabric", amount: 1 },
+    ],
+  },
+  Manipulator: {
+    baseSize: 40,
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [
+      { type: "Steel", amount: 1 },
+      { type: "Joint", amount: 2 },
+      { type: "Gear", amount: 1 },
+    ],
+  },
 } satisfies Record<string, BuildingParameters>;
 
 export type BuildingKind = keyof typeof buildingParameters;
@@ -162,6 +288,7 @@ export function addBuilding(
   const building = new BuildingClass(x, y);
 
   buildings.push(building);
+  registerCombatTarget(building);
   container.addChild(building.root);
 
   if (buildings.length > 1) {
@@ -262,7 +389,9 @@ export function hideCrafts() {
 
 export function animations(delta: number, movingAngle?: number) {
   for (const building of buildings) {
-    building.animation(delta, movingAngle);
+    if (building.isAlive) {
+      building.animation(delta, movingAngle);
+    }
   }
 }
 

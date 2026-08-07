@@ -15,6 +15,7 @@
       "@roads/*": ["./src/roads/*"],
       "@utils/*": ["./src/utils/*"],
       "@test-poligons/*": ["./src/test-poligons/*"],
+      "@combat/*": ["./src/combat/*"],
     }
   }
 }

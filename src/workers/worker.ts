@@ -23,8 +23,12 @@ export type WorkerProfession =
   | typeof JobType.production;
 
 export class Worker {
+  private static nextId = 0;
+
+  private readonly workerId = Worker.nextId++;
   root: Container = new Container();
   graphic: Graphics;
+  activityGraphic: Graphics = new Graphics();
 
   health: number = 100;
   speed: number = 2;
@@ -45,6 +49,7 @@ export class Worker {
   legCoordinates: Leg[] = [];
   legs: Graphics[] = [];
   stepPhase = 0;
+  activityPhase = 0;
   isMoving = false;
 
   constructor(
@@ -57,7 +62,11 @@ export class Worker {
     this.draw();
     this.initEvents();
 
-    this.root.addChild(this.graphic);
+    const parkingPosition = this.getPlatformPosition(this.currentPlatform);
+    this.x = parkingPosition.x;
+    this.y = parkingPosition.y;
+
+    this.root.addChild(this.graphic, this.activityGraphic);
     this.root.position.set(this.x, this.y);
   }
 
@@ -91,7 +100,47 @@ export class Worker {
 
     this.graphic.position.set(0, 0);
 
+    this.drawActivityGraphic();
     this.root.addChild(...this.legs);
+  }
+
+  private drawActivityGraphic() {
+    this.activityGraphic.clear();
+
+    if (this.profession === "building") {
+      this.activityGraphic
+        .moveTo(9, 1)
+        .lineTo(19, -10)
+        .stroke({ width: 3, color: "#855c3b", cap: "round" })
+        .roundRect(15, -15, 10, 6, 2)
+        .fill("#127ce1")
+        .stroke({ width: 2, color: "#000000" });
+    } else if (this.profession === "delivering") {
+      this.activityGraphic
+        .roundRect(10, -11, 13, 17, 2)
+        .fill("#f4e884")
+        .stroke({ width: 2, color: "#000000" })
+        .moveTo(13, -6)
+        .lineTo(20, -6)
+        .moveTo(13, -2)
+        .lineTo(19, -2)
+        .stroke({ width: 1.5, color: "#746c2d" });
+    } else {
+      this.activityGraphic
+        .circle(16, -4, 7)
+        .stroke({ width: 3, color: "#2ccb1a" })
+        .circle(16, -4, 2)
+        .fill("#2ccb1a")
+        .moveTo(16, -11)
+        .lineTo(16, -16)
+        .moveTo(23, -4)
+        .lineTo(28, -4)
+        .moveTo(16, 3)
+        .lineTo(16, 8)
+        .stroke({ width: 2, color: "#000000", cap: "round" });
+    }
+
+    this.activityGraphic.alpha = 0.72;
   }
 
   protected initEvents() {
@@ -99,7 +148,14 @@ export class Worker {
   }
 
   public moveWorker(delta: number) {
+    this.animateActivity(delta);
+
     if (!this.targetPlatform) {
+      if (this.path.length > 0) {
+        this.targetPlatform = this.path.shift();
+        return;
+      }
+
       if (this.inventory) {
         this.handleResourceLogic();
         return;
@@ -109,9 +165,6 @@ export class Worker {
         this.pickTask();
       }
 
-      if (this.path.length > 0) {
-        this.targetPlatform = this.path.shift();
-      }
       return;
     }
     if (this.targetPlatform) {
@@ -122,38 +175,88 @@ export class Worker {
     }
     this.legAnimation(delta);
 
-    if (isTest) {
-      this.x = this.targetPlatform.x;
-      this.y = this.targetPlatform.y;
-      this.onReachPlatform();
-    } else {
-      const dx = this.targetPlatform.x - this.x;
-      const dy = this.targetPlatform.y - this.y;
+    const target = this.getCurrentTargetPosition();
+    const dx = target.x - this.x;
+    const dy = target.y - this.y;
+    const distance = Math.hypot(dx, dy);
 
-      const angle = Math.atan2(dy, dx);
-      this.root.rotation = angle + Math.PI / 2;
-
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance === 0) return;
-
-      if (distance < 3) {
-        this.onReachPlatform();
-        if (!this.task) {
-          this.setLegsIdlePose(false);
-        }
-        this.isMoving = false;
-        this.drawLegs();
-        return;
-      }
-
-      const vx = dx / distance;
-      const vy = dy / distance;
-
-      this.x += vx * this.speed * delta;
-      this.y += vy * this.speed * delta;
+    if (isTest || distance <= this.speed * delta + 0.5) {
+      this.x = target.x;
+      this.y = target.y;
+      this.finishCurrentMovement();
+      this.root.position.set(this.x, this.y);
+      return;
     }
 
+    if (distance === 0) return;
+
+    const angle = Math.atan2(dy, dx);
+    this.root.rotation = angle + Math.PI / 2;
+
+    const travelDistance = Math.min(this.speed * delta, distance);
+    this.x += (dx / distance) * travelDistance;
+    this.y += (dy / distance) * travelDistance;
+
     this.root.position.set(this.x, this.y);
+  }
+
+  private getCurrentTargetPosition() {
+    if (!this.targetPlatform) {
+      return { x: this.x, y: this.y };
+    }
+
+    if (this.path.length === 0) {
+      return this.getPlatformPosition(this.targetPlatform);
+    }
+
+    return { x: this.targetPlatform.x, y: this.targetPlatform.y };
+  }
+
+  private getPlatformPosition(platform: Building) {
+    const angle = this.workerId * 2.399963229728653;
+    const ring = this.workerId % 7 === 6 ? 0.72 : 0.44;
+    const radius = Math.max(12, Math.min(platform.baseSize * ring, 30));
+
+    return {
+      x: platform.x + Math.cos(angle) * radius,
+      y: platform.y + Math.sin(angle) * radius,
+    };
+  }
+
+  private finishCurrentMovement() {
+    this.onReachPlatform();
+
+    if (this.targetPlatform) return;
+
+    this.isMoving = false;
+    this.root.rotation = 0;
+    this.setLegsIdlePose(false);
+    this.drawLegs();
+  }
+
+  private animateActivity(delta: number) {
+    this.activityPhase += delta * (this.isWorking ? 0.2 : 0.08);
+    const movementBob = this.isMoving
+      ? Math.sin(this.activityPhase * 2.2) * 1.7
+      : Math.sin(this.activityPhase) * 0.8;
+
+    this.graphic.y = movementBob;
+
+    if (this.profession === "building") {
+      const swing = this.isMoving ? 0.12 : 0.35;
+      this.activityGraphic.rotation =
+        -0.18 + Math.sin(this.activityPhase * 2) * swing;
+      this.activityGraphic.y = movementBob;
+    } else if (this.profession === "delivering") {
+      this.activityGraphic.rotation =
+        Math.sin(this.activityPhase * 1.5) * (this.isMoving ? 0.1 : 0.035);
+      this.activityGraphic.y = movementBob + Math.sin(this.activityPhase) * 1.5;
+    } else {
+      this.activityGraphic.rotation +=
+        delta * (this.isWorking ? 0.12 : this.isMoving ? 0.03 : 0.015);
+      this.activityGraphic.y = movementBob;
+      this.activityGraphic.alpha = this.isWorking ? 1 : 0.68;
+    }
   }
 
   private legAnimation(delta: number) {
@@ -251,12 +354,11 @@ export class Worker {
 
     this.path = path;
     this.reservedResource = reservedResource;
+    this.path.shift();
 
-    if (path.length === 1) {
+    if (this.path.length === 0) {
       this.handleResourceLogic();
     }
-
-    this.path.shift();
   }
 
   private onReachPlatform() {
@@ -310,6 +412,7 @@ export class Worker {
 
       if (this.task) {
         this.path = this.task.getRouteForTarget(this.currentPlatform);
+        this.path.shift();
       }
 
       return;

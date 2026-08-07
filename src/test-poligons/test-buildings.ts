@@ -30,6 +30,7 @@ import {
 import { WorkerProfession } from "@workers/worker";
 import { ResourceType } from "@resources/resource-types";
 import { BuildingType } from "@buildings/_buildings";
+import { CombatTeam } from "@combat/combat";
 
 import { autoConstructionOfBuildings } from "../../tests/scenarios/auto-construction-of-buildings";
 import { collisionBlueprints } from "../../tests/scenarios/collision-blueprints";
@@ -42,6 +43,8 @@ import { multipleConstructionOfDifferentBuildings } from "../../tests/scenarios/
 import { productionResources } from "../../tests/scenarios/production-resources";
 import { sceneRender } from "../../tests/scenarios/scene-render";
 import { showingPointers } from "../../tests/scenarios/showing-pointers";
+import { newContentShowcase } from "../../tests/scenarios/new-content-showcase";
+import { laboratoryConstruction } from "../../tests/scenarios/laboratory-construction";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -55,6 +58,7 @@ export type Scenario = {
     type: BuildingType;
     x: number;
     y: number;
+    team?: CombatTeam;
   }[];
 
   resources?: {
@@ -112,7 +116,6 @@ const scenarios: Record<string, Scenario> = {
       { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
       { from: "p0", id: "p1", type: "Platform", x: 500, y: 500 },
       { from: "p1", id: "p2", type: "Platform", x: 500, y: 600 },
-      { from: "p1", id: "windmill", type: "Windmill", x: 650, y: 500 },
     ],
     workers: [
       { buildingId: "p0", profession: "building" },
@@ -243,6 +246,8 @@ const scenarios: Record<string, Scenario> = {
   "showing-pointers": showingPointers,
   "production-resources": productionResources,
   "scene-render": sceneRender,
+  "new-content-showcase": newContentShowcase,
+  "laboratory-construction": laboratoryConstruction,
 };
 
 export function createTestBuildings(
@@ -287,6 +292,9 @@ function runScenario(
         building.type,
       );
       buildingsMap.set(building.id, newBuilding);
+      if (building.team) {
+        newBuilding.team = building.team;
+      }
     } else {
       select(buildingsMap.get(building.from));
       const newBuilding = addBuilding(
@@ -296,6 +304,9 @@ function runScenario(
         building.type,
       );
       buildingsMap.set(building.id, newBuilding);
+      if (building.team) {
+        newBuilding.team = building.team;
+      }
     }
   }
 

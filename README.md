@@ -13,8 +13,18 @@ and use it to explore the world.
   through the road network.
 - Windmills generate Batteries, one of the components required to construct an
   Engine.
+- Recyclers turn surplus Trusses back into Iron.
+- Glassworks, Workshop, Armor Press, Forge, Collector, and Loom extend the
+  production chain with six advanced materials.
+- Cannons, Machine Guns, and Saws automatically acquire hostile targets and
+  deal damage at different ranges and rates of fire.
+- Manipulators automatically satisfy nearby resource requests without using a
+  delivery worker.
 - Select an Engine to reveal the on-screen joystick. You can also steer with
-  `WASD` or the arrow keys.
+  `WASD` or the arrow keys. Movement has acceleration, coasting, banking, and
+  parallax feedback rather than an instant start/stop.
+- Explore a generated archipelago and follow the compass to the destination
+  beacon.
 
 ## Local development
 
@@ -49,6 +59,7 @@ npx playwright install chromium
 - `src/resources` — resource models and visuals.
 - `src/workers` — worker movement and job execution.
 - `src/dashboard` — task scheduling and route selection.
+- `src/combat` — combat targets, weapon targeting, projectiles, and damage.
 - `src/tutorial-overlay` — pointers, compass, and messages.
 - `tests/scenarios` — deterministic visual gameplay scenarios.
 

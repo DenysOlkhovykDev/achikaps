@@ -51,6 +51,20 @@ export function deleteTask(task: Task) {
   }
 }
 
+export function deleteTasksForTarget(target: Building) {
+  for (let i = dashboard.length - 1; i >= 0; i--) {
+    if (dashboard[i].target === target) {
+      dashboard.splice(i, 1);
+    }
+  }
+}
+
+export function requeueTask(task: Task) {
+  if (!dashboard.includes(task)) {
+    dashboard.push(task);
+  }
+}
+
 export function getPossibleTaskWithHighestPriority(
   currentBuilding: Building,
   jobType: JobType,
