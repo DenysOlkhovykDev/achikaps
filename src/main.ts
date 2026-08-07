@@ -12,6 +12,7 @@ import {
   animations,
   movingBlueprints,
   hideCrafts,
+  deSelectAllBuildings,
 } from "@buildings/_buildings";
 import { createTestBulding } from "./test-poligons/test-buildings";
 import { createTestWorld } from "@test-poligons/test-world";
@@ -63,6 +64,7 @@ app.stage.on("pointerdown", (event) => {
   }
   setIsBuildMode(false);
   hideCrafts();
+  deSelectAllBuildings();
   hideJoystick();
 });
 
