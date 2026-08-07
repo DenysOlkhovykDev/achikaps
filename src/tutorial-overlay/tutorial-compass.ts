@@ -1,10 +1,14 @@
 import { getDistance } from "@utils/basic-geometry";
 import { Graphics, Container } from "pixi.js";
+import {
+  TutorialCondition,
+  TutorialTargetFinder,
+} from "./tutorial-pointer";
 
 export type Compass = {
-  condition: Function;
+  condition: TutorialCondition;
 
-  findTarget: Function;
+  findTarget: TutorialTargetFinder;
 };
 
 export class TutorialCompass extends Container {

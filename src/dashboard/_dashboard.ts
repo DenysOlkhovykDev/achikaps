@@ -1,6 +1,7 @@
 import { Task, JobType } from "@dashboard/task";
 import { Building } from "@buildings/building";
-import { dijkstra } from "@utils/algorithms";
+import { dijkstra, getPathDistance } from "@utils/algorithms";
+import { ResourceType } from "@resources/resource-types";
 
 export const dashboard: Task[] = [];
 
@@ -8,25 +9,38 @@ export function addTask(
   target: Building,
   jobType: JobType,
   priority: number,
-  resource?: string,
+  resource?: ResourceType,
   countOfResources?: number,
 ) {
-  if (resource && countOfResources) {
-    const result = target.resourceList.get(resource)
-      ? target.resourceList.get(resource)
-      : 0;
+  if (resource !== undefined && countOfResources !== undefined) {
+    const storedResources = target.getAvailableResourceCount(resource);
+    const scheduledDeliveries = dashboard.filter(
+      (task) =>
+        task.target === target &&
+        task.jobType === jobType &&
+        task.resource === resource,
+    ).length;
+    const resourcesOnTheWay =
+      jobType === JobType.delivering ? scheduledDeliveries : 0;
 
-    if (countOfResources - result! > 0) {
+    if (storedResources + resourcesOnTheWay < countOfResources) {
       const task = new Task(target, jobType, priority, resource);
       dashboard.push(task);
       return task;
     }
   } else {
+    const existingTask = dashboard.find(
+      (task) => task.target === target && task.jobType === jobType,
+    );
+
+    if (existingTask) {
+      return existingTask;
+    }
+
     const task = new Task(target, jobType, priority);
-    dashboard.push(new Task(target, jobType, priority));
+    dashboard.push(task);
     return task;
   }
-  console.log(jobType, resource);
 }
 
 export function deleteTask(task: Task) {
@@ -37,7 +51,7 @@ export function deleteTask(task: Task) {
   }
 }
 
-export function getPosibleTaskWithHighestPriority(
+export function getPossibleTaskWithHighestPriority(
   currentBuilding: Building,
   jobType: JobType,
 ) {
@@ -49,25 +63,28 @@ export function getPosibleTaskWithHighestPriority(
   for (const task of dashboard) {
     if (task.jobType !== jobType) continue;
 
-    let resourceDistance = 0;
+    let totalDistance = distances.get(task.target) ?? Infinity;
 
     if (jobType === JobType.building || jobType === JobType.delivering) {
-      const [path, resourceIndex, distanceToResource] =
+      const [path, resource, distanceToResource] =
         task.getRouteForResource(currentBuilding, false);
 
       if (
         path.length === 0 ||
-        resourceIndex === undefined ||
+        resource === undefined ||
         distanceToResource === undefined
       )
         continue;
 
-      resourceDistance = distanceToResource;
+      const resourceBuilding = path[path.length - 1];
+      const deliveryPath = task.getRouteForTarget(resourceBuilding);
+
+      if (deliveryPath.length === 0) {
+        continue;
+      }
+
+      totalDistance = distanceToResource + getPathDistance(deliveryPath);
     }
-
-    const distanceToTask = distances.get(task.target)!;
-
-    const totalDistance = distanceToTask + resourceDistance * 2;
 
     const score = task.priority - totalDistance;
 

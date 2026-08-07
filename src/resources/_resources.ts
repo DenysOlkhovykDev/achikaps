@@ -5,8 +5,9 @@ import { Battery } from "@resources/battery";
 import { Gum } from "@resources/gum";
 import { Gear } from "@resources/gear";
 import { Truss } from "@resources/truss";
+import { ResourceType } from "@resources/resource-types";
 
-export function createResource(type: string) {
+export function createResource(type: ResourceType) {
   switch (type) {
     case "Iron":
       return new Iron("Iron");

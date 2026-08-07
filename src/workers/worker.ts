@@ -4,7 +4,7 @@ import { Building } from "@buildings/building";
 import { Resource } from "@resources/resource";
 import {
   dashboard,
-  getPosibleTaskWithHighestPriority,
+  getPossibleTaskWithHighestPriority,
 } from "@dashboard/_dashboard";
 import { Task, JobType } from "@dashboard/task";
 import { delay } from "@utils/delay";
@@ -16,6 +16,11 @@ type Leg = {
   y: number;
   isMovingForward: boolean;
 };
+
+export type WorkerProfession =
+  | typeof JobType.building
+  | typeof JobType.delivering
+  | typeof JobType.production;
 
 export class Worker {
   root: Container = new Container();
@@ -29,7 +34,7 @@ export class Worker {
   inventory: Resource | undefined;
 
   path: Building[] = [];
-  resourceIndex?: number;
+  reservedResource?: Resource;
   task: Task | undefined;
   isWorking: boolean = false;
 
@@ -46,7 +51,7 @@ export class Worker {
     public x: number,
     public y: number,
     public currentPlatform: Building,
-    public profession: string,
+    public profession: WorkerProfession,
   ) {
     this.graphic = new Graphics();
     this.draw();
@@ -95,6 +100,11 @@ export class Worker {
 
   public moveWorker(delta: number) {
     if (!this.targetPlatform) {
+      if (this.inventory) {
+        this.handleResourceLogic();
+        return;
+      }
+
       if (!this.task) {
         this.pickTask();
       }
@@ -196,19 +206,19 @@ export class Worker {
 
   private pickTask() {
     if (this.profession === "building") {
-      this.task = getPosibleTaskWithHighestPriority(
+      this.task = getPossibleTaskWithHighestPriority(
         this.currentPlatform,
         JobType.building,
       );
       this.pickPathForResource();
     } else if (this.profession === "delivering") {
-      this.task = getPosibleTaskWithHighestPriority(
+      this.task = getPossibleTaskWithHighestPriority(
         this.currentPlatform,
         JobType.delivering,
       );
       this.pickPathForResource();
     } else if (this.profession === "production") {
-      this.task = getPosibleTaskWithHighestPriority(
+      this.task = getPossibleTaskWithHighestPriority(
         this.currentPlatform,
         JobType.production,
       );
@@ -219,7 +229,7 @@ export class Worker {
 
       if (this.path.length === 0) {
         if (
-          this.task.target.recources.length < this.task.target.inventorySize
+          this.task.target.resources.length < this.task.target.inventorySize
         ) {
           this.handleProductionLogic();
         } else {
@@ -234,13 +244,13 @@ export class Worker {
   private pickPathForResource() {
     if (!this.task) return;
 
-    const [path, resourceIndex] = this.task.getRouteForResource(
+    const [path, reservedResource] = this.task.getRouteForResource(
       this.currentPlatform,
       true,
     );
 
     this.path = path;
-    this.resourceIndex = resourceIndex;
+    this.reservedResource = reservedResource;
 
     if (path.length === 1) {
       this.handleResourceLogic();
@@ -283,18 +293,20 @@ export class Worker {
   }
 
   private handleResourceLogic() {
-    if (this.resourceIndex !== undefined) {
-      this.inventory = this.currentPlatform.takeResourceByIndex(
-        this.resourceIndex,
-      );
-      this.resourceIndex = undefined;
+    if (this.reservedResource !== undefined) {
+      this.inventory = this.currentPlatform.takeResource(this.reservedResource);
+      this.reservedResource = undefined;
 
-      if (this.inventory) {
-        this.root.addChild(this.inventory.root);
-
-        this.inventory.root.x = 0;
-        this.inventory.root.y = 16;
+      if (!this.inventory) {
+        this.task = undefined;
+        this.path = [];
+        return;
       }
+
+      this.root.addChild(this.inventory.root);
+
+      this.inventory.root.x = 0;
+      this.inventory.root.y = 16;
 
       if (this.task) {
         this.path = this.task.getRouteForTarget(this.currentPlatform);
@@ -304,9 +316,13 @@ export class Worker {
     }
 
     if (this.inventory) {
-      this.root.removeChild(this.inventory.root);
-      if (this.task) {
-        this.currentPlatform.tryToAddResource(this.inventory, this.task);
+      const wasDelivered = this.currentPlatform.tryToAddResource(
+        this.inventory,
+        this.task,
+      );
+
+      if (!wasDelivered) {
+        return;
       }
 
       this.inventory = undefined;

@@ -49,7 +49,7 @@ export function makeAntennas(
   totalAmount: number,
   currentAmount?: number,
 ) {
-  const amount = currentAmount ? currentAmount : totalAmount;
+  const amount = currentAmount ?? totalAmount;
 
   for (let i = 0; i < amount; i++) {
     antennasGraphics[i] = new Graphics();

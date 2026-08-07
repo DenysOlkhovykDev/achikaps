@@ -2,7 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Achikaps-inspired resource management game prototype"
+    />
     <title>Achikaps</title>
+    <style>
+      :root {
+        color-scheme: light;
+        background: #1b1f1e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      canvas {
+        display: block;
+        max-width: 100vw;
+        max-height: 100vh;
+        width: auto;
+        height: auto;
+        touch-action: none;
+      }
+
+      .test-mode canvas {
+        max-width: none;
+        max-height: none;
+      }
+    </style>
   </head>
   <body>
     <script type="module" src="/src/main.ts"></script>

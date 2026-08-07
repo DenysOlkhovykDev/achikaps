@@ -23,6 +23,13 @@ import { Tutorials } from "../tutorial-overlay/_tutorials";
 import { worldLayer } from "../main";
 import { getDistance } from "@utils/basic-geometry";
 import { createResource } from "@resources/_resources";
+import {
+  TutorialCondition,
+  TutorialTargetFinder,
+} from "../tutorial-overlay/tutorial-pointer";
+import { WorkerProfession } from "@workers/worker";
+import { ResourceType } from "@resources/resource-types";
+import { BuildingType } from "@buildings/_buildings";
 
 import { autoConstructionOfBuildings } from "../../tests/scenarios/auto-construction-of-buildings";
 import { collisionBlueprints } from "../../tests/scenarios/collision-blueprints";
@@ -45,26 +52,26 @@ export type Scenario = {
   buildings: {
     from: string;
     id: string;
-    type: string;
+    type: BuildingType;
     x: number;
     y: number;
   }[];
 
   resources?: {
     buildingId: string;
-    type: string;
+    type: ResourceType;
     count: number;
   }[];
 
   workers?: {
     buildingId: string;
-    profession: string;
+    profession: WorkerProfession;
   }[];
 
   deliveryTasks?: {
     target: string;
     priority: number;
-    resource: string;
+    resource: ResourceType;
     count: number;
   }[];
 
@@ -72,23 +79,23 @@ export type Scenario = {
     from: string;
     x: number;
     y: number;
-    buildingType: string;
+    buildingType: BuildingType;
   }[];
 
   pointers?: {
-    condition: Function;
+    condition: TutorialCondition;
     x?: number;
     y?: number;
-    findTarget?: Function;
+    findTarget?: TutorialTargetFinder;
   }[];
 
   compasses?: {
-    condition: Function;
-    findTarget?: Function;
+    condition: TutorialCondition;
+    findTarget?: TutorialTargetFinder;
   }[];
 
   messages?: {
-    condition: Function;
+    condition: TutorialCondition;
     x: number;
     y: number;
     text: string;
@@ -105,6 +112,7 @@ const scenarios: Record<string, Scenario> = {
       { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
       { from: "p0", id: "p1", type: "Platform", x: 500, y: 500 },
       { from: "p1", id: "p2", type: "Platform", x: 500, y: 600 },
+      { from: "p1", id: "windmill", type: "Windmill", x: 650, y: 500 },
     ],
     workers: [
       { buildingId: "p0", profession: "building" },
@@ -214,13 +222,8 @@ const scenarios: Record<string, Scenario> = {
 
     messages: [
       {
-        condition: () => {
-          if (
-            getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 50
-          ) {
-            return true;
-          }
-        },
+        condition: () =>
+          getDistance(worldLayer.pivot.x, worldLayer.pivot.y, 1000, 100) < 50,
         x: 420,
         y: 500,
         text: "You win",
@@ -242,7 +245,7 @@ const scenarios: Record<string, Scenario> = {
   "scene-render": sceneRender,
 };
 
-export function createTestBulding(
+export function createTestBuildings(
   buildingsLayer: Container,
   workersLayer: Container,
   tutorials: Tutorials,

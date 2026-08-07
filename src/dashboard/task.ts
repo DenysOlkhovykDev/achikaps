@@ -1,7 +1,14 @@
 import { Building } from "@buildings/building";
-import { aStar, dijkstra, buildPath } from "@utils/algorithms";
+import {
+  aStar,
+  dijkstra,
+  buildPath,
+  getPathDistance,
+} from "@utils/algorithms";
 
 import { buildings } from "@buildings/_buildings";
+import { Resource } from "@resources/resource";
+import { ResourceType } from "@resources/resource-types";
 
 export const JobType = {
   delivering: "delivering",
@@ -17,7 +24,7 @@ export class Task {
     public target: Building,
     public jobType: JobType,
     public priority: number,
-    public resource?: string,
+    public resource?: ResourceType,
   ) {}
 
   public getRouteForTarget(current: Building): Building[] {
@@ -27,47 +34,51 @@ export class Task {
   public getRouteForResource(
     start: Building,
     reserve: boolean,
-  ): [Building[], number | undefined, number | undefined] {
+  ): [Building[], Resource | undefined, number | undefined] {
     const { distances, previous } = dijkstra(start);
 
     let bestBuilding: Building | undefined = undefined;
+    let bestResource: Resource | undefined = undefined;
     let bestDistance = Infinity;
-    let resourceIndex: number | undefined = undefined;
+    let bestTotalDistance = Infinity;
 
     for (const building of buildings) {
       if (building === this.target) continue;
 
-      const index = this.hasNeededResource(building);
+      const resource = this.findNeededResource(building);
 
-      if (index !== undefined) {
+      if (resource !== undefined) {
         const distance = distances.get(building)!;
+        const pathToTarget = aStar(building, this.target);
 
-        if (distance < bestDistance) {
+        if (pathToTarget.length === 0) {
+          continue;
+        }
+
+        const totalDistance = distance + getPathDistance(pathToTarget);
+
+        if (totalDistance < bestTotalDistance) {
+          bestTotalDistance = totalDistance;
           bestDistance = distance;
           bestBuilding = building;
-          resourceIndex = index;
+          bestResource = resource;
         }
       }
     }
 
     if (!bestBuilding) return [[], undefined, undefined];
 
-    if (reserve) {
-      bestBuilding.recources[resourceIndex!].isReserved = true;
+    if (reserve && bestResource) {
+      bestResource.isReserved = true;
     }
 
-    return [buildPath(previous, bestBuilding), resourceIndex, bestDistance];
+    return [buildPath(previous, bestBuilding), bestResource, bestDistance];
   }
 
-  private hasNeededResource(building: Building): number | undefined {
-    for (let i = 0; i < building.recources.length; i++) {
-      const element = building.recources[i];
-
-      if (element.resourceType === this.resource && !element.isReserved) {
-        return i;
-      }
-    }
-
-    return undefined;
+  private findNeededResource(building: Building): Resource | undefined {
+    return building.resources.find(
+      (resource) =>
+        resource.resourceType === this.resource && !resource.isReserved,
+    );
   }
 }

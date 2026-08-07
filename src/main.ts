@@ -13,7 +13,7 @@ import {
   movingBlueprints,
   hideCrafts,
 } from "@buildings/_buildings";
-import { createTestBulding } from "./test-poligons/test-buildings";
+import { createTestBuildings } from "./test-poligons/test-buildings";
 import { createTestWorld } from "@test-poligons/test-world";
 import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";
@@ -29,7 +29,9 @@ await app.init({
   antialias: false,
 });
 
-(window as any).app = app;
+window.app = app;
+app.canvas.setAttribute("aria-label", "Achikaps game world");
+app.canvas.setAttribute("role", "img");
 document.body.appendChild(app.canvas);
 app.stage.eventMode = "static";
 app.stage.hitArea = app.screen;
@@ -37,6 +39,8 @@ app.stage.hitArea = app.screen;
 const isTest = import.meta.env.MODE === "test";
 
 if (isTest) {
+  document.body.classList.add("test-mode");
+
   let seed = 123;
 
   Math.random = () => {
@@ -55,10 +59,16 @@ window.addEventListener("keyup", (e) => {
   keys.delete(e.key.toLowerCase());
 });
 
+window.addEventListener("blur", () => {
+  keys.clear();
+});
+
 app.stage.on("pointerdown", (event) => {
   const { x, y } = event.global;
-  if (getIsBuildMode() && getBuildingType() !== "") {
-    addBlueprint(x, y, buildingsLayer, getBuildingType());
+  const buildingType = getBuildingType();
+
+  if (getIsBuildMode() && buildingType !== "") {
+    addBlueprint(x, y, buildingsLayer, buildingType);
     setBuildingType("");
   }
   setIsBuildMode(false);
@@ -71,7 +81,7 @@ const buildingsLayer = new Container();
 const workersLayer = new Container();
 const UIcontainer = new Container();
 
-createTestBulding(
+createTestBuildings(
   buildingsLayer,
   workersLayer,
   tutorials,
@@ -101,14 +111,20 @@ tutorials.init(app.stage);
 
 app.ticker.add((delta) => {
   const deltaTime = isTest ? 1 : delta.deltaTime;
+  const keyboardX =
+    Number(keys.has("d") || keys.has("arrowright")) -
+    Number(keys.has("a") || keys.has("arrowleft"));
+  const keyboardY =
+    Number(keys.has("s") || keys.has("arrowdown")) -
+    Number(keys.has("w") || keys.has("arrowup"));
 
   const angle = moveWorld(
     deltaTime,
     worldLayer,
     buildingsLayer,
     workersLayer,
-    joystick.inputX,
-    joystick.inputY,
+    joystick.inputX || keyboardX,
+    joystick.inputY || keyboardY,
   );
 
   moveWorkers(deltaTime);

@@ -43,5 +43,6 @@ export class MenuTrigger {
     this.parent.removeChild(this.graphic);
     this.menu?.menuHide();
     this.menu = undefined;
+    this.isMenuActive = false;
   }
 }

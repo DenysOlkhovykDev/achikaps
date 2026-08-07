@@ -1,7 +1,11 @@
 import { Graphics, Container } from "pixi.js";
 
+export type TutorialCondition = () => boolean;
+export type TutorialTarget = { x: number; y: number };
+export type TutorialTargetFinder = () => TutorialTarget | undefined;
+
 export type Pointer = {
-  condition: Function;
+  condition: TutorialCondition;
 
   debounce: number;
   timeout: number;
@@ -9,7 +13,7 @@ export type Pointer = {
   x?: number;
   y?: number;
 
-  findTarget?: Function;
+  findTarget?: TutorialTargetFinder;
 };
 
 export class TutorialPointer extends Container {

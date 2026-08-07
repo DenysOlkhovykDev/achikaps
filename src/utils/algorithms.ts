@@ -2,7 +2,6 @@ import { Building } from "@buildings/building";
 
 import { buildings } from "@buildings/_buildings";
 
-// IDK how it works
 export function dijkstra(start: Building) {
   const distances = new Map<Building, number>();
   const previous = new Map<Building, Building>();
@@ -98,6 +97,16 @@ export function aStar(start: Building, goal: Building) {
 
 export function getDistanceBetweenBuildings(a: Building, b: Building): number {
   return Math.hypot(a.root.x - b.root.x, a.root.y - b.root.y);
+}
+
+export function getPathDistance(path: Building[]): number {
+  let distance = 0;
+
+  for (let i = 1; i < path.length; i++) {
+    distance += getDistanceBetweenBuildings(path[i - 1], path[i]);
+  }
+
+  return distance;
 }
 
 export function buildPath(previous: Map<Building, Building>, target: Building) {

@@ -1,10 +1,11 @@
 import { Container, Graphics } from "pixi.js";
 import { MenuTrigger } from "@menus/menu-trigger";
 import { MenuItem } from "@menus/menu";
+import { BuildingType } from "@buildings/_buildings";
 
 let isBuildMode = false;
 let menuTrigger: MenuTrigger;
-let buildingType = "";
+let buildingType: BuildingType | "" = "";
 
 const menuData: MenuItem[] = [
   {
@@ -47,6 +48,21 @@ const menuData: MenuItem[] = [
     color: "#a8b1db",
     onClick: () => setBuildingType("Engine"),
   },
+  {
+    label: "Windmill",
+    color: "#88b9ac",
+    onClick: () => setBuildingType("Windmill"),
+  },
+  {
+    label: "House",
+    color: "#72ac4a",
+    onClick: () => setBuildingType("House"),
+  },
+  {
+    label: "Junkyard",
+    color: "#cac8a5",
+    onClick: () => setBuildingType("Junkyard"),
+  },
 ];
 
 export function addBuildMenu(container: Container) {
@@ -76,7 +92,7 @@ export function getIsBuildMode() {
   return isBuildMode;
 }
 
-export function setBuildingType(type: string) {
+export function setBuildingType(type: BuildingType | "") {
   buildingType = type;
 }
 

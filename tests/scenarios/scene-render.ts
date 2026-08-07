@@ -15,7 +15,7 @@ export const sceneRender: Scenario = {
     { from: "p3", id: "house", type: "House", x: 500, y: 400 },
 
     { from: "p3", id: "p4", type: "Platform", x: 400, y: 500 },
-    { from: "p4", id: "junkuard", type: "Junkuard", x: 280, y: 500 },
+    { from: "p4", id: "junkyard", type: "Junkyard", x: 280, y: 500 },
 
     { from: "p4", id: "p5", type: "Platform", x: 400, y: 600 },
     { from: "p5", id: "grinder", type: "Grinder", x: 500, y: 600 },
@@ -28,6 +28,7 @@ export const sceneRender: Scenario = {
 
     { from: "p7", id: "p8", type: "Platform", x: 400, y: 900 },
     { from: "p8", id: "smelter", type: "Smelter", x: 300, y: 900 },
+    { from: "p8", id: "windmill", type: "Windmill", x: 500, y: 900 },
   ],
   resources: [
     { buildingId: "factory", type: "Perl", count: 5 },
@@ -37,6 +38,7 @@ export const sceneRender: Scenario = {
     { buildingId: "laboratory", type: "Gum", count: 5 },
     { buildingId: "smelter", type: "Gear", count: 5 },
     { buildingId: "grinder", type: "Truss", count: 5 },
+    { buildingId: "windmill", type: "Battery", count: 5 },
   ],
   workers: [{ buildingId: "p0", profession: "building" }],
 };

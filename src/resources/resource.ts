@@ -1,4 +1,5 @@
 import { Graphics, Texture, Container } from "pixi.js";
+import { ResourceType } from "@resources/resource-types";
 
 export abstract class Resource {
   root: Container;
@@ -6,7 +7,7 @@ export abstract class Resource {
 
   static baseTexture: Texture;
 
-  constructor(public resourceType: string) {
+  constructor(public resourceType: ResourceType) {
     this.root = new Container();
     this.draw();
     this.root.x = 0;

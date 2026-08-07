@@ -1,6 +1,10 @@
 import { Container } from "pixi.js";
 import { Building } from "@buildings/building";
-import { buidingParameters, select } from "@buildings/_buildings";
+import {
+  buildingParameters,
+  select,
+  BuildingType,
+} from "@buildings/_buildings";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
 import { addBuilding } from "@buildings/_buildings";
@@ -10,21 +14,21 @@ import { setIsBuildMode } from "@menus/build-menu";
 import { createResource } from "@resources/_resources";
 import { app } from "../main";
 import { Graphics, Sprite } from "pixi.js";
+import { ResourceType } from "@resources/resource-types";
 
 export class Blueprint extends Building {
   redraws: number = 0;
 
   tasks: Task[] = [];
-  buildResources: string[] = [];
+  buildResources: ResourceType[] = [];
 
   constructor(
     x: number,
     y: number,
-    public type: string,
+    public type: BuildingType,
   ) {
     super(x, y, 10, "Blueprint");
-    this.baseSize =
-      buidingParameters[type as keyof typeof buidingParameters].baseSize;
+    this.baseSize = buildingParameters[type].baseSize;
     this.draw();
   }
 
@@ -125,11 +129,9 @@ export class Blueprint extends Building {
     );
 
     const minLinkLength =
-      buidingParameters[this.type as keyof typeof buidingParameters]
-        .minLinkLength;
+      buildingParameters[this.type].minLinkLength;
     const maxLinkLength =
-      buidingParameters[this.type as keyof typeof buidingParameters]
-        .maxLinkLength;
+      buildingParameters[this.type].maxLinkLength;
 
     const prevRedraws = this.redraws;
 
@@ -210,10 +212,10 @@ export class Blueprint extends Building {
       this.updateCraftSign();
     }
 
-    this.blueprinToBuilding(container);
+    this.blueprintToBuilding(container);
   }
 
-  public blueprinToBuilding(container: Container) {
+  public blueprintToBuilding(container: Container) {
     if (this.tasks.length === 0) {
       select(this.links[0].from);
       addBuilding(this.x, this.y, container, this.type);
@@ -240,19 +242,19 @@ export class Blueprint extends Building {
   prepareBuildCraftSignElements() {
     this.craftSignElements = [];
 
-    const remeaningCraftIngredients = structuredClone(this.buildResources);
+    const remainingCraftIngredients = structuredClone(this.buildResources);
 
     for (let i = 0; i < this.tasks.length; i++) {
-      const index = remeaningCraftIngredients.findIndex(
+      const index = remainingCraftIngredients.findIndex(
         (element) => element === this.tasks[i].resource,
       );
       if (index !== -1) {
-        remeaningCraftIngredients.splice(index, 1);
+        remainingCraftIngredients.splice(index, 1);
       }
     }
 
     for (let i = 0; i < this.buildResources.length; i++) {
-      const index = remeaningCraftIngredients.findIndex(
+      const index = remainingCraftIngredients.findIndex(
         (element) => element === this.buildResources[i],
       );
 
@@ -260,7 +262,7 @@ export class Blueprint extends Building {
         this.craftSignElements.push(
           createResource(this.buildResources[i]).root,
         );
-        remeaningCraftIngredients.splice(index, 1);
+        remainingCraftIngredients.splice(index, 1);
       } else {
         const craftIngredient = createResource(this.buildResources[i]).root;
         craftIngredient.alpha = this.craftGraphicAlpha;

@@ -1,11 +1,14 @@
-import { buildingMap, buidingParameters } from "@buildings/_buildings";
+import {
+  buildingMap,
+  buildingParameters,
+  BuildingType,
+} from "@buildings/_buildings";
 import { Container, Graphics, Text } from "pixi.js";
-import { Platform } from "@buildings/platform";
 import { Building } from "@buildings/building";
 import { createResource } from "@resources/_resources";
 
 export interface MenuItem {
-  label: string;
+  label: BuildingType;
   color: string;
   onClick?: () => void;
 }
@@ -91,7 +94,7 @@ export class Menu {
     text.eventMode = "none";
     this.container.addChild(text);
 
-    const BuildingClass = buildingMap[item.label] || Platform;
+    const BuildingClass = buildingMap[item.label];
     const building = new BuildingClass(
       xOffset + this.width / 2,
       yOffset + this.height / 2,
@@ -123,9 +126,7 @@ export class Menu {
   }
 
   private drawBuildingRecipe(building: Building, x: number, y: number) {
-    const buildingRecipe =
-      buidingParameters[building.buildingType as keyof typeof buidingParameters]
-        .craft;
+    const buildingRecipe = buildingParameters[building.buildingType].craft;
 
     const buildingRecipeImage = new Container();
 
