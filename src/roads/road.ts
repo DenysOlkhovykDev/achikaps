@@ -13,9 +13,12 @@ export class Road {
   }
 
   draw(from: Building, to: Building) {
+    const fromCenter = from.getBaseCenterInWorld();
+    const toCenter = to.getBaseCenterInWorld();
+
     this.graphic
-      .moveTo(from.x, from.y)
-      .lineTo(to.x, to.y)
+      .moveTo(fromCenter.x, fromCenter.y)
+      .lineTo(toCenter.x, toCenter.y)
       .stroke({ width: 8, color: "#000000" });
 
     this.graphic.alpha = 0.5;

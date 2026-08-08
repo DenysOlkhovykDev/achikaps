@@ -39,7 +39,7 @@ export class Mine extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createKelpLeaves();
 
@@ -56,8 +56,8 @@ export class Mine extends Building {
 
     this.createKelpTrunks(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#a3791f", true);
-    makeBasicCircle(baseGraphics, this.baseSize - 2, "#c1bf4e", false);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#a3791f", true);
+    makeBasicCircle(baseGraphics, this.baseRadius - 2, "#c1bf4e", false);
 
     this.createDecorativePlant(baseGraphics);
 
@@ -69,7 +69,7 @@ export class Mine extends Building {
       const { angle, x, y } = getRadialPoint(
         i,
         this.kelpsParams.amount,
-        this.baseSize + 5,
+        this.baseRadius + 5,
       );
 
       const cos = Math.cos(angle);
@@ -96,8 +96,8 @@ export class Mine extends Building {
       const line = getRadialLine(
         i,
         this.kelpsParams.amount,
-        this.baseSize,
-        this.baseSize + 8,
+        this.baseRadius,
+        this.baseRadius + 8,
       );
 
       baseGraphics
@@ -108,13 +108,13 @@ export class Mine extends Building {
   }
 
   private createDecorativePlant(baseGraphics: Graphics) {
-    makeBasicCircle(baseGraphics, this.baseSize - 18, "#77c06a", false);
+    makeBasicCircle(baseGraphics, this.baseRadius - 18, "#77c06a", false);
 
     for (let i = 0; i < 5; i++) {
       const { x: x1, y: y1 } = getRadialPoint(
         i * 5 - 1,
         5 * 5,
-        this.baseSize - 20,
+        this.baseRadius - 20,
       );
 
       baseGraphics.circle(x1, y1, 8).fill("#67a75c");
@@ -122,7 +122,7 @@ export class Mine extends Building {
       const { x: x2, y: y2 } = getRadialPoint(
         i * 5 + 1,
         5 * 5,
-        this.baseSize - 20,
+        this.baseRadius - 20,
       );
 
       baseGraphics.circle(x2, y2, 8).fill("#67a75c");

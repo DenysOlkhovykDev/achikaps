@@ -35,6 +35,7 @@ import { multipleConstructionOfDifferentBuildings } from "../../tests/scenarios/
 import { productionResources } from "../../tests/scenarios/production-resources";
 import { sceneRender } from "../../tests/scenarios/scene-render";
 import { showingPointers } from "../../tests/scenarios/showing-pointers";
+import { differentAngles } from "../../tests/scenarios/different-angles";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -232,6 +233,7 @@ const scenarios: Record<string, Scenario> = {
   "collision-blueprints": collisionBlueprints,
   "construction-of-buildings": constructionOfBuildings,
   "crafting-resources": craftingResources,
+  "different-angles": differentAngles,
   "moving-blueprints": movingBlueprints,
   "moving-resources": movingResources,
   "multiple-construction-of-buildings": multipleConstructionOfBuildings,
@@ -307,9 +309,10 @@ function runScenario(
 
   for (const worker of scenario.workers || []) {
     const newBuilding = buildingsMap.get(worker.buildingId);
+    const baseCenter = newBuilding.getBaseCenterInWorld();
     addWorker(
-      newBuilding.x,
-      newBuilding.y,
+      baseCenter.x,
+      baseCenter.y,
       workersLayer,
       newBuilding,
       worker.profession,

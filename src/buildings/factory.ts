@@ -29,7 +29,7 @@ export class Factory extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createSatelites();
 
@@ -44,22 +44,22 @@ export class Factory extends Building {
       const small = getRadialLine(
         i * 4 + 2,
         this.gridsParams.amount * 4,
-        this.baseSize,
-        this.baseSize + this.gridsParams.sizes[0],
+        this.baseRadius,
+        this.baseRadius + this.gridsParams.sizes[0],
       );
 
       const medium = getRadialLine(
         i * 4 + 1,
         this.gridsParams.amount * 4,
-        this.baseSize,
-        this.baseSize + this.gridsParams.sizes[1],
+        this.baseRadius,
+        this.baseRadius + this.gridsParams.sizes[1],
       );
 
       const large = getRadialLine(
         i * 4,
         this.gridsParams.amount * 4,
-        this.baseSize,
-        this.baseSize + this.gridsParams.sizes[2],
+        this.baseRadius,
+        this.baseRadius + this.gridsParams.sizes[2],
       );
 
       this.gridsGraphics
@@ -73,7 +73,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          this.baseSize + this.gridsParams.sizes[0],
+          this.baseRadius + this.gridsParams.sizes[0],
           small.angle,
           small.angle - this.gridsParams.angleOffsets.small,
           true,
@@ -82,7 +82,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          this.baseSize + this.gridsParams.sizes[1],
+          this.baseRadius + this.gridsParams.sizes[1],
           medium.angle,
           medium.angle - this.gridsParams.angleOffsets.medium,
           true,
@@ -97,11 +97,11 @@ export class Factory extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#a8d0db", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#a8d0db", true);
 
     const points = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i, 3, this.baseSize - 16);
+      const { x, y } = getRadialPoint(i, 3, this.baseRadius - 16);
       points.push({ x, y });
     }
 

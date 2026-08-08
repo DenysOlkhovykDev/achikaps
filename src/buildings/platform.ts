@@ -23,7 +23,7 @@ export class Platform extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createBaseTexture();
 
@@ -36,9 +36,12 @@ export class Platform extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#acacac", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#acacac", true);
 
-    Platform.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Platform.baseTexture = generateTextureFromOrigin(
+      app.renderer,
+      baseGraphics,
+    );
   }
 
   animation(delta: number) {}

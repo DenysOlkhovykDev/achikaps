@@ -30,7 +30,7 @@ export class Smelter extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createBaseTexture();
 
@@ -43,7 +43,7 @@ export class Smelter extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#dec6a4", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#dec6a4", true);
 
     this.makeChimneyPart(baseGraphics, -1, 15, 20, "#000000");
     this.makeChimneyPart(baseGraphics, -1, 14, 16, "#dec6a4");
@@ -60,13 +60,13 @@ export class Smelter extends Building {
 
       baseGraphics
         .moveTo(0, 0)
-        .arc(0, 0, this.baseSize, startAngle, endAngle)
+        .arc(0, 0, this.baseRadius, startAngle, endAngle)
         .fill("#d4b58d");
     }
 
-    makeBasicCircle(baseGraphics, this.baseSize - 8, "#dec6a4", false);
+    makeBasicCircle(baseGraphics, this.baseRadius - 8, "#dec6a4", false);
 
-    makeBasicCircle(baseGraphics, this.baseSize - 18, "#dbb39e", true);
+    makeBasicCircle(baseGraphics, this.baseRadius - 18, "#dbb39e", true);
 
     Smelter.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
@@ -82,8 +82,8 @@ export class Smelter extends Building {
       const line = getRadialLine(
         i,
         this.buildingParams.amountOfChemnies,
-        this.baseSize + start,
-        this.baseSize + end,
+        this.baseRadius + start,
+        this.baseRadius + end,
       );
 
       baseGraphics

@@ -75,7 +75,7 @@ export function makeAntennas(
   contentContainer: Container,
   antennasGraphics: Graphics[],
   angleOffset: number,
-  baseSize: number,
+  baseRadius: number,
   totalAmount: number,
   currentAmount?: number,
 ) {
@@ -89,11 +89,11 @@ export function makeAntennas(
     const cos = Math.cos(angle + angleOffset);
     const sin = Math.sin(angle + angleOffset);
 
-    const x1 = cos * (baseSize - 5);
-    const y1 = sin * (baseSize - 5);
+    const x1 = cos * (baseRadius - 5);
+    const y1 = sin * (baseRadius - 5);
 
-    const x2 = cos * (baseSize + 18);
-    const y2 = sin * (baseSize + 18);
+    const x2 = cos * (baseRadius + 18);
+    const y2 = sin * (baseRadius + 18);
 
     antennasGraphics[i]
       .moveTo(x1, y1)

@@ -18,8 +18,21 @@ import { Laboratory } from "@buildings/laboratory";
 import { Smelter } from "@buildings/smelter";
 import { Engine } from "@buildings/engine";
 import { Blueprint } from "@buildings/blueprint";
+import { GlassMaker } from "@buildings/glassMaker";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
+
+export type BuildingCenter = {
+  x: number;
+  y: number;
+};
+
+const centeredGeometry = (baseRadius: number, decorativeRadius: number) => ({
+  baseRadius,
+  decorativeRadius: decorativeRadius,
+  baseCenter: { x: 0, y: 0 },
+  decorativeCenter: { x: 0, y: 0 },
+});
 
 export const buildingMap: Record<string, BuildingConstructor> = {
   Platform,
@@ -32,12 +45,18 @@ export const buildingMap: Record<string, BuildingConstructor> = {
   Laboratory,
   Smelter,
   Engine,
+  GlassMaker,
 };
 
 export const buidingParameters = {
-  Blueprint: { baseSize: 0, minLinkLength: 120, maxLinkLength: 200, craft: [] },
+  Blueprint: {
+    ...centeredGeometry(0, 0),
+    minLinkLength: 120,
+    maxLinkLength: 200,
+    craft: [],
+  },
   Platform: {
-    baseSize: 40,
+    ...centeredGeometry(40, 40),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -46,7 +65,7 @@ export const buidingParameters = {
     ],
   },
   Factory: {
-    baseSize: 40,
+    ...centeredGeometry(40, 45),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -55,13 +74,13 @@ export const buidingParameters = {
     ],
   },
   Mine: {
-    baseSize: 40,
+    ...centeredGeometry(40, 43),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [{ type: "Organic", amount: 3 }],
   },
   Farm: {
-    baseSize: 40,
+    ...centeredGeometry(40, 43),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -70,7 +89,7 @@ export const buidingParameters = {
     ],
   },
   Grinder: {
-    baseSize: 40,
+    ...centeredGeometry(40, 43),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -79,7 +98,7 @@ export const buidingParameters = {
     ],
   },
   Laboratory: {
-    baseSize: 40,
+    ...centeredGeometry(40, 45),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -89,7 +108,7 @@ export const buidingParameters = {
     ],
   },
   Smelter: {
-    baseSize: 40,
+    ...centeredGeometry(40, 50),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -98,7 +117,7 @@ export const buidingParameters = {
     ],
   },
   Engine: {
-    baseSize: 20,
+    ...centeredGeometry(20, 27),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -108,7 +127,7 @@ export const buidingParameters = {
     ],
   },
   Junkuard: {
-    baseSize: 60,
+    ...centeredGeometry(60, 60),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -117,7 +136,7 @@ export const buidingParameters = {
     ],
   },
   House: {
-    baseSize: 25,
+    ...centeredGeometry(25, 30),
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
@@ -125,13 +144,17 @@ export const buidingParameters = {
       { type: "Water", amount: 5 },
     ],
   },
-  Windmill: {
-    baseSize: 40,
+  GlassMaker: {
+    baseRadius: 20,
+    decorativeRadius: 35,
+    baseCenter: { x: 0, y: 0 },
+    decorativeCenter: { x: 15, y: 0 },
     minLinkLength: 120,
     maxLinkLength: 200,
     craft: [
-      { type: "Organic", amount: 6 },
-      { type: "Water", amount: 1 },
+      { type: "Organic", amount: 1 },
+      { type: "Water", amount: 2 },
+      { type: "Metal", amount: 3 },
     ],
   },
 };
@@ -148,18 +171,20 @@ export function addBuilding(
 ) {
   const BuildingClass = buildingMap[buildingType] || Platform;
   const building = new BuildingClass(x, y);
+  const from = buildings.length > 0 ? buildings[selectedBuilding] : undefined;
+
+  if (from) {
+    building.orientByBuildDirection(from);
+  }
 
   buildings.push(building);
   container.addChild(building.root);
 
-  if (buildings.length > 1) {
-    const from = buildings[selectedBuilding];
-    const to = buildings[buildings.length - 1];
-
-    const line = new Road(from, to);
+  if (from) {
+    const line = new Road(from, building);
 
     from.addLinkedBuilding(line);
-    to.addLinkedBuilding(line);
+    building.addLinkedBuilding(line);
 
     container.addChildAt(line.graphic, 0);
   }
@@ -180,6 +205,8 @@ export function addBlueprint(
 
   if (buildings.length > 0) {
     const from = buildings[selectedBuilding];
+
+    blueprint.orientByBuildDirection(from);
 
     const line = new BlueprintRoad(from, blueprint);
 

@@ -28,13 +28,13 @@ export class House extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     makeAntennas(
       this.contentContainer,
       this.antennasGraphics,
       this.antennasParams.angleOffset,
-      this.baseSize,
+      this.baseRadius,
       this.antennasParams.totalAmount,
       this.antennasParams.currentAmount,
     );
@@ -50,9 +50,9 @@ export class House extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#72ac4a", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#72ac4a", true);
 
-    makeBasicCircle(baseGraphics, this.baseSize - 18, "#5b8937", false);
+    makeBasicCircle(baseGraphics, this.baseRadius - 18, "#5b8937", false);
 
     House.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }

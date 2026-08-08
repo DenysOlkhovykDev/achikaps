@@ -97,7 +97,10 @@ export function aStar(start: Building, goal: Building) {
 }
 
 export function getDistanceBetweenBuildings(a: Building, b: Building): number {
-  return Math.hypot(a.root.x - b.root.x, a.root.y - b.root.y);
+  const aCenter = a.getBaseCenterInWorld();
+  const bCenter = b.getBaseCenterInWorld();
+
+  return Math.hypot(aCenter.x - bCenter.x, aCenter.y - bCenter.y);
 }
 
 export function buildPath(previous: Map<Building, Building>, target: Building) {

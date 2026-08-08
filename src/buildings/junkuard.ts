@@ -26,7 +26,7 @@ export class Junkuard extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createBaseTexture();
 
@@ -41,7 +41,7 @@ export class Junkuard extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#cac8a5", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#cac8a5", true);
 
     Junkuard.baseTexture = generateTextureFromOrigin(
       app.renderer,

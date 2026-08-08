@@ -34,7 +34,7 @@ export class Laboratory extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createSatelites();
 
@@ -51,7 +51,7 @@ export class Laboratory extends Building {
       const { x: cx, y: cy } = getRadialPoint(
         i,
         this.satelitesParams.amount,
-        this.baseSize - 5,
+        this.baseRadius - 5,
       );
 
       this.satelitesGraphics[i].position.set(cx, cy);
@@ -75,7 +75,7 @@ export class Laboratory extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#cc92c3", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#cc92c3", true);
 
     this.makeDecorativeCircles(baseGraphics);
 
@@ -92,7 +92,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i * 2 - 1,
         this.amountOfDecorativeCircles * 2,
-        this.baseSize - 24,
+        this.baseRadius - 24,
       );
 
       baseGraphics.circle(x, y, 6).fill("#b762ac");
@@ -102,7 +102,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.amountOfDecorativeCircles,
-        this.baseSize - 12,
+        this.baseRadius - 12,
       );
 
       baseGraphics.circle(x, y, 8).fill("#b762ac");

@@ -31,7 +31,7 @@ export class Grinder extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createBlades();
 
@@ -48,7 +48,7 @@ export class Grinder extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        this.baseSize + 4,
+        this.baseRadius + 4,
       );
 
       this.bladesGraphics[i].position.set(x, y);
@@ -94,12 +94,12 @@ export class Grinder extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#d2aa8a", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#d2aa8a", true);
 
     this.makeBladeConnectors(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseSize - 12, "#846c5b", false);
-    makeBasicCircle(baseGraphics, this.baseSize - 14, "#ce9e81", false);
+    makeBasicCircle(baseGraphics, this.baseRadius - 12, "#846c5b", false);
+    makeBasicCircle(baseGraphics, this.baseRadius - 14, "#ce9e81", false);
 
     Grinder.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
   }
@@ -109,13 +109,13 @@ export class Grinder extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        this.baseSize - 14,
+        this.baseRadius - 14,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        this.baseSize + 2,
+        this.baseRadius + 2,
       );
 
       baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
