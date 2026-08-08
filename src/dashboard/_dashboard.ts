@@ -11,30 +11,45 @@ export function addTask(
   resource?: string,
   countOfResources?: number,
 ) {
-  if (resource && countOfResources) {
-    const result = target.resourceList.get(resource)
-      ? target.resourceList.get(resource)
-      : 0;
+  if (jobType === JobType.production) {
+    if (!target.craft) return undefined;
 
-    if (countOfResources - result! > 0) {
-      const task = new Task(target, jobType, priority, resource);
-      dashboard.push(task);
-      return task;
-    }
-  } else {
-    const task = new Task(target, jobType, priority);
-    dashboard.push(new Task(target, jobType, priority));
-    return task;
+    const existingTask = dashboard.find(
+      (task) =>
+        task.target === target && task.jobType === JobType.production,
+    );
+
+    if (existingTask) return existingTask;
   }
-  console.log(jobType, resource);
+
+  const count = resource ? (countOfResources ?? 1) : 1;
+  if (count <= 0) return undefined;
+
+  let firstTask: Task | undefined;
+
+  for (let i = 0; i < count; i++) {
+    const task = new Task(target, jobType, priority, resource);
+    dashboard.push(task);
+    firstTask ??= task;
+  }
+
+  return firstTask;
 }
 
 export function deleteTask(task: Task) {
+  task.releaseResourceReservation();
+  task.inProgress = false;
+
   const index = dashboard.indexOf(task);
 
   if (index !== -1) {
     dashboard.splice(index, 1);
   }
+}
+
+export function releaseTask(task: Task) {
+  task.releaseResourceReservation();
+  task.inProgress = false;
 }
 
 export function getPosibleTaskWithHighestPriority(
@@ -44,41 +59,49 @@ export function getPosibleTaskWithHighestPriority(
   const { distances } = dijkstra(currentBuilding);
 
   let bestTask: Task | undefined;
-  let bestScore = -Infinity;
+  let bestPriority = -Infinity;
+  let bestDistance = Infinity;
 
   for (const task of dashboard) {
-    if (task.jobType !== jobType) continue;
+    if (task.jobType !== jobType || task.inProgress) continue;
 
-    let resourceDistance = 0;
+    let totalDistance: number;
 
     if (jobType === JobType.building || jobType === JobType.delivering) {
-      const [path, resourceIndex, distanceToResource] =
+      const [path, resource, distance] =
         task.getRouteForResource(currentBuilding, false);
 
       if (
         path.length === 0 ||
-        resourceIndex === undefined ||
-        distanceToResource === undefined
+        resource === undefined ||
+        distance === undefined
       )
         continue;
 
-      resourceDistance = distanceToResource;
+      totalDistance = distance;
+    } else {
+      const distanceToTask = distances.get(task.target);
+      if (distanceToTask === undefined || !Number.isFinite(distanceToTask)) {
+        continue;
+      }
+
+      totalDistance = distanceToTask;
     }
 
-    const distanceToTask = distances.get(task.target)!;
+    const effectivePriority = task.getEffectivePriority();
 
-    const totalDistance = distanceToTask + resourceDistance * 2;
-
-    const score = task.priority - totalDistance;
-
-    if (score > bestScore) {
-      bestScore = score;
+    if (
+      effectivePriority > bestPriority ||
+      (effectivePriority === bestPriority && totalDistance < bestDistance)
+    ) {
+      bestPriority = effectivePriority;
+      bestDistance = totalDistance;
       bestTask = task;
     }
   }
 
   if (bestTask) {
-    deleteTask(bestTask);
+    bestTask.inProgress = true;
   }
 
   return bestTask;

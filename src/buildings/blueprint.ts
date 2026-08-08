@@ -6,6 +6,7 @@ import { Resource } from "@resources/resource";
 import { addBuilding } from "@buildings/_buildings";
 import { deleteBlueprint } from "@buildings/_buildings";
 import { Task } from "@dashboard/task";
+import { deleteTask } from "@dashboard/_dashboard";
 import { setIsBuildMode } from "@menus/build-menu";
 import { createResource } from "@resources/_resources";
 import { app } from "../main";
@@ -16,6 +17,7 @@ export class Blueprint extends Building {
 
   tasks: Task[] = [];
   buildResources: string[] = [];
+  reservedBuildResources: Resource[] = [];
 
   constructor(
     x: number,
@@ -220,11 +222,23 @@ export class Blueprint extends Building {
     }
   }
 
-  public onBlueprintResourceAdded(task: Task, container: Container) {
+  public reserveBuildResource(resource: Resource) {
+    resource.isReserved = true;
+    resource.isReservedForConstruction = true;
+    this.reservedBuildResources.push(resource);
+  }
+
+  public onBlueprintResourceAdded(
+    task: Task,
+    resource: Resource,
+    container: Container,
+  ) {
     if (task.resource) {
       const index = this.tasks.indexOf(task);
       if (index !== -1) {
         this.tasks.splice(index, 1);
+        this.reserveBuildResource(resource);
+        task.target.refreshTasks();
       }
     }
 
@@ -236,17 +250,49 @@ export class Blueprint extends Building {
   }
 
   public blueprinToBuilding(container: Container) {
-    if (this.tasks.length === 0) {
-      select(this.links[0].from);
-      addBuilding(this.x, this.y, container, this.type);
-      for (const resource of this.buildResources) {
-        if (resource) {
-          this.links[0].from.takeResourceByName(resource);
-        }
+    const source = this.links[0]?.from;
+    if (!source) return;
+
+    const hasAllReservedResources =
+      this.reservedBuildResources.length === this.buildResources.length &&
+      this.reservedBuildResources.every((resource) =>
+        source.recources.includes(resource),
+      );
+
+    if (this.tasks.length === 0 && hasAllReservedResources) {
+      for (const resource of this.reservedBuildResources) {
+        source.takeResource(resource, false);
       }
+      this.reservedBuildResources = [];
+      source.refreshTasks();
+
+      select(source);
+      addBuilding(this.x, this.y, container, this.type);
       deleteBlueprint(this);
       setIsBuildMode(false);
     }
+  }
+
+  public cleanup() {
+    const source = this.links[0]?.from;
+
+    this.unsubscribe?.();
+    this.unsubscribe = undefined;
+
+    for (const resource of this.reservedBuildResources) {
+      resource.isReserved = false;
+      resource.isReservedForConstruction = false;
+    }
+    this.reservedBuildResources = [];
+
+    for (const task of this.tasks) {
+      if (!task.inProgress) {
+        deleteTask(task);
+      }
+    }
+    this.tasks = [];
+
+    source?.refreshTasks();
   }
 
   public unsubscribe?: () => void;

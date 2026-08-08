@@ -4,7 +4,6 @@ import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
 import { JobType, Task } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
-import { dashboard } from "@dashboard/_dashboard";
 import { Resource } from "@resources/resource";
 
 import { Platform } from "@buildings/platform";
@@ -218,19 +217,33 @@ export function addBlueprint(
 
     for (let i = 0; i < craft.length; i++) {
       for (let j = 0; j < craft[i].amount; j++) {
-        const task = addTask(from, JobType.building, 5, craft[i].type, 1);
-        if (task) {
-          blueprint.tasks.push(task);
+        const availableResource = from.recources.find(
+          (resource) =>
+            resource.resourceType === craft[i].type && !resource.isReserved,
+        );
+
+        if (availableResource) {
+          blueprint.reserveBuildResource(availableResource);
+        } else {
+          const task = addTask(from, JobType.building, 5, craft[i].type, 1);
+          if (task) {
+            blueprint.tasks.push(task);
+          }
         }
+
         blueprint.buildResources.push(craft[i].type);
       }
     }
 
+    from.refreshTasks();
+
     const source = blueprint.links[0].from;
 
-    const unsubscribe = source.onResourceAdded((task: Task) => {
-      blueprint.onBlueprintResourceAdded(task, container);
-    });
+    const unsubscribe = source.onResourceAdded(
+      (task: Task, resource: Resource) => {
+        blueprint.onBlueprintResourceAdded(task, resource, container);
+      },
+    );
 
     blueprint.unsubscribe = unsubscribe;
     blueprint.blueprinToBuilding(container);
@@ -292,17 +305,13 @@ export function movingBlueprints(delta: number) {
 
   for (let i = blueprints.length - 1; i >= 0; i--) {
     if (blueprints[i].redraws > 5000) {
-      for (const link of blueprints[i].links) {
-        link.graphic.destroy();
-      }
-      blueprints[i].root.destroy();
-      blueprints.splice(i, 1);
+      deleteBlueprint(blueprints[i]);
     }
   }
 }
 
 export function deleteBlueprint(blueprint: Blueprint) {
-  blueprint.unsubscribe?.();
+  blueprint.cleanup();
   let index = -1;
   for (let i = 0; i < blueprints.length; i++) {
     if (blueprints[i] === blueprint) {
