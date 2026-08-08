@@ -21,14 +21,38 @@ export class BlueprintRoad {
   }
 
   public drawDashedLine(from: Building, to: Building, dash = 10, gap = 10) {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
+    const fromCenter = from.getBaseCenterInWorld();
+    const toCenter = to.getBaseCenterInWorld();
+    const decorationCenter = to.getDecorativeCenterInWorld();
+
+    const dx = toCenter.x - fromCenter.x;
+    const dy = toCenter.y - fromCenter.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return;
 
     const dirX = dx / distance;
     const dirY = dy / distance;
 
-    const effectiveDistance = distance - to.baseSize;
+    const decorationDx = decorationCenter.x - fromCenter.x;
+    const decorationDy = decorationCenter.y - fromCenter.y;
+    const projection = decorationDx * dirX + decorationDy * dirY;
+    const perpendicularDistanceSquared =
+      decorationDx * decorationDx +
+      decorationDy * decorationDy -
+      projection * projection;
+    const radiusSquared = to.decorativeRadius * to.decorativeRadius;
+
+    let effectiveDistance = distance;
+    if (perpendicularDistanceSquared <= radiusSquared) {
+      const distanceToIntersection = Math.sqrt(
+        radiusSquared - perpendicularDistanceSquared,
+      );
+      effectiveDistance = Math.max(
+        0,
+        Math.min(distance, projection - distanceToIntersection),
+      );
+    }
 
     const step = dash + gap;
     const count = Math.floor(effectiveDistance / step) + 1;
@@ -37,11 +61,11 @@ export class BlueprintRoad {
       const start = i * step;
       const end = Math.min(start + dash, effectiveDistance);
 
-      const x1 = from.x + dirX * start;
-      const y1 = from.y + dirY * start;
+      const x1 = fromCenter.x + dirX * start;
+      const y1 = fromCenter.y + dirY * start;
 
-      const x2 = from.x + dirX * end;
-      const y2 = from.y + dirY * end;
+      const x2 = fromCenter.x + dirX * end;
+      const y2 = fromCenter.y + dirY * end;
 
       this.graphic.moveTo(x1, y1);
       this.graphic.lineTo(x2, y2);

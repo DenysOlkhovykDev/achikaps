@@ -112,13 +112,15 @@ export class Worker {
     }
     this.legAnimation(delta);
 
+    const targetCenter = this.targetPlatform.getBaseCenterInWorld();
+
     if (isTest) {
-      this.x = this.targetPlatform.x;
-      this.y = this.targetPlatform.y;
+      this.x = targetCenter.x;
+      this.y = targetCenter.y;
       this.onReachPlatform();
     } else {
-      const dx = this.targetPlatform.x - this.x;
-      const dy = this.targetPlatform.y - this.y;
+      const dx = targetCenter.x - this.x;
+      const dy = targetCenter.y - this.y;
 
       const angle = Math.atan2(dy, dx);
       this.root.rotation = angle + Math.PI / 2;

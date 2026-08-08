@@ -39,13 +39,13 @@ export class Farm extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     makeAntennas(
       this.contentContainer,
       this.antennasGraphics,
       this.antennasParams.angleOffset,
-      this.baseSize,
+      this.baseRadius,
       this.antennasParams.amount,
     );
 
@@ -60,13 +60,13 @@ export class Farm extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#b06667", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#b06667", true);
 
     this.makeSpikes(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#965859", false);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#965859", false);
 
-    makeBasicCircle(baseGraphics, this.baseSize - 5, "#c08484", false);
+    makeBasicCircle(baseGraphics, this.baseRadius - 5, "#c08484", false);
 
     this.makeDecorativeTriangles(baseGraphics);
 
@@ -83,14 +83,14 @@ export class Farm extends Building {
       } = getRadialLine(
         i * 10 + 4,
         this.spikeParams.amount * 10,
-        this.baseSize - 1,
-        this.baseSize + 8,
+        this.baseRadius - 1,
+        this.baseRadius + 8,
       );
 
       const { x: x1, y: y1 } = getRadialPoint(
         i * 10 + 1,
         this.spikeParams.amount * 10,
-        this.baseSize,
+        this.baseRadius,
       );
 
       baseGraphics
@@ -110,14 +110,14 @@ export class Farm extends Building {
       } = getRadialLine(
         i * 10 + 6,
         this.spikeParams.amount * 10,
-        this.baseSize - 1,
-        this.baseSize + 8,
+        this.baseRadius - 1,
+        this.baseRadius + 8,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i * 10 + 9,
         this.spikeParams.amount * 10,
-        this.baseSize,
+        this.baseRadius,
       );
 
       baseGraphics
@@ -134,7 +134,7 @@ export class Farm extends Building {
   private makeDecorativeTriangles(baseGraphics: Graphics) {
     const points = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i * 2 - 1, 3 * 2, this.baseSize - 7);
+      const { x, y } = getRadialPoint(i * 2 - 1, 3 * 2, this.baseRadius - 7);
       points.push({ x, y });
     }
 
@@ -147,7 +147,7 @@ export class Farm extends Building {
 
     const points2 = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i, 3, this.baseSize - 21);
+      const { x, y } = getRadialPoint(i, 3, this.baseRadius - 21);
       points2.push({ x, y });
     }
 

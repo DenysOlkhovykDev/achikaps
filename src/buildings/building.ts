@@ -33,7 +33,11 @@ export abstract class Building {
   craftSign: Container = new Container();
   craftSignElements: Container[] = [];
 
-  baseSize: number = 0;
+  baseRadius: number = 0;
+  decorativeRadius: number = 0;
+  baseCenter = { x: 0, y: 0 };
+  decorativeCenter = { x: 0, y: 0 };
+  orientation: number = 0;
 
   links: Road[] = [];
 
@@ -65,10 +69,89 @@ export abstract class Building {
     this.root.addChild(this.resourceContainer);
     this.root.addChild(this.craftSign);
 
-    this.baseSize =
-      buidingParameters[
-        this.buildingType as keyof typeof buidingParameters
-      ].baseSize;
+    this.configureGeometry(this.buildingType);
+  }
+
+  protected configureGeometry(buildingType: string) {
+    const parameters =
+      buidingParameters[buildingType as keyof typeof buidingParameters];
+
+    this.baseRadius = parameters.baseRadius;
+    this.decorativeRadius = parameters.decorativeRadius;
+    this.baseCenter = { ...parameters.baseCenter };
+    this.decorativeCenter = { ...parameters.decorativeCenter };
+
+    this.applyGeometryTransform();
+  }
+
+  private getDecorativeCenterInRoot() {
+    const offsetX = this.decorativeCenter.x - this.baseCenter.x;
+    const offsetY = this.decorativeCenter.y - this.baseCenter.y;
+    const cos = Math.cos(this.orientation);
+    const sin = Math.sin(this.orientation);
+
+    return {
+      x: this.baseCenter.x + offsetX * cos - offsetY * sin,
+      y: this.baseCenter.y + offsetX * sin + offsetY * cos,
+    };
+  }
+
+  private applyGeometryTransform() {
+    const decorativeCenter = this.getDecorativeCenterInRoot();
+
+    this.resourceContainer.position.set(this.baseCenter.x, this.baseCenter.y);
+    this.shadowContainer.position.set(
+      decorativeCenter.x,
+      decorativeCenter.y,
+    );
+    this.selectShadowContainer.position.set(
+      decorativeCenter.x,
+      decorativeCenter.y,
+    );
+    this.contentContainer.position.set(
+      decorativeCenter.x,
+      decorativeCenter.y,
+    );
+    this.craftSign.position.set(
+      decorativeCenter.x,
+      decorativeCenter.y,
+    );
+
+    this.shadowContainer.rotation = this.orientation;
+    this.selectShadowContainer.rotation = this.orientation;
+    this.contentContainer.rotation = this.orientation;
+  }
+
+  public setOrientation(angle: number) {
+    this.orientation = angle;
+    this.applyGeometryTransform();
+  }
+
+  public orientByBuildDirection(from: Building) {
+    const fromCenter = from.getBaseCenterInWorld();
+    const toCenter = this.getBaseCenterInWorld();
+    const dx = toCenter.x - fromCenter.x;
+    const dy = toCenter.y - fromCenter.y;
+
+    if (dx === 0 && dy === 0) return;
+
+    this.setOrientation(Math.atan2(dy, dx));
+  }
+
+  public getBaseCenterInWorld() {
+    return {
+      x: this.x + this.baseCenter.x,
+      y: this.y + this.baseCenter.y,
+    };
+  }
+
+  public getDecorativeCenterInWorld() {
+    const center = this.getDecorativeCenterInRoot();
+
+    return {
+      x: this.x + center.x,
+      y: this.y + center.y,
+    };
   }
 
   protected initEvents() {
@@ -167,12 +250,16 @@ export abstract class Building {
     this.showCraft(false);
     setIsBuildMode(false);
     deSelectAllBuildings();
-    makeRoundShadow(this.baseSize + 1, "#00ff00", this.selectShadowContainer);
+    makeRoundShadow(
+      this.decorativeRadius + 1,
+      "#00ff00",
+      this.selectShadowContainer,
+    );
     event.stopPropagation();
   }
 
   placeResource(res: Resource) {
-    const radius = this.baseSize - 8;
+    const radius = this.baseRadius - 8;
     const minDist = 15;
 
     let tries = 0;
@@ -371,7 +458,7 @@ export abstract class Building {
 
     const background = new Graphics();
     background
-      .rect(-width / 2, -this.baseSize - height, width, height - 5)
+      .rect(-width / 2, -this.decorativeRadius - height, width, height - 5)
       .fill("#c9c6bb")
       .stroke({ width: 2, color: "#000000" });
 
@@ -380,7 +467,7 @@ export abstract class Building {
     for (let i = 0; i < this.craftSignElements.length; i++) {
       this.craftSignElements[i].position.set(
         (i - center) * spacing,
-        -this.baseSize - 15,
+        -this.decorativeRadius - 15,
       );
 
       this.craftSign.addChild(this.craftSignElements[i]);

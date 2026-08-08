@@ -23,8 +23,7 @@ export class Blueprint extends Building {
     public type: string,
   ) {
     super(x, y, 10, "Blueprint");
-    this.baseSize =
-      buidingParameters[type as keyof typeof buidingParameters].baseSize;
+    this.configureGeometry(type);
     this.draw();
   }
 
@@ -36,10 +35,10 @@ export class Blueprint extends Building {
     const baseGraphics = new Graphics();
 
     baseGraphics
-      .circle(0, 0, this.baseSize)
+      .circle(0, 0, this.decorativeRadius)
       .fill({ color: 0xffffff, alpha: 0 });
 
-    this.drawDashedCircle(baseGraphics, this.baseSize);
+    this.drawDashedCircle(baseGraphics, this.decorativeRadius);
 
     this.contentContainer.addChild(baseGraphics);
   }
@@ -73,20 +72,24 @@ export class Blueprint extends Building {
     baseGraphics.stroke({ width: 3 });
   }
 
-  private moveAwayFrom(x: number, y: number, delta: number, speed: number) {
-    const dx = this.x - x;
-    const dy = this.y - y;
+  private moveAwayFrom(
+    x: number,
+    y: number,
+    delta: number,
+    speed: number,
+    center = this.getBaseCenterInWorld(),
+  ) {
+    const dx = center.x - x;
+    const dy = center.y - y;
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
 
     const nx = dx / len;
     const ny = dy / len;
 
-    const resX = this.x + nx * speed * delta;
-    const resY = this.y + ny * speed * delta;
-
-    this.x = resX;
-    this.y = resY;
-    this.root.position.set(resX, resY);
+    this.x += nx * speed * delta;
+    this.y += ny * speed * delta;
+    this.root.position.set(this.x, this.y);
+    this.orientByBuildDirection(this.links[0].from);
 
     for (const link of this.links) {
       link.draw(link.from, link.to);
@@ -94,19 +97,18 @@ export class Blueprint extends Building {
   }
 
   private moveTowards(x: number, y: number, delta: number, speed: number) {
-    const dx = x - this.x;
-    const dy = y - this.y;
+    const center = this.getBaseCenterInWorld();
+    const dx = x - center.x;
+    const dy = y - center.y;
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
 
     const nx = dx / len;
     const ny = dy / len;
 
-    const resX = this.x + nx * speed * delta;
-    const resY = this.y + ny * speed * delta;
-
-    this.x = resX;
-    this.y = resY;
-    this.root.position.set(resX, resY);
+    this.x += nx * speed * delta;
+    this.y += ny * speed * delta;
+    this.root.position.set(this.x, this.y);
+    this.orientByBuildDirection(this.links[0].from);
 
     for (const link of this.links) {
       link.draw(link.from, link.to);
@@ -114,14 +116,24 @@ export class Blueprint extends Building {
   }
 
   public checkAndMove(building: Building, delta: number) {
-    const minDistance = this.baseSize + 20;
-    const minDistanceToBuilding = building.baseSize + minDistance;
-    const distanceBetween = getDistance(building.x, building.y, this.x, this.y);
+    const thisDecorativeCenter = this.getDecorativeCenterInWorld();
+    const otherDecorativeCenter = building.getDecorativeCenterInWorld();
+    const minDistanceToBuilding =
+      this.decorativeRadius + building.decorativeRadius + 20;
+    const distanceBetween = getDistance(
+      otherDecorativeCenter.x,
+      otherDecorativeCenter.y,
+      thisDecorativeCenter.x,
+      thisDecorativeCenter.y,
+    );
+
+    const baseCenter = this.getBaseCenterInWorld();
+    const sourceBaseCenter = this.links[0].from.getBaseCenterInWorld();
     const linkLength = getDistance(
-      this.links[0].from.x,
-      this.links[0].from.y,
-      this.x,
-      this.y,
+      sourceBaseCenter.x,
+      sourceBaseCenter.y,
+      baseCenter.x,
+      baseCenter.y,
     );
 
     const minLinkLength =
@@ -135,17 +147,23 @@ export class Blueprint extends Building {
 
     if (distanceBetween <= minDistanceToBuilding) {
       this.redraws += 5;
-      this.moveAwayFrom(building.x, building.y, delta, 2);
+      this.moveAwayFrom(
+        otherDecorativeCenter.x,
+        otherDecorativeCenter.y,
+        delta,
+        2,
+        thisDecorativeCenter,
+      );
     }
 
     if (linkLength <= minLinkLength) {
       this.redraws++;
-      this.moveAwayFrom(this.links[0].from.x, this.links[0].from.y, delta, 0.5);
+      this.moveAwayFrom(sourceBaseCenter.x, sourceBaseCenter.y, delta, 0.5);
     }
 
     if (linkLength >= maxLinkLength) {
       this.redraws++;
-      this.moveTowards(this.links[0].from.x, this.links[0].from.y, delta, 0.5);
+      this.moveTowards(sourceBaseCenter.x, sourceBaseCenter.y, delta, 0.5);
     }
 
     this.checkLinksCollision(building, delta);
@@ -162,15 +180,19 @@ export class Blueprint extends Building {
   }
 
   private checkLinksCollision(building: Building, delta: number) {
-    const minDist = this.baseSize + 25;
+    const minDist = this.decorativeRadius + 25;
     for (const link of building.links) {
-      const ax = link.from.x;
-      const ay = link.from.y;
-      const bx = link.to.x;
-      const by = link.to.y;
+      const fromCenter = link.from.getBaseCenterInWorld();
+      const toCenter = link.to.getBaseCenterInWorld();
 
-      const px = this.x;
-      const py = this.y;
+      const ax = fromCenter.x;
+      const ay = fromCenter.y;
+      const bx = toCenter.x;
+      const by = toCenter.y;
+
+      const decorativeCenter = this.getDecorativeCenterInWorld();
+      const px = decorativeCenter.x;
+      const py = decorativeCenter.y;
 
       const abx = bx - ax;
       const aby = by - ay;
@@ -193,7 +215,7 @@ export class Blueprint extends Building {
 
       if (dist < minDist) {
         this.redraws += 5;
-        this.moveAwayFrom(closestX, closestY, delta, 2);
+        this.moveAwayFrom(closestX, closestY, delta, 2, decorativeCenter);
       }
     }
   }

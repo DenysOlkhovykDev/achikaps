@@ -30,7 +30,11 @@ export class Engine extends Building {
   decoPropellerParams = {
     amount: 3,
     tracesWidth: 1.6,
-    traceRadiuses: [this.baseSize - 14, this.baseSize - 10, this.baseSize - 5],
+    traceRadiuses: [
+      this.baseRadius - 14,
+      this.baseRadius - 10,
+      this.baseRadius - 5,
+    ],
   };
 
   particles: Particle[] = [];
@@ -47,7 +51,7 @@ export class Engine extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseSize, "#000000", this.shadowContainer);
+    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
     this.createPropellerBlades();
 
@@ -76,13 +80,13 @@ export class Engine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i * 8,
         this.propellerParams.amount * 8,
-        this.baseSize,
+        this.baseRadius,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i * 8 - 1,
         this.propellerParams.amount * 8,
-        this.baseSize + this.propellerParams.size,
+        this.baseRadius + this.propellerParams.size,
       );
 
       this.propellerGraphics
@@ -102,7 +106,7 @@ export class Engine extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseSize, "#c9c9c9", true);
+    makeBasicCircle(baseGraphics, this.baseRadius, "#c9c9c9", true);
 
     this.makeDecorativePropellerBlades(baseGraphics);
 
@@ -116,13 +120,13 @@ export class Engine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i,
         this.decoPropellerParams.amount,
-        this.baseSize - 15,
+        this.baseRadius - 15,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i,
         this.decoPropellerParams.amount,
-        this.baseSize - 4,
+        this.baseRadius - 4,
       );
 
       baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
@@ -190,8 +194,8 @@ export class Engine extends Building {
   }
 
   private resetParticle(particle: Particle) {
-    particle.gfx.x = getRandomCoordinate(this.baseSize, 7);
-    particle.gfx.y = getRandomCoordinate(this.baseSize, 7);
+    particle.gfx.x = getRandomCoordinate(this.baseRadius, 7);
+    particle.gfx.y = getRandomCoordinate(this.baseRadius, 7);
 
     particle.scale = 1;
     particle.delay = getRandomDelay(1, 64);
