@@ -7,12 +7,12 @@ import {
 } from "@buildings/_buildings";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
-import { addTask } from "@dashboard/_dashboard";
+import { addTask, dashboard, deleteTask } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
 import { setIsBuildMode } from "@menus/build-menu";
 import { makeRoundShadow } from "@utils/basic-graphic";
 
-type ResourceListener = (task: Task) => void;
+type ResourceListener = (task: Task, resource: Resource) => void;
 
 type Craft = {
   ingridients: { resourceName: string; count: number }[];
@@ -166,59 +166,155 @@ export abstract class Building {
   public abstract animation(delta: number, movingAngle?: number): void;
 
   protected generateProductionTask() {
-    if (this.checkIsEnoughResourceswForCraft()) {
-      addTask(this, JobType.production, this.priorityForTasks);
-    }
-  }
-
-  protected generateDeliveryTask(resourceName: string, count: number) {
-    addTask(
-      this,
-      JobType.delivering,
-      this.priorityForTasks,
-      resourceName,
-      count,
-    );
+    this.refreshTasks();
   }
 
   protected generateDeliveryTasks() {
-    if (this.craft) {
-      let neededSpace = 0;
-      for (let i = 0; i < this.craft?.ingridients.length; i++) {
-        neededSpace += this.craft?.ingridients[i].count;
+    this.refreshTasks();
+  }
+
+  public refreshTasks() {
+    this.syncProductionTask();
+
+    if (!this.craft || this.priorityForTasks < 0) return;
+
+    const missingResources = [...this.getRequiredResourceCounts()].map(
+      ([resourceName, requiredCount]) => ({
+        resourceName,
+        count: Math.max(
+          0,
+          requiredCount - this.getAvailableResourceCount(resourceName),
+        ),
+      }),
+    );
+    const totalMissingResources = missingResources.reduce(
+      (total, ingredient) => total + ingredient.count,
+      0,
+    );
+    const canFitMissingResources =
+      totalMissingResources <= this.inventorySize - this.recources.length;
+
+    for (const missingResource of missingResources) {
+      const tasks = dashboard.filter(
+        (task) =>
+          task.target === this &&
+          task.jobType === JobType.delivering &&
+          task.resource === missingResource.resourceName,
+      );
+      const inProgressCount = tasks.filter((task) => task.inProgress).length;
+      const desiredTaskCount = canFitMissingResources
+        ? missingResource.count
+        : inProgressCount;
+      const desiredPendingCount = Math.max(
+        0,
+        desiredTaskCount - inProgressCount,
+      );
+      const pendingTasks = tasks.filter((task) => !task.inProgress);
+
+      for (const task of pendingTasks.slice(desiredPendingCount)) {
+        deleteTask(task);
       }
-      let actualSpace = 0;
-      for (const resource of this.resourceList) {
-        actualSpace += resource[1];
-      }
-      if (
-        !this.checkIsEnoughResourceswForCraft() &&
-        this.inventorySize - actualSpace > neededSpace
-      ) {
-        for (let i = 0; i < this.craft?.ingridients.length; i++) {
-          for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
-            this.generateDeliveryTask(
-              this.craft?.ingridients[i].resourceName,
-              1,
-            );
-          }
-        }
+
+      const tasksToCreate = desiredPendingCount - pendingTasks.length;
+      if (tasksToCreate > 0) {
+        addTask(
+          this,
+          JobType.delivering,
+          this.priorityForTasks,
+          missingResource.resourceName,
+          tasksToCreate,
+        );
       }
     }
   }
 
-  public tryToDoProduction(): boolean {
-    if (this.craft) {
-      if (this.checkIsEnoughResourceswForCraft()) {
-        for (let i = 0; i < this.craft?.ingridients.length; i++) {
-          for (let j = 0; j < this.craft?.ingridients[i].count; j++) {
-            this.takeResourceByName(this.craft?.ingridients[i].resourceName);
-          }
+  private syncProductionTask() {
+    const tasks = dashboard.filter(
+      (task) =>
+        task.target === this && task.jobType === JobType.production,
+    );
+    const canProduce =
+      this.craft !== undefined &&
+      this.priorityForTasks >= 0 &&
+      this.checkIsEnoughResourceswForCraft() &&
+      this.hasSpaceForProductionResult();
+
+    if (!canProduce) {
+      for (const task of tasks) {
+        if (!task.inProgress) {
+          deleteTask(task);
         }
-        const newResource = createResource(this.craft?.result);
-        this.generateDeliveryTasks();
-        return this.tryToAddResource(newResource);
       }
+      return;
+    }
+
+    if (tasks.length === 0) {
+      addTask(this, JobType.production, this.priorityForTasks);
+      return;
+    }
+
+    const taskToKeep = tasks.find((task) => task.inProgress) ?? tasks[0];
+    for (const task of tasks) {
+      if (task !== taskToKeep && !task.inProgress) {
+        deleteTask(task);
+      }
+    }
+  }
+
+  private getAvailableResourceCount(resourceName: string) {
+    return this.recources.filter(
+      (resource) =>
+        resource.resourceType === resourceName &&
+        !resource.isReservedForTransport &&
+        !resource.isReservedForConstruction,
+    ).length;
+  }
+
+  private getRequiredResourceCounts() {
+    const requiredResources = new Map<string, number>();
+
+    if (!this.craft) return requiredResources;
+
+    for (const ingredient of this.craft.ingridients) {
+      requiredResources.set(
+        ingredient.resourceName,
+        (requiredResources.get(ingredient.resourceName) ?? 0) + ingredient.count,
+      );
+    }
+
+    return requiredResources;
+  }
+
+  private hasSpaceForProductionResult() {
+    if (!this.craft) return false;
+
+    const consumedResources = this.craft.ingridients.reduce(
+      (total, ingredient) => total + ingredient.count,
+      0,
+    );
+
+    return (
+      this.recources.length - consumedResources + 1 <= this.inventorySize
+    );
+  }
+
+  public tryToDoProduction(): boolean {
+    if (
+      this.craft &&
+      this.checkIsEnoughResourceswForCraft() &&
+      this.hasSpaceForProductionResult()
+    ) {
+      for (const ingredient of this.craft.ingridients) {
+        for (let i = 0; i < ingredient.count; i++) {
+          this.takeResourceByName(ingredient.resourceName, false);
+        }
+      }
+
+      const newResource = createResource(this.craft.result);
+      const wasAdded = this.tryToAddResource(newResource, undefined, false);
+      this.refreshTasks();
+
+      return wasAdded;
     }
 
     return false;
@@ -226,19 +322,13 @@ export abstract class Building {
 
   public checkIsEnoughResourceswForCraft() {
     if (this.craft) {
-      let isEnoughResources = true;
-      for (let i = 0; i < this.craft?.ingridients.length; i++) {
-        const countOfResources =
-          this.resourceList.get(this.craft?.ingridients[i].resourceName) ?? 0;
-
-        if (countOfResources < this.craft?.ingridients[i].count) {
-          isEnoughResources = false;
-        }
-      }
-      return isEnoughResources;
-    } else {
-      return false;
+      return [...this.getRequiredResourceCounts()].every(
+        ([resourceName, requiredCount]) =>
+          this.getAvailableResourceCount(resourceName) >= requiredCount,
+      );
     }
+
+    return false;
   }
 
   addLinkedBuilding(line: Road) {
@@ -307,9 +397,16 @@ export abstract class Building {
     };
   }
 
-  tryToAddResource(resource: Resource, task?: Task) {
+  tryToAddResource(
+    resource: Resource,
+    task?: Task,
+    shouldRefreshTasks = true,
+  ) {
     if (this.recources.length >= this.inventorySize) return false;
 
+    resource.isReserved = task !== undefined;
+    resource.isReservedForTransport = false;
+    resource.isReservedForConstruction = false;
     this.recources.push(resource);
     this.resourceContainer.addChild(resource.root);
 
@@ -324,18 +421,31 @@ export abstract class Building {
       this.updateCraftSign();
     }
 
-    this.generateProductionTask();
+    if (task) {
+      deleteTask(task);
+    }
+
+    if (shouldRefreshTasks) {
+      this.refreshTasks();
+    }
 
     for (const fn of this.resourceListeners) {
       if (task) {
-        fn(task);
+        fn(task, resource);
       }
     }
 
     return true;
   }
 
-  takeResourceByIndex(resourceIndex: number): Resource {
+  takeResourceByIndex(
+    resourceIndex: number,
+    shouldRefreshTasks = true,
+  ): Resource | undefined {
+    if (resourceIndex < 0 || resourceIndex >= this.recources.length) {
+      return undefined;
+    }
+
     const resourceName = this.recources[resourceIndex].resourceType;
     const current = this.resourceList.get(resourceName) ?? 0;
 
@@ -348,24 +458,33 @@ export abstract class Building {
     const [res] = this.recources.splice(resourceIndex, 1);
 
     this.resourceContainer.removeChild(res.root);
+    res.isReserved = false;
+    res.isReservedForTransport = false;
+    res.isReservedForConstruction = false;
 
-    if (
-      this.recources.length < this.inventorySize &&
-      this.priorityForTasks > -1
-    ) {
-      this.generateProductionTask();
+    if (shouldRefreshTasks) {
+      this.refreshTasks();
     }
 
     return res;
   }
 
-  takeResourceByName(resourceName: string) {
+  takeResource(resource: Resource, shouldRefreshTasks = true) {
+    const index = this.recources.indexOf(resource);
+
+    return this.takeResourceByIndex(index, shouldRefreshTasks);
+  }
+
+  takeResourceByName(resourceName: string, shouldRefreshTasks = true) {
     const index = this.recources.findIndex(
-      (r) => r.resourceType === resourceName,
+      (resource) =>
+        resource.resourceType === resourceName &&
+        !resource.isReservedForTransport &&
+        !resource.isReservedForConstruction,
     );
 
     if (index !== -1) {
-      this.takeResourceByIndex(index);
+      this.takeResourceByIndex(index, shouldRefreshTasks);
       return true;
     }
 

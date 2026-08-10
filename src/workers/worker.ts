@@ -3,8 +3,9 @@ import { Building } from "@buildings/building";
 
 import { Resource } from "@resources/resource";
 import {
-  dashboard,
+  deleteTask,
   getPosibleTaskWithHighestPriority,
+  releaseTask,
 } from "@dashboard/_dashboard";
 import { Task, JobType } from "@dashboard/task";
 import { delay } from "@utils/delay";
@@ -29,7 +30,7 @@ export class Worker {
   inventory: Resource | undefined;
 
   path: Building[] = [];
-  resourceIndex?: number;
+  reservedResource?: Resource;
   task: Task | undefined;
   isWorking: boolean = false;
 
@@ -126,8 +127,6 @@ export class Worker {
       this.root.rotation = angle + Math.PI / 2;
 
       const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance === 0) return;
-
       if (distance < 3) {
         this.onReachPlatform();
         if (!this.task) {
@@ -217,18 +216,15 @@ export class Worker {
       if (!this.task) return;
 
       this.path = this.task.getRouteForTarget(this.currentPlatform);
+      if (this.path.length === 0) {
+        this.releaseCurrentTask();
+        return;
+      }
+
       this.path.shift();
 
       if (this.path.length === 0) {
-        if (
-          this.task.target.recources.length < this.task.target.inventorySize
-        ) {
-          this.handleProductionLogic();
-        } else {
-          this.task = undefined;
-          this.targetPlatform = undefined;
-          this.path = [];
-        }
+        this.handleProductionLogic();
       }
     }
   }
@@ -236,13 +232,18 @@ export class Worker {
   private pickPathForResource() {
     if (!this.task) return;
 
-    const [path, resourceIndex] = this.task.getRouteForResource(
+    const [path, resource] = this.task.getRouteForResource(
       this.currentPlatform,
       true,
     );
 
+    if (path.length === 0 || !resource) {
+      this.releaseCurrentTask();
+      return;
+    }
+
     this.path = path;
-    this.resourceIndex = resourceIndex;
+    this.reservedResource = resource;
 
     if (path.length === 1) {
       this.handleResourceLogic();
@@ -260,7 +261,11 @@ export class Worker {
     }
 
     if (this.profession === "building" || this.profession === "delivering") {
-      this.handleResourceLogic();
+      const shouldRetry = !this.handleResourceLogic();
+      if (shouldRetry) {
+        this.targetPlatform = this.currentPlatform;
+        return;
+      }
     } else {
       this.handleProductionLogic();
     }
@@ -268,28 +273,44 @@ export class Worker {
   }
 
   private async handleProductionLogic() {
-    if (this.isWorking) return;
+    if (this.isWorking || !this.task) return;
 
+    const task = this.task;
     this.isWorking = true;
-    while (true) {
-      if (!isTest) {
-        await delay(1000);
+    try {
+      while (true) {
+        if (!isTest) {
+          await delay(1000);
+        }
+
+        const result = task.target.tryToDoProduction();
+
+        if (!result) break;
       }
-
-      const result = this.task?.target.tryToDoProduction();
-
-      if (!result) break;
+    } finally {
+      deleteTask(task);
+      task.target.refreshTasks();
+      if (this.task === task) {
+        this.task = undefined;
+      }
+      this.isWorking = false;
     }
-    this.isWorking = false;
-    this.task = undefined;
   }
 
   private handleResourceLogic() {
-    if (this.resourceIndex !== undefined) {
-      this.inventory = this.currentPlatform.takeResourceByIndex(
-        this.resourceIndex,
+    if (this.reservedResource) {
+      const resource = this.currentPlatform.takeResource(
+        this.reservedResource,
       );
-      this.resourceIndex = undefined;
+
+      if (!resource) {
+        this.releaseCurrentTask();
+        return true;
+      }
+
+      this.task?.releaseResourceReservation();
+      this.reservedResource = undefined;
+      this.inventory = resource;
 
       if (this.inventory) {
         this.root.addChild(this.inventory.root);
@@ -302,17 +323,33 @@ export class Worker {
         this.path = this.task.getRouteForTarget(this.currentPlatform);
       }
 
-      return;
+      return true;
     }
 
-    if (this.inventory) {
-      this.root.removeChild(this.inventory.root);
-      if (this.task) {
-        this.currentPlatform.tryToAddResource(this.inventory, this.task);
-      }
+    if (this.inventory && this.task) {
+      const wasAdded = this.currentPlatform.tryToAddResource(
+        this.inventory,
+        this.task,
+      );
+
+      if (!wasAdded) return false;
 
       this.inventory = undefined;
       this.task = undefined;
+      this.path = [];
     }
+
+    return true;
+  }
+
+  private releaseCurrentTask() {
+    if (this.task) {
+      releaseTask(this.task);
+    }
+
+    this.task = undefined;
+    this.reservedResource = undefined;
+    this.path = [];
+    this.targetPlatform = undefined;
   }
 }
