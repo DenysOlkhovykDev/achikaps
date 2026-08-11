@@ -1,13 +1,13 @@
 import { Container } from "pixi.js";
-import { Building } from "@buildings/building";
-import { buidingParameters, select } from "@buildings/_buildings";
+import { Building } from "@aircraft/building";
+import { buidingParameters, select } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
-import { addBuilding } from "@buildings/_buildings";
-import { deleteBlueprint } from "@buildings/_buildings";
+import { addBuilding } from "@aircraft/aircraft";
+import { deleteBlueprint } from "@aircraft/aircraft";
 import { Task } from "@dashboard/task";
 import { deleteTask } from "@dashboard/_dashboard";
-import { setIsBuildMode } from "@menus/build-menu";
+import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { createResource } from "@resources/_resources";
 import { app } from "../main";
 import { Graphics, Sprite } from "pixi.js";
@@ -269,7 +269,7 @@ export class Blueprint extends Building {
       select(source);
       addBuilding(this.x, this.y, container, this.type);
       deleteBlueprint(this);
-      setIsBuildMode(false);
+      hideBuildMenuTrigger();
     }
   }
 

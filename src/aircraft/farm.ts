@@ -1,6 +1,5 @@
 import { Graphics, Triangle, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -102,7 +101,7 @@ export class Farm extends Building {
 
     this.makeDecorativeTriangles(baseGraphics);
 
-    Farm.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Farm.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private makeSpikes(baseGraphics: Graphics) {

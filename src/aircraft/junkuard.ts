@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -43,10 +42,7 @@ export class Junkuard extends Building {
 
     makeBasicCircle(baseGraphics, this.baseRadius, "#cac8a5", true);
 
-    Junkuard.baseTexture = generateTextureFromOrigin(
-      app.renderer,
-      baseGraphics,
-    );
+    Junkuard.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private createParticles() {

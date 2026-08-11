@@ -1,5 +1,5 @@
 import { Task, JobType } from "@dashboard/task";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import { dijkstra } from "@utils/algorithms";
 
 export const dashboard: Task[] = [];
@@ -15,8 +15,7 @@ export function addTask(
     if (!target.craft) return undefined;
 
     const existingTask = dashboard.find(
-      (task) =>
-        task.target === target && task.jobType === JobType.production,
+      (task) => task.target === target && task.jobType === JobType.production,
     );
 
     if (existingTask) return existingTask;
@@ -68,14 +67,12 @@ export function getPosibleTaskWithHighestPriority(
     let totalDistance: number;
 
     if (jobType === JobType.building || jobType === JobType.delivering) {
-      const [path, resource, distance] =
-        task.getRouteForResource(currentBuilding, false);
+      const [path, resource, distance] = task.getRouteForResource(
+        currentBuilding,
+        false,
+      );
 
-      if (
-        path.length === 0 ||
-        resource === undefined ||
-        distance === undefined
-      )
+      if (path.length === 0 || resource === undefined || distance === undefined)
         continue;
 
       totalDistance = distance;

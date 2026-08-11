@@ -93,7 +93,7 @@ export class Tutorials {
       if (
         x === undefined ||
         y === undefined ||
-        pointer.timeout >= 100 ||
+        pointer.timeout >= 1000000 ||
         pointer.debounce <= 25
       ) {
         if (pointer.debounce <= 25) {

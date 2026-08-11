@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -101,7 +100,7 @@ export class Grinder extends Building {
     makeBasicCircle(baseGraphics, this.baseRadius - 12, "#846c5b", false);
     makeBasicCircle(baseGraphics, this.baseRadius - 14, "#ce9e81", false);
 
-    Grinder.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Grinder.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private makeBladeConnectors(baseGraphics: Graphics) {

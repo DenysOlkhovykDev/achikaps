@@ -6,14 +6,14 @@ export default defineConfig(({ mode }) => ({
 
   resolve: {
     alias: {
-      "@buildings": path.resolve(__dirname, "src/buildings"),
+      "@aircraft": path.resolve(__dirname, "src/aircraft"),
       "@dashboard": path.resolve(__dirname, "src/dashboard"),
       "@resources": path.resolve(__dirname, "src/resources"),
       "@workers": path.resolve(__dirname, "src/workers"),
       "@menus": path.resolve(__dirname, "src/menus"),
       "@roads": path.resolve(__dirname, "src/roads"),
       "@utils": path.resolve(__dirname, "src/utils"),
-      "@test-poligons": path.resolve(__dirname, "src/test-poligons"),
+      "@test-situations": path.resolve(__dirname, "src/test-situations"),
     },
   },
 }));

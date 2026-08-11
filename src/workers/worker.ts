@@ -1,5 +1,5 @@
 import { Graphics, Container } from "pixi.js";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 
 import { Resource } from "@resources/resource";
 import {
@@ -299,9 +299,7 @@ export class Worker {
 
   private handleResourceLogic() {
     if (this.reservedResource) {
-      const resource = this.currentPlatform.takeResource(
-        this.reservedResource,
-      );
+      const resource = this.currentPlatform.takeResource(this.reservedResource);
 
       if (!resource) {
         this.releaseCurrentTask();

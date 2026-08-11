@@ -1,16 +1,8 @@
-import {
-  Graphics,
-  Container,
-  Rectangle,
-  type Renderer,
-  type Texture,
-} from "pixi.js";
+import { Graphics, Container, Rectangle, type Texture } from "pixi.js";
 import { getRadialPoint } from "@utils/basic-geometry";
+import { app } from "../main";
 
-export function generateTextureFromOrigin(
-  renderer: Renderer,
-  target: Container,
-): Texture {
+export function generateTextureFromOrigin(target: Container): Texture {
   const bounds = target.getLocalBounds();
 
   const left = Math.floor(bounds.minX);
@@ -20,7 +12,7 @@ export function generateTextureFromOrigin(
   const width = Math.max(right - left, 1);
   const height = Math.max(bottom - top, 1);
 
-  return renderer.generateTexture({
+  return app.renderer.generateTexture({
     target,
     frame: new Rectangle(left, top, width, height),
     defaultAnchor: {

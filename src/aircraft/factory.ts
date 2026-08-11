@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -116,7 +115,7 @@ export class Factory extends Building {
       baseGraphics.circle(points[i].x, points[i].y, 12).fill("#81bcf3");
     }
 
-    Factory.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Factory.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   animation(delta: number) {

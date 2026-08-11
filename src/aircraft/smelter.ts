@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -68,7 +67,7 @@ export class Smelter extends Building {
 
     makeBasicCircle(baseGraphics, this.baseRadius - 18, "#dbb39e", true);
 
-    Smelter.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Smelter.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private makeChimneyPart(

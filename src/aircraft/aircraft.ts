@@ -1,30 +1,25 @@
 import { Container } from "pixi.js";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
 import { JobType, Task } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
 import { Resource } from "@resources/resource";
 
-import { Platform } from "@buildings/platform";
-import { Factory } from "@buildings/factory";
-import { Mine } from "@buildings/mine";
-import { Farm } from "@buildings/farm";
-import { Grinder } from "@buildings/grinder";
-import { Junkuard } from "@buildings/junkuard";
-import { House } from "@buildings/house";
-import { Laboratory } from "@buildings/laboratory";
-import { Smelter } from "@buildings/smelter";
-import { Engine } from "@buildings/engine";
-import { Blueprint } from "@buildings/blueprint";
-import { GlassMaker } from "@buildings/glassMaker";
+import { Platform } from "@aircraft/platform";
+import { Factory } from "@aircraft/factory";
+import { Mine } from "@aircraft/mine";
+import { Farm } from "@aircraft/farm";
+import { Grinder } from "@aircraft/grinder";
+import { Junkuard } from "@aircraft/junkuard";
+import { House } from "@aircraft/house";
+import { Laboratory } from "@aircraft/laboratory";
+import { Smelter } from "@aircraft/smelter";
+import { Engine } from "@aircraft/engine";
+import { Blueprint } from "@aircraft/blueprint";
+import { GlassMaker } from "@aircraft/glassMaker";
 
 type BuildingConstructor = new (x: number, y: number) => Building;
-
-export type BuildingCenter = {
-  x: number;
-  y: number;
-};
 
 const centeredGeometry = (baseRadius: number, decorativeRadius: number) => ({
   baseRadius,

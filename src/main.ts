@@ -1,9 +1,10 @@
 import { Application, Container } from "pixi.js";
 import {
-  setIsBuildMode,
-  getIsBuildMode,
+  isVisibleBuildMenuTrigger,
   getBuildingType,
   setBuildingType,
+  hideBuildMenuTrigger,
+  addBuildMenu,
 } from "@menus/build-menu";
 import { moveWorkers } from "@workers/_workers";
 import {
@@ -13,12 +14,13 @@ import {
   movingBlueprints,
   hideCrafts,
   deSelectAllBuildings,
-} from "@buildings/_buildings";
-import { createTestBulding } from "./test-poligons/test-buildings";
-import { createTestWorld } from "@test-poligons/test-world";
+} from "@aircraft/aircraft";
+import { makeTestWorld } from "@test-situations/test-world";
 import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";
 import { Tutorials } from "./tutorial-overlay/_tutorials";
+import { setTestRandom } from "@utils/initializers";
+import { createTestSituation } from "@test-situations/test-situation";
 
 export const app = new Application();
 
@@ -38,68 +40,45 @@ app.stage.hitArea = app.screen;
 const isTest = import.meta.env.MODE === "test";
 
 if (isTest) {
-  let seed = 123;
-
-  Math.random = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
+  setTestRandom();
 }
 
-const keys = new Set<string>();
-
-window.addEventListener("keydown", (e) => {
-  keys.add(e.key.toLowerCase());
-});
-
-window.addEventListener("keyup", (e) => {
-  keys.delete(e.key.toLowerCase());
-});
-
 app.stage.on("pointerdown", (event) => {
-  const { x, y } = event.global;
-  if (getIsBuildMode() && getBuildingType() !== "") {
-    addBlueprint(x, y, buildingsLayer, getBuildingType());
-    setBuildingType("");
+  const buildingType = getBuildingType();
+
+  if (!isVisibleBuildMenuTrigger() && buildingType !== undefined) {
+    const { x, y } = event.global;
+
+    addBlueprint(x, y, airCraftLayer, buildingType);
+    setBuildingType(undefined);
   }
-  setIsBuildMode(false);
-  hideCrafts();
+
   deSelectAllBuildings();
+
+  hideBuildMenuTrigger();
+  hideCrafts();
   hideJoystick();
 });
 
-const tutorials = new Tutorials();
-const buildingsLayer = new Container();
-const workersLayer = new Container();
 const UIcontainer = new Container();
-
-createTestBulding(
-  buildingsLayer,
-  workersLayer,
-  tutorials,
-  UIcontainer,
-  app.stage,
-);
-
-export const worldLayer = new Container();
-createTestWorld(worldLayer, app.stage);
-
+addBuildMenu(UIcontainer);
 const joystick = new Joystick();
+hideJoystick();
 
-joystick.position.set(500, 930);
-joystick.hide();
+UIcontainer.addChild(joystick);
 
-export function showJoystick() {
-  joystick.show();
-}
+const tutorials = new Tutorials(); //
+const airCraftLayer = new Container(); //
+const workersLayer = new Container(); //
+export const worldLayer = new Container(); //
 
-export function hideJoystick() {
-  joystick.hide();
-}
+createTestSituation(airCraftLayer, workersLayer, worldLayer, tutorials);
 
-app.stage.addChild(joystick);
-
-tutorials.init(app.stage);
+app.stage.addChild(airCraftLayer); //
+app.stage.addChild(workersLayer); //
+app.stage.addChild(worldLayer); //
+app.stage.addChild(UIcontainer); //
+tutorials.init(app.stage); //
 
 app.ticker.add((delta) => {
   const deltaTime = isTest ? 1 : delta.deltaTime;
@@ -107,7 +86,7 @@ app.ticker.add((delta) => {
   const angle = moveWorld(
     deltaTime,
     worldLayer,
-    buildingsLayer,
+    airCraftLayer,
     workersLayer,
     joystick.inputX,
     joystick.inputY,
@@ -123,3 +102,15 @@ app.ticker.add((delta) => {
 
   tutorials.updateTutorials();
 });
+
+export function showJoystick() {
+  joystick.show();
+}
+
+export function hideJoystick() {
+  joystick.hide();
+}
+
+export function getWorldCoordinates() {
+  return { x: worldLayer.pivot.x, y: worldLayer.pivot.y }; //
+}

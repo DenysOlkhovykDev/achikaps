@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -79,10 +78,7 @@ export class Laboratory extends Building {
 
     this.makeDecorativeCircles(baseGraphics);
 
-    Laboratory.baseTexture = generateTextureFromOrigin(
-      app.renderer,
-      baseGraphics,
-    );
+    Laboratory.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private makeDecorativeCircles(baseGraphics: Graphics) {

@@ -1,23 +1,15 @@
 import { test, expect } from "@playwright/test";
 
-import { testSettings, skipFrames } from "./test-infra";
+import { testSettings, skipFrames, initGame } from "./test-infra";
 
-test("auto-construction-of-buildings", async ({ page }) => {
-  await page.goto(
-    "http://localhost:5173/?scenario=auto-construction-of-buildings",
-  );
+const testName = "auto-construction-of-buildings";
 
-  const canvas = page.locator("canvas");
-  await expect(canvas).toBeVisible();
+test(testName, async ({ page }) => {
+  await initGame(page, testName);
 
-  await page.waitForFunction(() => (window as any).app !== undefined);
-
-  await skipFrames(page, 3 * 5);
+  await skipFrames(page, 15);
 
   const screenshot = await page.locator("canvas").screenshot();
 
-  expect(screenshot).toMatchSnapshot(
-    "./tests/screenshots/auto-construction-of-buildings.png",
-    testSettings,
-  );
+  expect(screenshot).toMatchSnapshot(testName + ".png", testSettings);
 });

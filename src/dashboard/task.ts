@@ -1,8 +1,8 @@
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import { aStar, dijkstra, buildPath } from "@utils/algorithms";
 import { Resource } from "@resources/resource";
 
-import { buildings } from "@buildings/_buildings";
+import { buildings } from "@aircraft/aircraft";
 
 export const JobType = {
   delivering: "delivering",
@@ -62,8 +62,7 @@ export class Task {
           continue;
         }
 
-        const totalDistance =
-          distanceToResource + distanceFromResourceToTarget;
+        const totalDistance = distanceToResource + distanceFromResourceToTarget;
 
         if (totalDistance < bestDistance) {
           bestDistance = totalDistance;

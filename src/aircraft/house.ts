@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -19,7 +18,7 @@ export class House extends Building {
   buildingParams = {
     changeSizeDelay: 300,
     isGrowing: true,
-    buildingSize: 1,
+    aircraftize: 1,
   };
 
   constructor(x: number, y: number) {
@@ -87,7 +86,7 @@ export class House extends Building {
 
     makeBasicCircle(baseGraphics, this.baseRadius - 18, "#5b8937", false);
 
-    House.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    House.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private updateAntennasVisibility() {
@@ -99,18 +98,18 @@ export class House extends Building {
   animation(delta: number) {
     if (this.buildingParams.changeSizeDelay <= 0) {
       const direction = this.buildingParams.isGrowing ? 1 : -1;
-      this.buildingParams.buildingSize += 0.01 * delta * direction;
-      if (this.buildingParams.buildingSize > 1.1) {
+      this.buildingParams.aircraftize += 0.01 * delta * direction;
+      if (this.buildingParams.aircraftize > 1.1) {
         this.buildingParams.isGrowing = false;
         // this.antennasParams.currentAmount--;
         // this.updateAntennasVisibility();
       }
-      if (this.buildingParams.buildingSize <= 1) {
+      if (this.buildingParams.aircraftize <= 1) {
         this.buildingParams.isGrowing = true;
         this.buildingParams.changeSizeDelay = 300;
       }
 
-      this.contentContainer.scale.set(this.buildingParams.buildingSize);
+      this.contentContainer.scale.set(this.buildingParams.aircraftize);
     } else {
       this.buildingParams.changeSizeDelay -= delta;
     }

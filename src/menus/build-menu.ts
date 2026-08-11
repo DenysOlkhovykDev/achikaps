@@ -4,7 +4,7 @@ import { MenuItem } from "@menus/menu";
 
 let isBuildMode = false;
 let menuTrigger: MenuTrigger;
-let buildingType = "";
+let buildingType: string | undefined = undefined;
 
 const menuData: MenuItem[] = [
   {
@@ -63,20 +63,21 @@ export function addBuildMenu(container: Container) {
   menuTrigger = new MenuTrigger(menuData, graphic, container);
 }
 
-export function setIsBuildMode(type: boolean) {
-  isBuildMode = type;
-  if (isBuildMode) {
-    menuTrigger.menuTriggershow();
-  } else {
-    menuTrigger.menuTriggerHide();
-  }
+export function showBuildMenuTrigger() {
+  menuTrigger.menuTriggerShow();
+  isBuildMode = true;
 }
 
-export function getIsBuildMode() {
+export function hideBuildMenuTrigger() {
+  menuTrigger.menuTriggerHide();
+  isBuildMode = false;
+}
+
+export function isVisibleBuildMenuTrigger() {
   return isBuildMode;
 }
 
-export function setBuildingType(type: string) {
+export function setBuildingType(type: string | undefined) {
   buildingType = type;
 }
 

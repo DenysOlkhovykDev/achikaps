@@ -1,6 +1,6 @@
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 
-import { buildings } from "@buildings/_buildings";
+import { buildings } from "@aircraft/aircraft";
 
 // IDK how it works
 export function dijkstra(start: Building) {

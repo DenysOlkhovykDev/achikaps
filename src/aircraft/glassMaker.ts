@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@buildings/building";
-import { app } from "../main";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -14,11 +13,7 @@ export class GlassMaker extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      this.decorativeRadius,
-      "#000000",
-      this.shadowContainer,
-    );
+    makeRoundShadow(this.decorativeRadius, "#000000", this.shadowContainer);
 
     this.createDecorativeTexture();
 
@@ -41,10 +36,7 @@ export class GlassMaker extends Building {
       false,
     );
 
-    GlassMaker.baseTexture = generateTextureFromOrigin(
-      app.renderer,
-      decorationGraphics,
-    );
+    GlassMaker.baseTexture = generateTextureFromOrigin(decorationGraphics);
   }
 
   animation(delta: number) {}

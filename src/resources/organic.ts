@@ -1,6 +1,5 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 export class Organic extends Resource {
@@ -21,6 +20,6 @@ export class Organic extends Resource {
       .stroke({ width: 3, color: "#000000" })
       .fill("#49c461");
 
-    Organic.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Organic.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 }

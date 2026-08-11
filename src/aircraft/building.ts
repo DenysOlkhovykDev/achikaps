@@ -4,13 +4,14 @@ import {
   buidingParameters,
   deSelectAllBuildings,
   hideCrafts,
-} from "@buildings/_buildings";
+} from "@aircraft/aircraft";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
 import { addTask, dashboard, deleteTask } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
-import { setIsBuildMode } from "@menus/build-menu";
+import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { makeRoundShadow } from "@utils/basic-graphic";
+import { hideJoystick } from "../main";
 
 type ResourceListener = (task: Task, resource: Resource) => void;
 
@@ -100,22 +101,13 @@ export abstract class Building {
     const decorativeCenter = this.getDecorativeCenterInRoot();
 
     this.resourceContainer.position.set(this.baseCenter.x, this.baseCenter.y);
-    this.shadowContainer.position.set(
-      decorativeCenter.x,
-      decorativeCenter.y,
-    );
+    this.shadowContainer.position.set(decorativeCenter.x, decorativeCenter.y);
     this.selectShadowContainer.position.set(
       decorativeCenter.x,
       decorativeCenter.y,
     );
-    this.contentContainer.position.set(
-      decorativeCenter.x,
-      decorativeCenter.y,
-    );
-    this.craftSign.position.set(
-      decorativeCenter.x,
-      decorativeCenter.y,
-    );
+    this.contentContainer.position.set(decorativeCenter.x, decorativeCenter.y);
+    this.craftSign.position.set(decorativeCenter.x, decorativeCenter.y);
 
     this.shadowContainer.rotation = this.orientation;
     this.selectShadowContainer.rotation = this.orientation;
@@ -230,8 +222,7 @@ export abstract class Building {
 
   private syncProductionTask() {
     const tasks = dashboard.filter(
-      (task) =>
-        task.target === this && task.jobType === JobType.production,
+      (task) => task.target === this && task.jobType === JobType.production,
     );
     const canProduce =
       this.craft !== undefined &&
@@ -278,7 +269,8 @@ export abstract class Building {
     for (const ingredient of this.craft.ingridients) {
       requiredResources.set(
         ingredient.resourceName,
-        (requiredResources.get(ingredient.resourceName) ?? 0) + ingredient.count,
+        (requiredResources.get(ingredient.resourceName) ?? 0) +
+          ingredient.count,
       );
     }
 
@@ -293,9 +285,7 @@ export abstract class Building {
       0,
     );
 
-    return (
-      this.recources.length - consumedResources + 1 <= this.inventorySize
-    );
+    return this.recources.length - consumedResources + 1 <= this.inventorySize;
   }
 
   public tryToDoProduction(): boolean {
@@ -338,7 +328,8 @@ export abstract class Building {
   onClick(event: FederatedPointerEvent) {
     hideCrafts();
     this.showCraft(false);
-    setIsBuildMode(false);
+    hideJoystick();
+    hideBuildMenuTrigger();
     deSelectAllBuildings();
     makeRoundShadow(
       this.decorativeRadius + 1,
@@ -397,11 +388,7 @@ export abstract class Building {
     };
   }
 
-  tryToAddResource(
-    resource: Resource,
-    task?: Task,
-    shouldRefreshTasks = true,
-  ) {
+  tryToAddResource(resource: Resource, task?: Task, shouldRefreshTasks = true) {
     if (this.recources.length >= this.inventorySize) return false;
 
     resource.isReserved = task !== undefined;

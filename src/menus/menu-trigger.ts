@@ -35,13 +35,14 @@ export class MenuTrigger {
     }
   }
 
-  menuTriggershow() {
+  menuTriggerShow() {
     this.parent.addChild(this.graphic);
   }
 
   menuTriggerHide() {
     this.parent.removeChild(this.graphic);
     this.menu?.menuHide();
+    this.isMenuActive = false;
     this.menu = undefined;
   }
 }
