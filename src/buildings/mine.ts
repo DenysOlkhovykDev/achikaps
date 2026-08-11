@@ -12,11 +12,12 @@ export class Mine extends Building {
   kelpLeavesGraphics: Graphics[] = [];
   kelpTrunksGraphics: Graphics = new Graphics();
   kelpsParams = {
-    amount: 8,
-    leavesSize: 8,
-    leafSegments: 7,
+    amount: 4,
+    leavesSize: 16,
+    leavesWidth: 20,
+    leafSegments: 6,
     movingSpeed: 0.05,
-    maxAmplitude: 1.55,
+    maxAmplitude: 3,
     kelpTime: 0,
   };
 
@@ -69,7 +70,7 @@ export class Mine extends Building {
       const { angle, x, y } = getRadialPoint(
         i,
         this.kelpsParams.amount,
-        this.baseRadius + 5,
+        this.baseRadius - 6,
       );
 
       const cos = Math.cos(angle);
@@ -97,7 +98,7 @@ export class Mine extends Building {
         i,
         this.kelpsParams.amount,
         this.baseRadius,
-        this.baseRadius + 8,
+        this.baseRadius + 3,
       );
 
       baseGraphics
@@ -156,7 +157,7 @@ export class Mine extends Building {
       );
 
       this.kelpLeavesGraphics[i].stroke({
-        width: 4,
+        width: this.kelpsParams.leavesWidth,
         color: "#559c48",
         cap: "round",
         join: "round",
