@@ -70,38 +70,3 @@ export function makeBasicCircle(
   }
   graphic.fill(color);
 }
-
-export function makeAntennas(
-  contentContainer: Container,
-  antennasGraphics: Graphics[],
-  angleOffset: number,
-  baseRadius: number,
-  totalAmount: number,
-  currentAmount?: number,
-) {
-  const amount = currentAmount ? currentAmount : totalAmount;
-
-  for (let i = 0; i < amount; i++) {
-    antennasGraphics[i] = new Graphics();
-
-    const { angle } = getRadialPoint(i, totalAmount, 1);
-
-    const cos = Math.cos(angle + angleOffset);
-    const sin = Math.sin(angle + angleOffset);
-
-    const x1 = cos * (baseRadius - 5);
-    const y1 = sin * (baseRadius - 5);
-
-    const x2 = cos * (baseRadius + 18);
-    const y2 = sin * (baseRadius + 18);
-
-    antennasGraphics[i]
-      .moveTo(x1, y1)
-      .lineTo(x2, y2)
-      .stroke({ width: 4, color: "#000000" })
-      .circle(x2, y2, 4)
-      .fill("#000000");
-
-    contentContainer.addChild(antennasGraphics[i]);
-  }
-}

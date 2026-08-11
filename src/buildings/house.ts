@@ -3,10 +3,10 @@ import { app } from "../main";
 import { Building } from "@buildings/building";
 import {
   generateTextureFromOrigin,
-  makeAntennas,
   makeBasicCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
+import { getRadialPoint } from "@utils/basic-geometry";
 
 export class House extends Building {
   antennasGraphics: Graphics[] = [];
@@ -30,8 +30,7 @@ export class House extends Building {
   draw() {
     makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
 
-    makeAntennas(
-      this.contentContainer,
+    this.makeAntennas(
       this.antennasGraphics,
       this.antennasParams.angleOffset,
       this.baseRadius,
@@ -43,6 +42,40 @@ export class House extends Building {
 
     const base = new Sprite(House.baseTexture);
     this.contentContainer.addChild(base);
+  }
+
+  private makeAntennas(
+    antennasGraphics: Graphics[],
+    angleOffset: number,
+    baseRadius: number,
+    totalAmount: number,
+    currentAmount?: number,
+  ) {
+    const amount = currentAmount ? currentAmount : totalAmount;
+
+    for (let i = 0; i < amount; i++) {
+      antennasGraphics[i] = new Graphics();
+
+      const { angle } = getRadialPoint(i, totalAmount, 1);
+
+      const cos = Math.cos(angle + angleOffset);
+      const sin = Math.sin(angle + angleOffset);
+
+      const x1 = cos * (baseRadius - 5);
+      const y1 = sin * (baseRadius - 5);
+
+      const x2 = cos * (baseRadius + 18);
+      const y2 = sin * (baseRadius + 18);
+
+      antennasGraphics[i]
+        .moveTo(x1, y1)
+        .lineTo(x2, y2)
+        .stroke({ width: 4, color: "#000000" })
+        .circle(x2, y2, 4)
+        .fill("#000000");
+
+      this.contentContainer.addChild(antennasGraphics[i]);
+    }
   }
 
   private createBaseTexture() {
