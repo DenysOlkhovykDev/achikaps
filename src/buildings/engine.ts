@@ -162,7 +162,7 @@ export class Engine extends Building {
       this.propellerParams.rotationSpeed * delta;
 
     const isMoving = movingAngle !== undefined;
-    const backAngle = isMoving ? movingAngle + Math.PI : 0;
+    const backAngle = isMoving ? movingAngle : 0;
 
     for (const particle of this.particles) {
       if (particle.scale <= 0.1) {
