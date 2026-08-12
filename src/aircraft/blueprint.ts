@@ -7,7 +7,7 @@ import { Task } from "@dashboard/task";
 import { deleteTask } from "@dashboard/_dashboard";
 import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { createResource } from "@resources/_resources";
-import { Graphics, Sprite } from "pixi.js";
+import { Graphics } from "pixi.js";
 
 export class Blueprint extends Building {
   redraws: number = 0;

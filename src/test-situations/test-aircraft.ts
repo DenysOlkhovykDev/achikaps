@@ -1,6 +1,3 @@
-import { Container } from "pixi.js";
-
-import { addWorker } from "@workers/_workers";
 import { aircraft } from "@aircraft/aircraft";
 
 import { JobType } from "@dashboard/task";
@@ -9,7 +6,7 @@ import { addTask } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
 import { AircraftScenario } from "./test-situation";
 
-export function makeAirCraftByScenario(scenario: AircraftScenario) {
+export function createAirCraftByScenario(scenario: AircraftScenario) {
   const buildingsMap = new Map();
 
   for (const building of scenario.buildings) {
@@ -43,7 +40,7 @@ export function makeAirCraftByScenario(scenario: AircraftScenario) {
   for (const worker of scenario.workers || []) {
     const newBuilding = buildingsMap.get(worker.buildingId);
     const baseCenter = newBuilding.getBaseCenterInWorld();
-    addWorker(
+    aircraft.workers.addWorker(
       baseCenter.x,
       baseCenter.y,
       aircraft.workersLayer,

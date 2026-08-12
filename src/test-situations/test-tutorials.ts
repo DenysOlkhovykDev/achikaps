@@ -1,7 +1,7 @@
 import { Tutorials } from "../tutorial-overlay/_tutorials";
 import { TutorialsScenario } from "./test-situation";
 
-export function makeTutorialsByScenario(
+export function createTutorialsByScenario(
   scenario: TutorialsScenario,
   tutorials: Tutorials,
 ) {

@@ -18,6 +18,7 @@ import { Smelter } from "@aircraft/smelter";
 import { Engine } from "@aircraft/engine";
 import { Blueprint } from "@aircraft/blueprint";
 import { GlassMaker } from "@aircraft/glassMaker";
+import { Workers } from "@workers/_workers";
 
 const centeredGeometry = (baseRadius: number, decorativeRadius: number) => ({
   baseRadius: baseRadius,
@@ -157,6 +158,7 @@ export const buidingParameters = {
 export class Aircraft {
   public buildings: Building[] = [];
   public blueprints: Blueprint[] = [];
+  public workers: Workers = new Workers();
   public selectedBuilding?: number;
 
   public airCraftLayer = new Container();

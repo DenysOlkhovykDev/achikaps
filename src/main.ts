@@ -7,11 +7,9 @@ import {
   addBuildMenu,
 } from "@menus/build-menu";
 import { aircraft } from "@aircraft/aircraft";
-import { moveWorkers } from "@workers/_workers";
-import { makeTestWorld } from "@test-situations/test-world";
 import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";
-import { Tutorials } from "./tutorial-overlay/_tutorials";
+import { tutorials, Tutorials } from "./tutorial-overlay/_tutorials";
 import { setTestRandom } from "@utils/initializers";
 import { createTestSituation } from "@test-situations/test-situation";
 
@@ -36,6 +34,24 @@ if (isTest) {
   setTestRandom();
 }
 
+const UIcontainer = new Container(); // Temp
+addBuildMenu(UIcontainer); // Temp
+const joystick = new Joystick(); // Temp
+hideJoystick(); // Temp
+
+UIcontainer.addChild(joystick); // Temp
+
+const worldLayer = new Container(); // Temp
+
+createTestSituation(worldLayer, tutorials);
+
+aircraft.initilaizeAircraft(app.stage);
+
+app.stage.addChild(worldLayer); // Temp
+app.stage.addChild(UIcontainer); // Temp
+
+tutorials.initializaTutorials(app.stage);
+
 app.stage.on("pointerdown", (event) => {
   const buildingType = getBuildingType();
 
@@ -53,25 +69,6 @@ app.stage.on("pointerdown", (event) => {
   hideJoystick();
 });
 
-const UIcontainer = new Container();
-addBuildMenu(UIcontainer);
-const joystick = new Joystick();
-hideJoystick();
-
-UIcontainer.addChild(joystick);
-
-const tutorials = new Tutorials(); //
-export const worldLayer = new Container(); //
-
-createTestSituation(worldLayer, tutorials);
-
-aircraft.initilaizeAircraft(app.stage);
-
-app.stage.addChild(worldLayer); //
-app.stage.addChild(UIcontainer); //
-
-tutorials.initializaTutorials(app.stage);
-
 app.ticker.add((delta) => {
   const deltaTime = isTest ? 1 : delta.deltaTime;
 
@@ -84,7 +81,7 @@ app.ticker.add((delta) => {
     joystick.inputY,
   );
 
-  moveWorkers(deltaTime);
+  aircraft.workers.moveWorkers(deltaTime);
 
   if (!isTest) {
     aircraft.buildingAnimations(deltaTime, angle);
@@ -104,5 +101,14 @@ export function hideJoystick() {
 }
 
 export function getWorldCoordinates() {
-  return { x: worldLayer.pivot.x, y: worldLayer.pivot.y }; //
+  return { x: worldLayer.pivot.x, y: worldLayer.pivot.y }; // Temp
+}
+
+export function getGlobalWorldCoordinates(x: number, y: number) {
+  const global = worldLayer.toGlobal({
+    x: x,
+    y: y,
+  });
+
+  return { x: global.x, y: global.y }; // Temp
 }

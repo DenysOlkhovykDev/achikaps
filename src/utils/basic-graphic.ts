@@ -1,5 +1,4 @@
 import { Graphics, Container, Rectangle, type Texture } from "pixi.js";
-import { getRadialPoint } from "@utils/basic-geometry";
 import { app } from "../main";
 
 export function generateTextureFromOrigin(target: Container): Texture {

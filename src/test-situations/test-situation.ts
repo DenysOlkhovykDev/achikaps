@@ -23,10 +23,10 @@ import { productionResources } from "../../tests/scenarios/production-resources"
 import { sceneRender } from "../../tests/scenarios/scene-render";
 import { showingPointers } from "../../tests/scenarios/showing-pointers";
 import { differentAngles } from "../../tests/scenarios/different-angles";
-import { makeAirCraftByScenario } from "./test-aircraft";
-import { makeTestWorld } from "./test-world";
+import { createAirCraftByScenario } from "./test-aircraft";
+import { createTestWorld } from "./test-world";
 import { getWorldCoordinates } from "../main";
-import { makeTutorialsByScenario } from "./test-tutorials";
+import { createTutorialsByScenario } from "./test-tutorials";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -268,11 +268,11 @@ export function createTestSituation(
     throw new Error("Scenario not found: " + scenarioName);
   }
 
-  makeAirCraftByScenario(scenario.aircraft);
+  createAirCraftByScenario(scenario.aircraft);
   if (scenario.tutorials) {
-    makeTutorialsByScenario(scenario.tutorials, tutorials);
+    createTutorialsByScenario(scenario.tutorials, tutorials);
   }
-  makeTestWorld(worldLayer);
+  createTestWorld(worldLayer);
 
   aircraft.hideCraftSigns();
   hideBuildMenuTrigger();
