@@ -2,7 +2,7 @@ import { Building } from "@aircraft/building";
 import { aStar, dijkstra, buildPath } from "@utils/algorithms";
 import { Resource } from "@resources/resource";
 
-import { buildings } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 
 export const JobType = {
   delivering: "delivering",
@@ -44,7 +44,7 @@ export class Task {
     let bestDistance = Infinity;
     let bestResource: Resource | undefined = undefined;
 
-    for (const building of buildings) {
+    for (const building of aircraft.buildings) {
       if (building === this.target) continue;
 
       const resource = this.findNeededResource(building);

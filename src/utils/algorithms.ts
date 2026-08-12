@@ -1,6 +1,6 @@
 import { Building } from "@aircraft/building";
 
-import { buildings } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 
 // IDK how it works
 export function dijkstra(start: Building) {
@@ -8,7 +8,7 @@ export function dijkstra(start: Building) {
   const previous = new Map<Building, Building>();
   const visited = new Set<Building>();
 
-  for (const building of buildings) {
+  for (const building of aircraft.buildings) {
     distances.set(building, Infinity);
   }
 
@@ -54,7 +54,7 @@ export function aStar(start: Building, goal: Building) {
   const costFromStart = new Map<Building, number>();
   const estimatedTotalCost = new Map<Building, number>();
 
-  for (const building of buildings) {
+  for (const building of aircraft.buildings) {
     costFromStart.set(building, Infinity);
     estimatedTotalCost.set(building, Infinity);
   }

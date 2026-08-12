@@ -1,10 +1,6 @@
 import { Graphics, FederatedPointerEvent, Container, Texture } from "pixi.js";
 import { Resource } from "@resources/resource";
-import {
-  buidingParameters,
-  deSelectAllBuildings,
-  hideCrafts,
-} from "@aircraft/aircraft";
+import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
 import { Task, JobType } from "@dashboard/task";
 import { addTask, dashboard, deleteTask } from "@dashboard/_dashboard";
@@ -326,11 +322,11 @@ export abstract class Building {
   }
 
   onClick(event: FederatedPointerEvent) {
-    hideCrafts();
+    aircraft.hideCraftSigns();
     this.showCraft(false);
     hideJoystick();
     hideBuildMenuTrigger();
-    deSelectAllBuildings();
+    aircraft.deSelectAllBuildings();
     makeRoundShadow(
       this.decorativeRadius + 1,
       "#00ff00",

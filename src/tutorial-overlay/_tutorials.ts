@@ -13,7 +13,7 @@ export class Tutorials {
   compasses: Compass[] = [];
   messages: Message[] = [];
 
-  public init(stage: Container) {
+  public initializaTutorials(stage: Container) {
     stage.addChild(this.tutorialOverlay);
     stage.addChild(this.compassOverlay);
     stage.addChild(this.messagesOverlay);

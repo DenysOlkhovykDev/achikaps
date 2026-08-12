@@ -6,15 +6,8 @@ import {
   hideBuildMenuTrigger,
   addBuildMenu,
 } from "@menus/build-menu";
+import { aircraft } from "@aircraft/aircraft";
 import { moveWorkers } from "@workers/_workers";
-import {
-  addBuilding,
-  addBlueprint,
-  animations,
-  movingBlueprints,
-  hideCrafts,
-  deSelectAllBuildings,
-} from "@aircraft/aircraft";
 import { makeTestWorld } from "@test-situations/test-world";
 import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";
@@ -46,17 +39,17 @@ if (isTest) {
 app.stage.on("pointerdown", (event) => {
   const buildingType = getBuildingType();
 
-  if (!isVisibleBuildMenuTrigger() && buildingType !== undefined) {
+  if (isVisibleBuildMenuTrigger() && buildingType !== undefined) {
     const { x, y } = event.global;
 
-    addBlueprint(x, y, airCraftLayer, buildingType);
+    aircraft.addBlueprint(x, y, buildingType);
     setBuildingType(undefined);
   }
 
-  deSelectAllBuildings();
+  aircraft.deSelectAllBuildings();
 
   hideBuildMenuTrigger();
-  hideCrafts();
+  aircraft.hideCraftSigns();
   hideJoystick();
 });
 
@@ -68,17 +61,16 @@ hideJoystick();
 UIcontainer.addChild(joystick);
 
 const tutorials = new Tutorials(); //
-const airCraftLayer = new Container(); //
-const workersLayer = new Container(); //
 export const worldLayer = new Container(); //
 
-createTestSituation(airCraftLayer, workersLayer, worldLayer, tutorials);
+createTestSituation(worldLayer, tutorials);
 
-app.stage.addChild(airCraftLayer); //
-app.stage.addChild(workersLayer); //
+aircraft.initilaizeAircraft(app.stage);
+
 app.stage.addChild(worldLayer); //
 app.stage.addChild(UIcontainer); //
-tutorials.init(app.stage); //
+
+tutorials.initializaTutorials(app.stage);
 
 app.ticker.add((delta) => {
   const deltaTime = isTest ? 1 : delta.deltaTime;
@@ -86,8 +78,8 @@ app.ticker.add((delta) => {
   const angle = moveWorld(
     deltaTime,
     worldLayer,
-    airCraftLayer,
-    workersLayer,
+    aircraft.airCraftLayer,
+    aircraft.workersLayer,
     joystick.inputX,
     joystick.inputY,
   );
@@ -95,10 +87,10 @@ app.ticker.add((delta) => {
   moveWorkers(deltaTime);
 
   if (!isTest) {
-    animations(deltaTime, angle);
+    aircraft.buildingAnimations(deltaTime, angle);
   }
 
-  movingBlueprints(deltaTime);
+  aircraft.movingBlueprints(deltaTime);
 
   tutorials.updateTutorials();
 });

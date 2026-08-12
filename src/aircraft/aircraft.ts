@@ -19,16 +19,17 @@ import { Engine } from "@aircraft/engine";
 import { Blueprint } from "@aircraft/blueprint";
 import { GlassMaker } from "@aircraft/glassMaker";
 
-type BuildingConstructor = new (x: number, y: number) => Building;
-
 const centeredGeometry = (baseRadius: number, decorativeRadius: number) => ({
-  baseRadius,
+  baseRadius: baseRadius,
   decorativeRadius: decorativeRadius,
   baseCenter: { x: 0, y: 0 },
   decorativeCenter: { x: 0, y: 0 },
 });
 
-export const buildingMap: Record<string, BuildingConstructor> = {
+export const buildingMap: Record<
+  string,
+  new (x: number, y: number) => Building
+> = {
   Platform,
   Factory,
   Mine,
@@ -153,172 +154,182 @@ export const buidingParameters = {
   },
 };
 
-export const buildings: Building[] = [];
-export const blueprints: Blueprint[] = [];
-let selectedBuilding: number;
+export class Aircraft {
+  public buildings: Building[] = [];
+  public blueprints: Blueprint[] = [];
+  public selectedBuilding?: number;
 
-export function addBuilding(
-  x: number,
-  y: number,
-  container: Container,
-  buildingType: string,
-) {
-  const BuildingClass = buildingMap[buildingType] || Platform;
-  const building = new BuildingClass(x, y);
-  const from = buildings.length > 0 ? buildings[selectedBuilding] : undefined;
+  public airCraftLayer = new Container();
+  public workersLayer = new Container();
 
-  if (from) {
-    building.orientByBuildDirection(from);
+  public initilaizeAircraft(stage: Container) {
+    stage.addChild(this.airCraftLayer);
+    stage.addChild(this.workersLayer);
   }
 
-  buildings.push(building);
-  container.addChild(building.root);
+  public addBuilding(x: number, y: number, buildingType: string) {
+    const BuildingClass = buildingMap[buildingType] || Platform;
+    const building = new BuildingClass(x, y);
 
-  if (from) {
-    const line = new Road(from, building);
+    const from =
+      this.buildings.length > 0 && this.selectedBuilding !== undefined
+        ? this.buildings[this.selectedBuilding]
+        : undefined;
 
-    from.addLinkedBuilding(line);
-    building.addLinkedBuilding(line);
+    if (from) {
+      building.orientByBuildDirection(from);
+    }
 
-    container.addChildAt(line.graphic, 0);
+    this.buildings.push(building);
+    this.airCraftLayer.addChild(building.root);
+
+    if (from) {
+      const line = new Road(from, building);
+
+      from.addLinkedBuilding(line);
+      building.addLinkedBuilding(line);
+
+      this.airCraftLayer.addChildAt(line.graphic, 0);
+    }
+
+    return building;
   }
 
-  return building;
-}
+  public addBlueprint(x: number, y: number, buildingType: string) {
+    const blueprint = new Blueprint(x, y, buildingType);
 
-export function addBlueprint(
-  x: number,
-  y: number,
-  container: Container,
-  buildingType: string,
-) {
-  const blueprint = new Blueprint(x, y, buildingType);
+    this.blueprints.push(blueprint);
+    this.airCraftLayer.addChild(blueprint.root);
 
-  blueprints.push(blueprint);
-  container.addChild(blueprint.root);
+    if (this.buildings.length > 0 && this.selectedBuilding !== undefined) {
+      const from = this.buildings[this.selectedBuilding];
 
-  if (buildings.length > 0) {
-    const from = buildings[selectedBuilding];
+      blueprint.orientByBuildDirection(from);
 
-    blueprint.orientByBuildDirection(from);
+      const line = new BlueprintRoad(from, blueprint);
 
-    const line = new BlueprintRoad(from, blueprint);
+      blueprint.addLinkedBuilding(line);
 
-    blueprint.addLinkedBuilding(line);
+      this.airCraftLayer.addChildAt(line.graphic, 0);
+      const craft =
+        buidingParameters[buildingType as keyof typeof buidingParameters].craft;
 
-    container.addChildAt(line.graphic, 0);
-    const craft =
-      buidingParameters[buildingType as keyof typeof buidingParameters].craft;
+      for (let i = 0; i < craft.length; i++) {
+        for (let j = 0; j < craft[i].amount; j++) {
+          const availableResource = from.recources.find(
+            (resource) =>
+              resource.resourceType === craft[i].type && !resource.isReserved,
+          );
 
-    for (let i = 0; i < craft.length; i++) {
-      for (let j = 0; j < craft[i].amount; j++) {
-        const availableResource = from.recources.find(
-          (resource) =>
-            resource.resourceType === craft[i].type && !resource.isReserved,
-        );
-
-        if (availableResource) {
-          blueprint.reserveBuildResource(availableResource);
-        } else {
-          const task = addTask(from, JobType.building, 5, craft[i].type, 1);
-          if (task) {
-            blueprint.tasks.push(task);
+          if (availableResource) {
+            blueprint.reserveBuildResource(availableResource);
+          } else {
+            const task = addTask(from, JobType.building, 5, craft[i].type, 1);
+            if (task) {
+              blueprint.tasks.push(task);
+            }
           }
+
+          blueprint.buildResources.push(craft[i].type);
         }
+      }
 
-        blueprint.buildResources.push(craft[i].type);
+      from.refreshTasks();
+
+      const source = blueprint.links[0].from;
+
+      const unsubscribe = source.onResourceAdded(
+        (task: Task, resource: Resource) => {
+          blueprint.onBlueprintResourceAdded(
+            task,
+            resource,
+            this.airCraftLayer,
+          );
+        },
+      );
+
+      blueprint.unsubscribe = unsubscribe;
+      blueprint.blueprinToBuilding(this.airCraftLayer);
+    }
+
+    return blueprint;
+  }
+
+  public selectBuilding(node: Building) {
+    this.selectedBuilding = this.buildings.indexOf(node);
+    this.showCraftSigns();
+  }
+
+  public deSelectAllBuildings() {
+    for (const building of this.buildings) {
+      building.selectShadowContainer.removeChildren();
+    }
+
+    for (const blueprint of this.blueprints) {
+      blueprint.selectShadowContainer.removeChildren();
+    }
+  }
+
+  public showCraftSigns() {
+    this.hideCraftSigns();
+    for (const blueprint of this.blueprints) {
+      blueprint.showCraft();
+    }
+  }
+
+  public hideCraftSigns() {
+    for (const building of this.buildings) {
+      building.hideCraftSign();
+    }
+    for (const blueprint of this.blueprints) {
+      blueprint.hideCraftSign();
+    }
+  }
+
+  public buildingAnimations(delta: number, movingAngle?: number) {
+    for (const building of this.buildings) {
+      building.animation(delta, movingAngle);
+    }
+  }
+
+  public movingBlueprints(delta: number) {
+    for (const blueprint of this.blueprints) {
+      for (const building of this.buildings) {
+        blueprint.checkAndMove(building, delta);
+      }
+    }
+    for (const blueprint of this.blueprints) {
+      for (const blueprintForCheck of this.blueprints) {
+        if (blueprint !== blueprintForCheck) {
+          blueprint.checkAndMove(blueprintForCheck, delta);
+        }
       }
     }
 
-    from.refreshTasks();
-
-    const source = blueprint.links[0].from;
-
-    const unsubscribe = source.onResourceAdded(
-      (task: Task, resource: Resource) => {
-        blueprint.onBlueprintResourceAdded(task, resource, container);
-      },
-    );
-
-    blueprint.unsubscribe = unsubscribe;
-    blueprint.blueprinToBuilding(container);
-  }
-
-  return blueprint;
-}
-
-export function select(node: Building) {
-  selectedBuilding = buildings.indexOf(node);
-  showCrafts();
-}
-
-export function deSelectAllBuildings() {
-  for (const building of buildings) {
-    building.selectShadowContainer.removeChildren();
-  }
-
-  for (const blueprint of blueprints) {
-    blueprint.selectShadowContainer.removeChildren();
-  }
-}
-
-export function showCrafts() {
-  hideCrafts();
-  for (const blueprint of blueprints) {
-    blueprint.showCraft();
-  }
-}
-
-export function hideCrafts() {
-  for (const building of buildings) {
-    building.hideCraftSign();
-  }
-  for (const blueprint of blueprints) {
-    blueprint.hideCraftSign();
-  }
-}
-
-export function animations(delta: number, movingAngle?: number) {
-  for (const building of buildings) {
-    building.animation(delta, movingAngle);
-  }
-}
-
-export function movingBlueprints(delta: number) {
-  for (const blueprint of blueprints) {
-    for (const building of buildings) {
-      blueprint.checkAndMove(building, delta);
-    }
-  }
-  for (const blueprint of blueprints) {
-    for (const blueprintForCheck of blueprints) {
-      if (blueprint !== blueprintForCheck) {
-        blueprint.checkAndMove(blueprintForCheck, delta);
+    for (let i = this.blueprints.length - 1; i >= 0; i--) {
+      if (this.blueprints[i].redraws > 5000) {
+        this.deleteBlueprint(this.blueprints[i]);
       }
     }
   }
 
-  for (let i = blueprints.length - 1; i >= 0; i--) {
-    if (blueprints[i].redraws > 5000) {
-      deleteBlueprint(blueprints[i]);
+  public deleteBlueprint(blueprint: Blueprint) {
+    blueprint.cleanup();
+    let index = -1;
+    for (let i = 0; i < this.blueprints.length; i++) {
+      if (this.blueprints[i] === blueprint) {
+        index = i;
+      }
+    }
+    for (const link of blueprint.links) {
+      link.graphic.destroy();
+    }
+    blueprint.root.destroy();
+
+    if (index !== -1) {
+      this.blueprints.splice(index, 1);
     }
   }
 }
 
-export function deleteBlueprint(blueprint: Blueprint) {
-  blueprint.cleanup();
-  let index = -1;
-  for (let i = 0; i < blueprints.length; i++) {
-    if (blueprints[i] === blueprint) {
-      index = i;
-    }
-  }
-  for (const link of blueprint.links) {
-    link.graphic.destroy();
-  }
-  blueprint.root.destroy();
-
-  if (index !== -1) {
-    blueprints.splice(index, 1);
-  }
-}
+export const aircraft: Aircraft = new Aircraft();

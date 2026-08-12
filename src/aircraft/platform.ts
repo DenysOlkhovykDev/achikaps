@@ -1,6 +1,6 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
 import { Building } from "@aircraft/building";
-import { select, showCrafts } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 import { showBuildMenuTrigger } from "@menus/build-menu";
 import {
   generateTextureFromOrigin,
@@ -10,10 +10,10 @@ import {
 
 export class Platform extends Building {
   onClick(event: FederatedPointerEvent) {
-    select(this);
+    aircraft.selectBuilding(this);
     super.onClick(event);
     showBuildMenuTrigger();
-    showCrafts();
+    aircraft.showCraftSigns();
   }
 
   constructor(x: number, y: number) {

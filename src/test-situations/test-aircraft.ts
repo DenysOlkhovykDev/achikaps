@@ -1,7 +1,7 @@
 import { Container } from "pixi.js";
 
 import { addWorker } from "@workers/_workers";
-import { addBuilding, addBlueprint, select } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 
 import { JobType } from "@dashboard/task";
 import { addTask } from "@dashboard/_dashboard";
@@ -9,28 +9,22 @@ import { addTask } from "@dashboard/_dashboard";
 import { createResource } from "@resources/_resources";
 import { AircraftScenario } from "./test-situation";
 
-export function makeAirCraftByScenario(
-  scenario: AircraftScenario,
-  buildingsLayer: Container,
-  workersLayer: Container,
-) {
+export function makeAirCraftByScenario(scenario: AircraftScenario) {
   const buildingsMap = new Map();
 
   for (const building of scenario.buildings) {
     if (building.from === "") {
-      const newBuilding = addBuilding(
+      const newBuilding = aircraft.addBuilding(
         building.x,
         building.y,
-        buildingsLayer,
         building.type,
       );
       buildingsMap.set(building.id, newBuilding);
     } else {
-      select(buildingsMap.get(building.from));
-      const newBuilding = addBuilding(
+      aircraft.selectBuilding(buildingsMap.get(building.from));
+      const newBuilding = aircraft.addBuilding(
         building.x,
         building.y,
-        buildingsLayer,
         building.type,
       );
       buildingsMap.set(building.id, newBuilding);
@@ -52,7 +46,7 @@ export function makeAirCraftByScenario(
     addWorker(
       baseCenter.x,
       baseCenter.y,
-      workersLayer,
+      aircraft.workersLayer,
       newBuilding,
       worker.profession,
     );
@@ -70,12 +64,7 @@ export function makeAirCraftByScenario(
   }
 
   for (const blueprint of scenario.buildingTasks || []) {
-    select(buildingsMap.get(blueprint.from));
-    addBlueprint(
-      blueprint.x,
-      blueprint.y,
-      buildingsLayer,
-      blueprint.buildingType,
-    );
+    aircraft.selectBuilding(buildingsMap.get(blueprint.from));
+    aircraft.addBlueprint(blueprint.x, blueprint.y, blueprint.buildingType);
   }
 }

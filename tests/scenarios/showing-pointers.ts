@@ -1,4 +1,4 @@
-import { blueprints } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { getWorldCoordinates } from "../../src/main";
 import { Scenario } from "@test-situations/test-situation";
@@ -18,10 +18,10 @@ export const showingPointers: Scenario = {
   tutorials: {
     pointers: [
       {
-        condition: () => blueprints.length > 0,
+        condition: () => aircraft.blueprints.length > 0,
 
         findTarget: () => {
-          const blueprint = blueprints[0];
+          const blueprint = aircraft.blueprints[0];
 
           if (!blueprint) {
             return;

@@ -6,7 +6,7 @@ import {
   hideBuildMenuTrigger,
 } from "@menus/build-menu";
 
-import { buildings, hideCrafts, blueprints } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 
 import { Tutorials } from "../tutorial-overlay/_tutorials";
 import { getDistance } from "@utils/basic-geometry";
@@ -124,10 +124,10 @@ const scenarios: Record<string, Scenario> = {
     tutorials: {
       pointers: [
         {
-          condition: () => blueprints.length > 0,
+          condition: () => aircraft.blueprints.length > 0,
 
           findTarget: () => {
-            const blueprint = blueprints[0];
+            const blueprint = aircraft.blueprints[0];
 
             if (!blueprint) {
               return;
@@ -141,13 +141,13 @@ const scenarios: Record<string, Scenario> = {
         {
           condition: () => {
             return (
-              blueprints.length > 0 &&
-              blueprints[0].craftSign.children.length > 0
+              aircraft.blueprints.length > 0 &&
+              aircraft.blueprints[0].craftSign.children.length > 0
             );
           },
 
           findTarget: () => {
-            const building = buildings[0];
+            const building = aircraft.buildings[0];
 
             if (!building) {
               return;
@@ -182,7 +182,7 @@ const scenarios: Record<string, Scenario> = {
         },
         {
           condition: () => {
-            const engines = buildings.filter(
+            const engines = aircraft.buildings.filter(
               (b) => b.buildingType === "Engine",
             );
 
@@ -190,7 +190,7 @@ const scenarios: Record<string, Scenario> = {
           },
 
           findTarget: () => {
-            const engines = buildings.filter(
+            const engines = aircraft.buildings.filter(
               (b) => b.buildingType === "Engine",
             );
 
@@ -258,8 +258,6 @@ const scenarios: Record<string, Scenario> = {
 };
 
 export function createTestSituation(
-  buildingsLayer: Container,
-  workersLayer: Container,
   worldLayer: Container,
   tutorials: Tutorials,
 ) {
@@ -270,12 +268,12 @@ export function createTestSituation(
     throw new Error("Scenario not found: " + scenarioName);
   }
 
-  makeAirCraftByScenario(scenario.aircraft, buildingsLayer, workersLayer);
+  makeAirCraftByScenario(scenario.aircraft);
   if (scenario.tutorials) {
     makeTutorialsByScenario(scenario.tutorials, tutorials);
   }
   makeTestWorld(worldLayer);
 
-  hideCrafts();
+  aircraft.hideCraftSigns();
   hideBuildMenuTrigger();
 }

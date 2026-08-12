@@ -1,15 +1,12 @@
 import { Container } from "pixi.js";
 import { Building } from "@aircraft/building";
-import { buidingParameters, select } from "@aircraft/aircraft";
+import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
-import { addBuilding } from "@aircraft/aircraft";
-import { deleteBlueprint } from "@aircraft/aircraft";
 import { Task } from "@dashboard/task";
 import { deleteTask } from "@dashboard/_dashboard";
 import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { createResource } from "@resources/_resources";
-import { app } from "../main";
 import { Graphics, Sprite } from "pixi.js";
 
 export class Blueprint extends Building {
@@ -266,9 +263,9 @@ export class Blueprint extends Building {
       this.reservedBuildResources = [];
       source.refreshTasks();
 
-      select(source);
-      addBuilding(this.x, this.y, container, this.type);
-      deleteBlueprint(this);
+      aircraft.selectBuilding(source);
+      aircraft.addBuilding(this.x, this.y, this.type);
+      aircraft.deleteBlueprint(this);
       hideBuildMenuTrigger();
     }
   }
