@@ -24,7 +24,7 @@ export class Factory extends Building {
       result: "Water",
     };
     this.priorityForTasks = 5;
-    this.genProductionTask();
+    this.generateProductionTask();
   }
 
   draw() {
@@ -120,9 +120,5 @@ export class Factory extends Building {
 
   animation(delta: number) {
     this.gridsGraphics.rotation -= this.gridsParams.rotationSpeed * delta;
-  }
-
-  genProductionTask() {
-    this.generateProductionTask();
   }
 }

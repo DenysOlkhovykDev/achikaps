@@ -257,7 +257,7 @@ export class Blueprint extends Building {
 
     if (this.tasks.length === 0 && hasAllReservedResources) {
       for (const resource of this.reservedBuildResources) {
-        source.takeResource(resource, false);
+        source.takeResourceByType(resource, false);
       }
       this.reservedBuildResources = [];
       source.refreshTasks();

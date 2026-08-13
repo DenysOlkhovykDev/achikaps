@@ -147,9 +147,29 @@ export abstract class Building {
     );
   }
 
+  addLinkedBuilding(line: Road) {
+    this.links.push(line);
+  }
+
+  onClick(event: FederatedPointerEvent) {
+    aircraft.hideCraftSigns();
+    this.showRecipeState();
+    hideJoystick();
+    hideBuildMenuTrigger();
+    aircraft.deSelectAllBuildings();
+    makeRoundShadow(
+      this.decorativeRadius + 1,
+      "#00ff00",
+      this.selectShadowContainer,
+    );
+    event.stopPropagation();
+  }
+
   protected abstract draw(): void;
 
   public abstract animation(delta: number, movingAngle?: number): void;
+
+  // TaskManager // Fix
 
   protected generateProductionTask() {
     this.refreshTasks();
@@ -169,7 +189,8 @@ export abstract class Building {
         resourceName,
         count: Math.max(
           0,
-          requiredCount - this.getAvailableResourceCount(resourceName),
+          requiredCount -
+            this.resourceStorage.getAvailableResourceCount(resourceName),
         ),
       }),
     );
@@ -222,7 +243,7 @@ export abstract class Building {
     const canProduce =
       this.craft !== undefined &&
       this.priorityForTasks >= 0 &&
-      this.checkIsEnoughResourceswForCraft() &&
+      this.checkIsEnoughResourcesForCraft() &&
       this.hasSpaceForProductionResult();
 
     if (!canProduce) {
@@ -238,18 +259,9 @@ export abstract class Building {
       addTask(this, JobType.production, this.priorityForTasks);
       return;
     }
-
-    const taskToKeep = tasks.find((task) => task.inProgress) ?? tasks[0];
-    for (const task of tasks) {
-      if (task !== taskToKeep && !task.inProgress) {
-        deleteTask(task);
-      }
-    }
   }
 
-  private getAvailableResourceCount(resourceName: string) {
-    return this.resourceStorage.getAvailableResourceCount(resourceName);
-  }
+  // Production // Fix
 
   private getRequiredResourceCounts() {
     const requiredResources = new Map<string, number>();
@@ -281,21 +293,21 @@ export abstract class Building {
     );
   }
 
-  public tryToDoProduction(): boolean {
+  public tryToDoProduction() {
     if (
       this.craft &&
-      this.checkIsEnoughResourceswForCraft() &&
+      this.checkIsEnoughResourcesForCraft() &&
       this.hasSpaceForProductionResult()
     ) {
       for (const ingredient of this.craft.ingredients) {
         for (let i = 0; i < ingredient.count; i++) {
-          this.takeResourceByName(ingredient.resourceName, false);
+          this.takeResourceByName(ingredient.resourceName);
         }
       }
 
       const result = this.craft.result !== undefined ? this.craft.result : "";
       const newResource = createResource(result);
-      const wasAdded = this.tryToAddResource(newResource, undefined, false);
+      const wasAdded = this.tryToAddResource(newResource, undefined);
       this.refreshTasks();
 
       return wasAdded;
@@ -304,88 +316,67 @@ export abstract class Building {
     return false;
   }
 
-  public checkIsEnoughResourceswForCraft() {
+  private checkIsEnoughResourcesForCraft() {
     if (this.craft) {
       return [...this.getRequiredResourceCounts()].every(
         ([resourceName, requiredCount]) =>
-          this.getAvailableResourceCount(resourceName) >= requiredCount,
+          this.resourceStorage.getAvailableResourceCount(resourceName) >=
+          requiredCount,
       );
     }
 
     return false;
   }
 
-  addLinkedBuilding(line: Road) {
-    this.links.push(line);
-  }
+  // ResourceStorage
 
-  onClick(event: FederatedPointerEvent) {
-    aircraft.hideCraftSigns();
-    this.showRecipeState();
-    hideJoystick();
-    hideBuildMenuTrigger();
-    aircraft.deSelectAllBuildings();
-    makeRoundShadow(
-      this.decorativeRadius + 1,
-      "#00ff00",
-      this.selectShadowContainer,
-    );
-    event.stopPropagation();
-  }
-
-  placeResource(resource: Resource) {
-    this.resourceStorage.placeResource(resource);
-  }
-
-  onResourceAdded(fn: (task: Task, resource: Resource) => void) {
+  public onResourceAdded(fn: (task: Task, resource: Resource) => void) {
     return this.resourceStorage.onResourceAdded(fn);
   }
 
-  onStorageChanged(shouldRefreshTasks: boolean) {
+  public tryToAddResource(resource: Resource, task?: Task) {
+    const result = this.resourceStorage.tryToAddResource(resource, task);
+
+    this.onResourceStorageChanged();
+
+    return result;
+  }
+
+  public takeResourceByIndex(resourceIndex: number) {
+    const result = this.resourceStorage.takeResourceByIndex(resourceIndex);
+
+    this.onResourceStorageChanged();
+
+    return result;
+  }
+
+  public takeResourceByType(resource: Resource) {
+    const result = this.resourceStorage.takeResourceByType(resource);
+
+    this.onResourceStorageChanged();
+
+    return result;
+  }
+
+  public takeResourceByName(resourceName: string) {
+    const result = this.resourceStorage.takeResourceByName(resourceName);
+
+    this.onResourceStorageChanged();
+
+    return result;
+  }
+
+  private onResourceStorageChanged() {
     if (this.recipeSign.isShown()) {
       this.updateRecipeSign();
     }
 
-    if (shouldRefreshTasks) {
-      this.refreshTasks();
-    }
+    this.refreshTasks();
   }
 
-  tryToAddResource(resource: Resource, task?: Task, shouldRefreshTasks = true) {
-    const result = this.resourceStorage.tryToAddResource(
-      resource,
-      task,
-      shouldRefreshTasks,
-    );
+  // CraftSign
 
-    this.onStorageChanged(shouldRefreshTasks);
-
-    return result;
-  }
-
-  takeResourceByIndex(resourceIndex: number, shouldRefreshTasks = true) {
-    const result = this.resourceStorage.takeResourceByIndex(
-      resourceIndex,
-      shouldRefreshTasks,
-    );
-
-    this.onStorageChanged(shouldRefreshTasks);
-
-    return result;
-  }
-
-  takeResource(resource: Resource, shouldRefreshTasks = true) {
-    return this.resourceStorage.takeResource(resource, shouldRefreshTasks);
-  }
-
-  takeResourceByName(resourceName: string, shouldRefreshTasks = true) {
-    return this.resourceStorage.takeResourceByName(
-      resourceName,
-      shouldRefreshTasks,
-    );
-  }
-
-  showRecipeState() {
+  public showRecipeState() {
     if (!this.craft) return;
 
     this.recipeSign.show(
@@ -402,7 +393,7 @@ export abstract class Building {
     );
   }
 
-  showRecipeInfo() {
+  public showRecipeInfo() {
     if (!this.craft) return;
 
     this.recipeSign.show(
@@ -417,11 +408,11 @@ export abstract class Building {
     );
   }
 
-  hideCraftSign() {
+  public hideCraftSign() {
     this.recipeSign.hide();
   }
 
-  updateRecipeSign() {
+  public updateRecipeSign() {
     this.showRecipeState();
   }
 }

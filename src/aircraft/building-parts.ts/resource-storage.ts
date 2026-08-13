@@ -74,7 +74,7 @@ export class ResourceStorage {
     };
   }
 
-  tryToAddResource(resource: Resource, task?: Task, shouldRefreshTasks = true) {
+  tryToAddResource(resource: Resource, task?: Task) {
     if (this.recources.length >= this.inventorySize) return false;
 
     resource.isReserved = task !== undefined;
@@ -102,7 +102,7 @@ export class ResourceStorage {
     return true;
   }
 
-  takeResourceByIndex(resourceIndex: number, shouldRefreshTasks = true) {
+  takeResourceByIndex(resourceIndex: number) {
     if (resourceIndex < 0 || resourceIndex >= this.recources.length) {
       return undefined;
     }
@@ -126,13 +126,13 @@ export class ResourceStorage {
     return resource;
   }
 
-  takeResource(resource: Resource, shouldRefreshTasks = true) {
+  takeResourceByType(resource: Resource) {
     const index = this.recources.indexOf(resource);
 
-    return this.takeResourceByIndex(index, shouldRefreshTasks);
+    return this.takeResourceByIndex(index);
   }
 
-  takeResourceByName(resourceName: string, shouldRefreshTasks = true) {
+  takeResourceByName(resourceName: string) {
     const index = this.recources.findIndex(
       (resource) =>
         resource.resourceType === resourceName &&
@@ -142,7 +142,7 @@ export class ResourceStorage {
 
     if (index === -1) return false;
 
-    this.takeResourceByIndex(index, shouldRefreshTasks);
+    this.takeResourceByIndex(index);
     return true;
   }
 }

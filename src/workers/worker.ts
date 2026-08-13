@@ -299,7 +299,9 @@ export class Worker {
 
   private handleResourceLogic() {
     if (this.reservedResource) {
-      const resource = this.currentPlatform.takeResource(this.reservedResource);
+      const resource = this.currentPlatform.takeResourceByType(
+        this.reservedResource,
+      );
 
       if (!resource) {
         this.releaseCurrentTask();
