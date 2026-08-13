@@ -26,7 +26,7 @@ export class Task {
   ) {}
 
   public getEffectivePriority() {
-    return this.priority - this.target.recources.length;
+    return this.priority - this.target.resourceStorage.recources.length;
   }
 
   public getRouteForTarget(current: Building): Building[] {
@@ -99,7 +99,7 @@ export class Task {
   }
 
   private findNeededResource(building: Building): Resource | undefined {
-    for (const resource of building.recources) {
+    for (const resource of building.resourceStorage.recources) {
       if (resource.resourceType === this.resource && !resource.isReserved) {
         return resource;
       }

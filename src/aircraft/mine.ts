@@ -31,7 +31,7 @@ export class Mine extends Building {
     super(x, y, 5, "Mine");
     this.draw();
     this.craft = {
-      ingridients: [],
+      ingredients: [],
       result: "Organic",
     };
     this.priorityForTasks = 5;

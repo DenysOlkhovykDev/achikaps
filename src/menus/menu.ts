@@ -2,7 +2,7 @@ import { buildingMap, buidingParameters } from "@aircraft/aircraft";
 import { Container, Graphics, Text } from "pixi.js";
 import { Platform } from "@aircraft/platform";
 import { Building } from "@aircraft/building";
-import { createResource } from "@resources/_resources";
+import { RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
 
 export interface MenuItem {
   label: string;
@@ -100,25 +100,23 @@ export class Menu {
     building.root.scale = 0.5;
 
     this.drawBuildingRecipe(building, xOffset, yOffset);
-    this.drawCrafRecipe(building, xOffset, yOffset);
+    this.drawCraftRecipe(building, xOffset, yOffset);
 
     building.root.eventMode = "none";
 
     this.container.addChild(building.root);
   }
 
-  private drawCrafRecipe(building: Building, x: number, y: number) {
+  private drawCraftRecipe(building: Building, x: number, y: number) {
     if (building.craft) {
-      building.showCraft(true);
+      building.showRecipeInfo();
 
-      building.craftSign.position.set(
+      building.recipeSign.root.position.set(
         x + this.width / 2,
-        y + this.height * 1.35,
+        y + this.height - 18,
       );
 
-      building.craftSign.eventMode = "none";
-
-      this.container.addChild(building.craftSign);
+      this.container.addChild(building.recipeSign.root);
     }
   }
 
@@ -127,42 +125,19 @@ export class Menu {
       buidingParameters[building.buildingType as keyof typeof buidingParameters]
         .craft;
 
-    const buildingRecipeImage = new Container();
+    const recipeSign = new RecipeSign();
+    recipeSign.show(
+      {
+        ingredients: buildingRecipe.map((ingredient) => ({
+          resourceName: ingredient.type,
+          count: ingredient.amount,
+        })),
+      },
+      { layout: "vertical" },
+    );
+    recipeSign.root.position.set(x + this.width - 31, y + this.height - 90);
 
-    const background = new Graphics();
-    background
-      .rect(
-        x + this.width - 31,
-        y + this.height - 90,
-        30,
-        buildingRecipe.length * 15 + 5,
-      )
-      .fill("#c9c6bb")
-      .stroke({ width: 2, color: "#000000" });
-
-    this.container.addChild(background);
-
-    for (let i = 0; i < buildingRecipe.length; i++) {
-      const resource = createResource(buildingRecipe[i].type).root;
-
-      resource.position.set(x + this.width - 10, y + this.height - 80 + i * 15);
-
-      const text = new Text({
-        text: buildingRecipe[i].amount,
-        style: {
-          fill: "#000000",
-          fontSize: 14,
-        },
-        x: x + this.width - 27,
-        y: y + this.height - 88 + i * 15,
-      });
-
-      buildingRecipeImage.addChild(resource, text);
-    }
-
-    buildingRecipeImage.eventMode = "none";
-
-    this.container.addChild(buildingRecipeImage);
+    this.container.addChild(recipeSign.root);
   }
 
   menuShow(parent: Container) {

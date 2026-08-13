@@ -6,7 +6,6 @@ import { Resource } from "@resources/resource";
 import { Task } from "@dashboard/task";
 import { deleteTask } from "@dashboard/_dashboard";
 import { hideBuildMenuTrigger } from "@menus/build-menu";
-import { createResource } from "@resources/_resources";
 import { Graphics } from "pixi.js";
 
 export class Blueprint extends Building {
@@ -239,8 +238,8 @@ export class Blueprint extends Building {
       }
     }
 
-    if (this.craftSign.children.length > 0) {
-      this.updateCraftSign();
+    if (this.recipeSign.isShown()) {
+      this.updateRecipeSign();
     }
 
     this.blueprinToBuilding(container);
@@ -253,7 +252,7 @@ export class Blueprint extends Building {
     const hasAllReservedResources =
       this.reservedBuildResources.length === this.buildResources.length &&
       this.reservedBuildResources.every((resource) =>
-        source.recources.includes(resource),
+        source.resourceStorage.recources.includes(resource),
       );
 
     if (this.tasks.length === 0 && hasAllReservedResources) {
@@ -294,43 +293,23 @@ export class Blueprint extends Building {
 
   public unsubscribe?: () => void;
 
-  showCraft() {
-    if (!this.buildResources) return;
-
-    this.prepareBuildCraftSignElements();
-
-    this.drawCraftSign();
+  showRecipeState() {
+    this.recipeSign.show(
+      {
+        ingredients: this.buildResources.map((resourceName) => ({
+          resourceName,
+          count: 1,
+        })),
+      },
+      {
+        availableResources: this.reservedBuildResources.map(
+          (resource) => resource.resourceType,
+        ),
+      },
+    );
   }
 
-  prepareBuildCraftSignElements() {
-    this.craftSignElements = [];
-
-    const remeaningCraftIngredients = structuredClone(this.buildResources);
-
-    for (let i = 0; i < this.tasks.length; i++) {
-      const index = remeaningCraftIngredients.findIndex(
-        (element) => element === this.tasks[i].resource,
-      );
-      if (index !== -1) {
-        remeaningCraftIngredients.splice(index, 1);
-      }
-    }
-
-    for (let i = 0; i < this.buildResources.length; i++) {
-      const index = remeaningCraftIngredients.findIndex(
-        (element) => element === this.buildResources[i],
-      );
-
-      if (index !== -1) {
-        this.craftSignElements.push(
-          createResource(this.buildResources[i]).root,
-        );
-        remeaningCraftIngredients.splice(index, 1);
-      } else {
-        const craftIngredient = createResource(this.buildResources[i]).root;
-        craftIngredient.alpha = this.craftGraphicAlpha;
-        this.craftSignElements.push(craftIngredient);
-      }
-    }
+  updateRecipeSign() {
+    this.showRecipeState();
   }
 }

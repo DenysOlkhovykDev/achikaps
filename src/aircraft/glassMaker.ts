@@ -22,7 +22,7 @@ export class GlassMaker extends Building {
 
     const base = new Graphics();
     makeBasicCircle(base, this.baseRadius, "#74f6ff", true);
-    this.resourceContainer.addChildAt(base, 0);
+    this.resourceStorage.resourcesContainer.addChildAt(base, 0);
   }
 
   private createDecorativeTexture() {

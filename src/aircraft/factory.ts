@@ -20,7 +20,7 @@ export class Factory extends Building {
     super(x, y, 5, "Factory");
     this.draw();
     this.craft = {
-      ingridients: [],
+      ingredients: [],
       result: "Water",
     };
     this.priorityForTasks = 5;

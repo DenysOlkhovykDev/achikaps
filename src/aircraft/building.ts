@@ -1,4 +1,4 @@
-import { Graphics, FederatedPointerEvent, Container, Texture } from "pixi.js";
+import { FederatedPointerEvent, Container, Texture } from "pixi.js";
 import { Resource } from "@resources/resource";
 import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
@@ -8,13 +8,8 @@ import { createResource } from "@resources/_resources";
 import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { makeRoundShadow } from "@utils/basic-graphic";
 import { hideJoystick } from "../main";
-
-type ResourceListener = (task: Task, resource: Resource) => void;
-
-type Craft = {
-  ingridients: { resourceName: string; count: number }[];
-  result: string;
-};
+import { Recipe, RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
+import { ResourceStorage } from "@aircraft/building-parts.ts/resource-storage";
 
 export abstract class Building {
   root: Container = new Container();
@@ -25,10 +20,10 @@ export abstract class Building {
   contentContainer: Container;
   static baseTexture: Texture;
 
-  resourceContainer: Container = new Container();
+  resourceStorage: ResourceStorage;
 
-  craftSign: Container = new Container();
-  craftSignElements: Container[] = [];
+  recipeSign = new RecipeSign();
+  craft: Recipe | undefined;
 
   baseRadius: number = 0;
   decorativeRadius: number = 0;
@@ -38,15 +33,7 @@ export abstract class Building {
 
   links: Road[] = [];
 
-  resourceList: Map<string, number> = new Map<string, number>();
-  recources: Resource[] = [];
-
   priorityForTasks: number = -1;
-
-  craft: Craft | undefined;
-  craftGraphicAlpha: number = 0.45;
-
-  private resourceListeners: ResourceListener[] = [];
 
   constructor(
     public x: number,
@@ -55,6 +42,13 @@ export abstract class Building {
     public buildingType: string,
   ) {
     this.contentContainer = new Container();
+
+    this.configureGeometry(this.buildingType);
+
+    this.resourceStorage = new ResourceStorage(
+      this.inventorySize,
+      this.baseRadius - 8,
+    );
     this.initEvents();
 
     this.root.x = this.x;
@@ -63,10 +57,10 @@ export abstract class Building {
     this.root.addChild(this.shadowContainer);
     this.root.addChild(this.selectShadowContainer);
     this.root.addChild(this.contentContainer);
-    this.root.addChild(this.resourceContainer);
-    this.root.addChild(this.craftSign);
+    this.root.addChild(this.resourceStorage.resourcesContainer);
+    this.root.addChild(this.recipeSign.root);
 
-    this.configureGeometry(this.buildingType);
+    this.applyGeometryTransform();
   }
 
   protected configureGeometry(buildingType: string) {
@@ -77,8 +71,6 @@ export abstract class Building {
     this.decorativeRadius = parameters.decorativeRadius;
     this.baseCenter = { ...parameters.baseCenter };
     this.decorativeCenter = { ...parameters.decorativeCenter };
-
-    this.applyGeometryTransform();
   }
 
   private getDecorativeCenterInRoot() {
@@ -96,14 +88,20 @@ export abstract class Building {
   private applyGeometryTransform() {
     const decorativeCenter = this.getDecorativeCenterInRoot();
 
-    this.resourceContainer.position.set(this.baseCenter.x, this.baseCenter.y);
+    this.resourceStorage.resourcesContainer.position.set(
+      this.baseCenter.x,
+      this.baseCenter.y,
+    );
     this.shadowContainer.position.set(decorativeCenter.x, decorativeCenter.y);
     this.selectShadowContainer.position.set(
       decorativeCenter.x,
       decorativeCenter.y,
     );
     this.contentContainer.position.set(decorativeCenter.x, decorativeCenter.y);
-    this.craftSign.position.set(decorativeCenter.x, decorativeCenter.y);
+    this.recipeSign.root.position.set(
+      decorativeCenter.x,
+      decorativeCenter.y - this.decorativeRadius - 15,
+    );
 
     this.shadowContainer.rotation = this.orientation;
     this.selectShadowContainer.rotation = this.orientation;
@@ -180,7 +178,8 @@ export abstract class Building {
       0,
     );
     const canFitMissingResources =
-      totalMissingResources <= this.inventorySize - this.recources.length;
+      totalMissingResources <=
+      this.inventorySize - this.resourceStorage.recources.length;
 
     for (const missingResource of missingResources) {
       const tasks = dashboard.filter(
@@ -249,12 +248,7 @@ export abstract class Building {
   }
 
   private getAvailableResourceCount(resourceName: string) {
-    return this.recources.filter(
-      (resource) =>
-        resource.resourceType === resourceName &&
-        !resource.isReservedForTransport &&
-        !resource.isReservedForConstruction,
-    ).length;
+    return this.resourceStorage.getAvailableResourceCount(resourceName);
   }
 
   private getRequiredResourceCounts() {
@@ -262,7 +256,7 @@ export abstract class Building {
 
     if (!this.craft) return requiredResources;
 
-    for (const ingredient of this.craft.ingridients) {
+    for (const ingredient of this.craft.ingredients) {
       requiredResources.set(
         ingredient.resourceName,
         (requiredResources.get(ingredient.resourceName) ?? 0) +
@@ -276,12 +270,15 @@ export abstract class Building {
   private hasSpaceForProductionResult() {
     if (!this.craft) return false;
 
-    const consumedResources = this.craft.ingridients.reduce(
+    const consumedResources = this.craft.ingredients.reduce(
       (total, ingredient) => total + ingredient.count,
       0,
     );
 
-    return this.recources.length - consumedResources + 1 <= this.inventorySize;
+    return (
+      this.resourceStorage.recources.length - consumedResources + 1 <=
+      this.inventorySize
+    );
   }
 
   public tryToDoProduction(): boolean {
@@ -290,13 +287,14 @@ export abstract class Building {
       this.checkIsEnoughResourceswForCraft() &&
       this.hasSpaceForProductionResult()
     ) {
-      for (const ingredient of this.craft.ingridients) {
+      for (const ingredient of this.craft.ingredients) {
         for (let i = 0; i < ingredient.count; i++) {
           this.takeResourceByName(ingredient.resourceName, false);
         }
       }
 
-      const newResource = createResource(this.craft.result);
+      const result = this.craft.result !== undefined ? this.craft.result : "";
+      const newResource = createResource(result);
       const wasAdded = this.tryToAddResource(newResource, undefined, false);
       this.refreshTasks();
 
@@ -323,7 +321,7 @@ export abstract class Building {
 
   onClick(event: FederatedPointerEvent) {
     aircraft.hideCraftSigns();
-    this.showCraft(false);
+    this.showRecipeState();
     hideJoystick();
     hideBuildMenuTrigger();
     aircraft.deSelectAllBuildings();
@@ -335,244 +333,95 @@ export abstract class Building {
     event.stopPropagation();
   }
 
-  placeResource(res: Resource) {
-    const radius = this.baseRadius - 8;
-    const minDist = 15;
-
-    let tries = 0;
-
-    while (tries < 50) {
-      const angle = Math.random() * Math.PI * 2;
-      const r = Math.sqrt(Math.random()) * radius;
-
-      const x = Math.cos(angle) * r;
-      const y = Math.sin(angle) * r;
-
-      const isValid = this.recources.every((other) => {
-        if (other === res) return true;
-
-        const dx = other.root.x - x;
-        const dy = other.root.y - y;
-
-        return Math.sqrt(dx * dx + dy * dy) > minDist;
-      });
-
-      if (isValid) {
-        res.root.x = x;
-        res.root.y = y;
-        res.root.rotation = Math.random() * Math.PI * 2;
-        return;
-      }
-
-      tries++;
-    }
-    if (tries >= 50) {
-      res.root.x = 0;
-      res.root.y = 0;
-      res.root.rotation = Math.random() * Math.PI * 2;
-    }
+  placeResource(resource: Resource) {
+    this.resourceStorage.placeResource(resource);
   }
 
-  onResourceAdded(fn: ResourceListener) {
-    this.resourceListeners.push(fn);
+  onResourceAdded(fn: (task: Task, resource: Resource) => void) {
+    return this.resourceStorage.onResourceAdded(fn);
+  }
 
-    return () => {
-      const index = this.resourceListeners.indexOf(fn);
-      if (index !== -1) {
-        this.resourceListeners.splice(index, 1);
-      }
-    };
+  onStorageChanged(shouldRefreshTasks: boolean) {
+    if (this.recipeSign.isShown()) {
+      this.updateRecipeSign();
+    }
+
+    if (shouldRefreshTasks) {
+      this.refreshTasks();
+    }
   }
 
   tryToAddResource(resource: Resource, task?: Task, shouldRefreshTasks = true) {
-    if (this.recources.length >= this.inventorySize) return false;
+    const result = this.resourceStorage.tryToAddResource(
+      resource,
+      task,
+      shouldRefreshTasks,
+    );
 
-    resource.isReserved = task !== undefined;
-    resource.isReservedForTransport = false;
-    resource.isReservedForConstruction = false;
-    this.recources.push(resource);
-    this.resourceContainer.addChild(resource.root);
+    this.onStorageChanged(shouldRefreshTasks);
 
-    const resourceName = resource.resourceType;
-    const current = this.resourceList.get(resourceName) ?? 0;
-
-    this.resourceList.set(resourceName, current + 1);
-
-    this.placeResource(resource);
-
-    if (this.craftSign.children.length > 0) {
-      this.updateCraftSign();
-    }
-
-    if (task) {
-      deleteTask(task);
-    }
-
-    if (shouldRefreshTasks) {
-      this.refreshTasks();
-    }
-
-    for (const fn of this.resourceListeners) {
-      if (task) {
-        fn(task, resource);
-      }
-    }
-
-    return true;
+    return result;
   }
 
-  takeResourceByIndex(
-    resourceIndex: number,
-    shouldRefreshTasks = true,
-  ): Resource | undefined {
-    if (resourceIndex < 0 || resourceIndex >= this.recources.length) {
-      return undefined;
-    }
+  takeResourceByIndex(resourceIndex: number, shouldRefreshTasks = true) {
+    const result = this.resourceStorage.takeResourceByIndex(
+      resourceIndex,
+      shouldRefreshTasks,
+    );
 
-    const resourceName = this.recources[resourceIndex].resourceType;
-    const current = this.resourceList.get(resourceName) ?? 0;
+    this.onStorageChanged(shouldRefreshTasks);
 
-    if (current > 1) {
-      this.resourceList.set(resourceName, current - 1);
-    } else {
-      this.resourceList.delete(resourceName);
-    }
-
-    const [res] = this.recources.splice(resourceIndex, 1);
-
-    this.resourceContainer.removeChild(res.root);
-    res.isReserved = false;
-    res.isReservedForTransport = false;
-    res.isReservedForConstruction = false;
-
-    if (shouldRefreshTasks) {
-      this.refreshTasks();
-    }
-
-    return res;
+    return result;
   }
 
   takeResource(resource: Resource, shouldRefreshTasks = true) {
-    const index = this.recources.indexOf(resource);
-
-    return this.takeResourceByIndex(index, shouldRefreshTasks);
+    return this.resourceStorage.takeResource(resource, shouldRefreshTasks);
   }
 
   takeResourceByName(resourceName: string, shouldRefreshTasks = true) {
-    const index = this.recources.findIndex(
-      (resource) =>
-        resource.resourceType === resourceName &&
-        !resource.isReservedForTransport &&
-        !resource.isReservedForConstruction,
+    return this.resourceStorage.takeResourceByName(
+      resourceName,
+      shouldRefreshTasks,
     );
-
-    if (index !== -1) {
-      this.takeResourceByIndex(index, shouldRefreshTasks);
-      return true;
-    }
-
-    return false;
   }
 
-  showCraft(isStandart: boolean) {
-    if (this.craft) {
-      this.prepareCraftSignElements(isStandart);
+  showRecipeState() {
+    if (!this.craft) return;
 
-      const arrow = new Graphics();
+    this.recipeSign.show(
+      {
+        ingredients: this.craft.ingredients,
+        result: this.craft.result,
+      },
+      {
+        availableResources: this.resourceStorage.recources.map(
+          (resource) => resource.resourceType,
+        ),
+        isAvailableResult: false,
+      },
+    );
+  }
 
-      arrow
-        .moveTo(-5, 0)
-        .lineTo(5, 0)
-        .moveTo(5, 0)
-        .lineTo(0, -5)
-        .moveTo(5, 0)
-        .lineTo(0, 5)
-        .stroke({ width: 2, color: "#000000", cap: "round" });
+  showRecipeInfo() {
+    if (!this.craft) return;
 
-      this.craftSignElements.push(arrow);
-
-      const craftResult = createResource(this.craft.result).root;
-      craftResult.alpha = isStandart ? 1 : this.craftGraphicAlpha;
-      this.craftSignElements.push(craftResult);
-
-      this.drawCraftSign();
-    }
+    this.recipeSign.show(
+      {
+        ingredients: this.craft.ingredients,
+        result: this.craft.result,
+      },
+      {
+        availableResources: undefined,
+        isAvailableResult: true,
+      },
+    );
   }
 
   hideCraftSign() {
-    this.craftSign.removeChildren();
+    this.recipeSign.hide();
   }
 
-  prepareCraftSignElements(isStandart: boolean) {
-    if (this.craft) {
-      this.craftSignElements = [];
-
-      const remeaningCraftIngredients = structuredClone(this.craft.ingridients);
-
-      for (let i = 0; i < remeaningCraftIngredients.length; i++) {
-        remeaningCraftIngredients[i].count = 0;
-      }
-
-      for (let i = 0; i < this.recources.length; i++) {
-        const craftIngredient = remeaningCraftIngredients.find(
-          (element) => element.resourceName === this.recources[i].resourceType,
-        );
-        if (craftIngredient) {
-          craftIngredient.count++;
-        }
-      }
-
-      for (let i = 0; i < this.craft.ingridients.length; i++) {
-        for (let j = 0; j < this.craft.ingridients[i].count; j++) {
-          if (remeaningCraftIngredients[i].count > 0) {
-            this.craftSignElements.push(
-              createResource(this.craft.ingridients[i].resourceName).root,
-            );
-            remeaningCraftIngredients[i].count--;
-          } else {
-            const craftIngredient = createResource(
-              this.craft.ingridients[i].resourceName,
-            ).root;
-            craftIngredient.alpha = isStandart ? 1 : this.craftGraphicAlpha;
-            this.craftSignElements.push(craftIngredient);
-          }
-        }
-      }
-    }
-  }
-
-  updateCraftSign() {
-    this.hideCraftSign();
-    this.showCraft(false);
-  }
-
-  drawCraftSign() {
-    if (!this.craftSignElements) return;
-
-    const spacing = 15;
-    const padding = 10;
-
-    const count = this.craftSignElements.length;
-    const center = (count - 1) / 2;
-
-    const width = (count - 1) * spacing + padding * 2;
-    const height = 25;
-
-    const background = new Graphics();
-    background
-      .rect(-width / 2, -this.decorativeRadius - height, width, height - 5)
-      .fill("#c9c6bb")
-      .stroke({ width: 2, color: "#000000" });
-
-    this.craftSign.addChild(background);
-
-    for (let i = 0; i < this.craftSignElements.length; i++) {
-      this.craftSignElements[i].position.set(
-        (i - center) * spacing,
-        -this.decorativeRadius - 15,
-      );
-
-      this.craftSign.addChild(this.craftSignElements[i]);
-    }
+  updateRecipeSign() {
+    this.showRecipeState();
   }
 }

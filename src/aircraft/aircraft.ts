@@ -218,7 +218,7 @@ export class Aircraft {
 
       for (let i = 0; i < craft.length; i++) {
         for (let j = 0; j < craft[i].amount; j++) {
-          const availableResource = from.recources.find(
+          const availableResource = from.resourceStorage.recources.find(
             (resource) =>
               resource.resourceType === craft[i].type && !resource.isReserved,
           );
@@ -275,7 +275,7 @@ export class Aircraft {
   public showCraftSigns() {
     this.hideCraftSigns();
     for (const blueprint of this.blueprints) {
-      blueprint.showCraft();
+      blueprint.showRecipeState();
     }
   }
 
