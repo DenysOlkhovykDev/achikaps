@@ -263,7 +263,55 @@ export abstract class Building {
 
   // Production // Fix
 
-  private getRequiredResourceCounts() {
+  public tryToDoProduction() {
+    if (!this.canProduce()) {
+      return false;
+    }
+
+    const craft = this.craft!;
+
+    for (const ingredient of craft.ingredients) {
+      for (let i = 0; i < ingredient.count; i++) {
+        this.takeResourceByName(ingredient.resourceName);
+      }
+    }
+
+    const result = craft.result !== undefined ? craft.result : "";
+    const newResource = createResource(result);
+    const wasAdded = this.tryToAddResource(newResource, undefined);
+
+    this.refreshTasks();
+
+    return wasAdded;
+  }
+
+  public checkIsEnoughResourcesForCraft() {
+    if (this.craft) {
+      return [...this.getRequiredResourceCounts()].every(
+        ([resourceName, requiredCount]) =>
+          this.resourceStorage.getAvailableResourceCount(resourceName) >=
+          requiredCount,
+      );
+    }
+
+    return false;
+  }
+
+  public hasSpaceForProductionResult() {
+    if (!this.craft) return false;
+
+    const consumedResources = this.craft.ingredients.reduce(
+      (total, ingredient) => total + ingredient.count,
+      0,
+    );
+
+    return (
+      this.resourceStorage.recources.length - consumedResources + 1 <=
+      this.inventorySize
+    );
+  }
+
+  public getRequiredResourceCounts() {
     const requiredResources = new Map<string, number>();
 
     if (!this.craft) return requiredResources;
@@ -279,53 +327,13 @@ export abstract class Building {
     return requiredResources;
   }
 
-  private hasSpaceForProductionResult() {
-    if (!this.craft) return false;
-
-    const consumedResources = this.craft.ingredients.reduce(
-      (total, ingredient) => total + ingredient.count,
-      0,
-    );
-
+  public canProduce() {
     return (
-      this.resourceStorage.recources.length - consumedResources + 1 <=
-      this.inventorySize
-    );
-  }
-
-  public tryToDoProduction() {
-    if (
-      this.craft &&
+      this.craft !== undefined &&
+      this.priorityForTasks >= 0 &&
       this.checkIsEnoughResourcesForCraft() &&
       this.hasSpaceForProductionResult()
-    ) {
-      for (const ingredient of this.craft.ingredients) {
-        for (let i = 0; i < ingredient.count; i++) {
-          this.takeResourceByName(ingredient.resourceName);
-        }
-      }
-
-      const result = this.craft.result !== undefined ? this.craft.result : "";
-      const newResource = createResource(result);
-      const wasAdded = this.tryToAddResource(newResource, undefined);
-      this.refreshTasks();
-
-      return wasAdded;
-    }
-
-    return false;
-  }
-
-  private checkIsEnoughResourcesForCraft() {
-    if (this.craft) {
-      return [...this.getRequiredResourceCounts()].every(
-        ([resourceName, requiredCount]) =>
-          this.resourceStorage.getAvailableResourceCount(resourceName) >=
-          requiredCount,
-      );
-    }
-
-    return false;
+    );
   }
 
   // ResourceStorage
