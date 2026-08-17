@@ -4,7 +4,6 @@ import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
 import { Task } from "@dashboard/task";
-import { deleteTask } from "@dashboard/_dashboard";
 import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { Graphics } from "pixi.js";
 
@@ -234,7 +233,6 @@ export class Blueprint extends Building {
       if (index !== -1) {
         this.tasks.splice(index, 1);
         this.reserveBuildResource(resource);
-        task.target.refreshTasks();
       }
     }
 
@@ -257,7 +255,7 @@ export class Blueprint extends Building {
 
     if (this.tasks.length === 0 && hasAllReservedResources) {
       for (const resource of this.reservedBuildResources) {
-        source.takeResourceByType(resource, false);
+        source.takeResourceByTypeWithoutRefresh(resource);
       }
       this.reservedBuildResources = [];
       source.refreshTasks();
@@ -282,9 +280,7 @@ export class Blueprint extends Building {
     this.reservedBuildResources = [];
 
     for (const task of this.tasks) {
-      if (!task.inProgress) {
-        deleteTask(task);
-      }
+      source?.taskManager.cancelTask(task);
     }
     this.tasks = [];
 

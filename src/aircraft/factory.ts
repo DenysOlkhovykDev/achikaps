@@ -24,7 +24,7 @@ export class Factory extends Building {
       result: "Water",
     };
     this.priorityForTasks = 5;
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {

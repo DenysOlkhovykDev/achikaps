@@ -3,7 +3,6 @@ import { Building } from "@aircraft/building";
 import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
 import { JobType, Task } from "@dashboard/task";
-import { addTask } from "@dashboard/_dashboard";
 import { Resource } from "@resources/resource";
 
 import { Platform } from "@aircraft/platform";
@@ -226,7 +225,11 @@ export class Aircraft {
           if (availableResource) {
             blueprint.reserveBuildResource(availableResource);
           } else {
-            const task = addTask(from, JobType.building, 5, craft[i].type, 1);
+            const [task] = from.taskManager.addTasks(
+              JobType.building,
+              5,
+              craft[i].type,
+            );
             if (task) {
               blueprint.tasks.push(task);
             }
@@ -281,10 +284,10 @@ export class Aircraft {
 
   public hideCraftSigns() {
     for (const building of this.buildings) {
-      building.hideCraftSign();
+      building.hideRecipeSign();
     }
     for (const blueprint of this.blueprints) {
-      blueprint.hideCraftSign();
+      blueprint.hideRecipeSign();
     }
   }
 

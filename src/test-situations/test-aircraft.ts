@@ -1,7 +1,6 @@
 import { aircraft } from "@aircraft/aircraft";
 
 import { JobType } from "@dashboard/task";
-import { addTask } from "@dashboard/_dashboard";
 
 import { createResource } from "@resources/_resources";
 import { AircraftScenario } from "./test-situation";
@@ -51,8 +50,7 @@ export function createAirCraftByScenario(scenario: AircraftScenario) {
 
   for (const task of scenario.deliveryTasks || []) {
     const newBuilding = buildingsMap.get(task.target);
-    addTask(
-      newBuilding,
+    newBuilding.taskManager.addTasks(
       JobType.delivering,
       task.priority,
       task.resource,

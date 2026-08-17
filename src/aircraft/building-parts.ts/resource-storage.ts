@@ -1,7 +1,6 @@
 import { Container } from "pixi.js";
 import { Resource } from "@resources/resource";
 import { Task } from "@dashboard/task";
-import { deleteTask } from "@dashboard/_dashboard";
 
 type ResourceListener = (task: Task, resource: Resource) => void;
 
@@ -88,10 +87,6 @@ export class ResourceStorage {
 
     this.resourceList.set(resourceName, current + 1);
     this.placeResource(resource);
-
-    if (task) {
-      deleteTask(task);
-    }
 
     for (const fn of this.resourceListeners) {
       if (task) {

@@ -24,8 +24,7 @@ export class Smelter extends Building {
       result: "Gear",
     };
     this.priorityForTasks = 5;
-    this.generateDeliveryTasks();
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {

@@ -33,7 +33,7 @@ export class Farm extends Building {
       result: "Metal",
     };
     this.priorityForTasks = 5;
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {

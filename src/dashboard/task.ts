@@ -13,8 +13,16 @@ export const JobType = {
 
 export type JobType = (typeof JobType)[keyof typeof JobType];
 
+export const TaskStatus = {
+  available: "available",
+  inProgress: "inProgress",
+  completed: "completed",
+} as const;
+
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
+
 export class Task {
-  inProgress: boolean = false;
+  status: TaskStatus = TaskStatus.available;
   reservedResource?: Resource;
   reservedAt?: Building;
 
@@ -86,8 +94,6 @@ export class Task {
   }
 
   public releaseResourceReservation() {
-    const reservedAt = this.reservedAt;
-
     if (this.reservedResource) {
       this.reservedResource.isReserved = false;
       this.reservedResource.isReservedForTransport = false;
@@ -95,7 +101,6 @@ export class Task {
     }
 
     this.reservedAt = undefined;
-    reservedAt?.refreshTasks();
   }
 
   private findNeededResource(building: Building): Resource | undefined {

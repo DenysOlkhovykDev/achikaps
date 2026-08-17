@@ -142,7 +142,7 @@ const scenarios: Record<string, Scenario> = {
           condition: () => {
             return (
               aircraft.blueprints.length > 0 &&
-              aircraft.blueprints[0].craftSign.children.length > 0
+              aircraft.blueprints[0].recipeSign.root.children.length > 0
             );
           },
 

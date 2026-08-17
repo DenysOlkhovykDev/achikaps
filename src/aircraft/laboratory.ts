@@ -28,8 +28,7 @@ export class Laboratory extends Building {
       result: "Gum",
     };
     this.priorityForTasks = 5;
-    this.generateDeliveryTasks();
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {

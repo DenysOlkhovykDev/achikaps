@@ -25,8 +25,7 @@ export class Grinder extends Building {
       result: "Truss",
     };
     this.priorityForTasks = 5;
-    this.generateDeliveryTasks();
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {

@@ -35,7 +35,7 @@ export class Mine extends Building {
       result: "Organic",
     };
     this.priorityForTasks = 5;
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {

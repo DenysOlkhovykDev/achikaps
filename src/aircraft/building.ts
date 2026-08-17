@@ -2,14 +2,14 @@ import { FederatedPointerEvent, Container, Texture } from "pixi.js";
 import { Resource } from "@resources/resource";
 import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
-import { Task, JobType } from "@dashboard/task";
-import { addTask, dashboard, deleteTask } from "@dashboard/_dashboard";
+import { Task } from "@dashboard/task";
 import { createResource } from "@resources/_resources";
 import { hideBuildMenuTrigger } from "@menus/build-menu";
 import { makeRoundShadow } from "@utils/basic-graphic";
 import { hideJoystick } from "../main";
 import { Recipe, RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
 import { ResourceStorage } from "@aircraft/building-parts.ts/resource-storage";
+import { TaskManager } from "@aircraft/building-parts.ts/task-manager";
 
 export abstract class Building {
   root: Container = new Container();
@@ -34,6 +34,7 @@ export abstract class Building {
   links: Road[] = [];
 
   priorityForTasks: number = -1;
+  taskManager: TaskManager;
 
   constructor(
     public x: number,
@@ -49,6 +50,7 @@ export abstract class Building {
       this.inventorySize,
       this.baseRadius - 8,
     );
+    this.taskManager = new TaskManager(this);
     this.initEvents();
 
     this.root.x = this.x;
@@ -62,6 +64,8 @@ export abstract class Building {
 
     this.applyGeometryTransform();
   }
+
+  // Geometry // Fix
 
   protected configureGeometry(buildingType: string) {
     const parameters =
@@ -169,99 +173,13 @@ export abstract class Building {
 
   public abstract animation(delta: number, movingAngle?: number): void;
 
-  // TaskManager // Fix
-
-  protected generateProductionTask() {
-    this.refreshTasks();
-  }
-
-  protected generateDeliveryTasks() {
-    this.refreshTasks();
-  }
+  // TaskManager
 
   public refreshTasks() {
-    this.syncProductionTask();
-
-    if (!this.craft || this.priorityForTasks < 0) return;
-
-    const missingResources = [...this.getRequiredResourceCounts()].map(
-      ([resourceName, requiredCount]) => ({
-        resourceName,
-        count: Math.max(
-          0,
-          requiredCount -
-            this.resourceStorage.getAvailableResourceCount(resourceName),
-        ),
-      }),
-    );
-    const totalMissingResources = missingResources.reduce(
-      (total, ingredient) => total + ingredient.count,
-      0,
-    );
-    const canFitMissingResources =
-      totalMissingResources <=
-      this.inventorySize - this.resourceStorage.recources.length;
-
-    for (const missingResource of missingResources) {
-      const tasks = dashboard.filter(
-        (task) =>
-          task.target === this &&
-          task.jobType === JobType.delivering &&
-          task.resource === missingResource.resourceName,
-      );
-      const inProgressCount = tasks.filter((task) => task.inProgress).length;
-      const desiredTaskCount = canFitMissingResources
-        ? missingResource.count
-        : inProgressCount;
-      const desiredPendingCount = Math.max(
-        0,
-        desiredTaskCount - inProgressCount,
-      );
-      const pendingTasks = tasks.filter((task) => !task.inProgress);
-
-      for (const task of pendingTasks.slice(desiredPendingCount)) {
-        deleteTask(task);
-      }
-
-      const tasksToCreate = desiredPendingCount - pendingTasks.length;
-      if (tasksToCreate > 0) {
-        addTask(
-          this,
-          JobType.delivering,
-          this.priorityForTasks,
-          missingResource.resourceName,
-          tasksToCreate,
-        );
-      }
-    }
+    this.taskManager.refreshTasks();
   }
 
-  private syncProductionTask() {
-    const tasks = dashboard.filter(
-      (task) => task.target === this && task.jobType === JobType.production,
-    );
-    const canProduce =
-      this.craft !== undefined &&
-      this.priorityForTasks >= 0 &&
-      this.checkIsEnoughResourcesForCraft() &&
-      this.hasSpaceForProductionResult();
-
-    if (!canProduce) {
-      for (const task of tasks) {
-        if (!task.inProgress) {
-          deleteTask(task);
-        }
-      }
-      return;
-    }
-
-    if (tasks.length === 0) {
-      addTask(this, JobType.production, this.priorityForTasks);
-      return;
-    }
-  }
-
-  // Production // Fix
+  // ResourceProduction
 
   public tryToDoProduction() {
     if (!this.canProduce()) {
@@ -272,15 +190,13 @@ export abstract class Building {
 
     for (const ingredient of craft.ingredients) {
       for (let i = 0; i < ingredient.count; i++) {
-        this.takeResourceByName(ingredient.resourceName);
+        this.takeResourceByNameWithoutRefresh(ingredient.resourceName);
       }
     }
 
     const result = craft.result !== undefined ? craft.result : "";
     const newResource = createResource(result);
     const wasAdded = this.tryToAddResource(newResource, undefined);
-
-    this.refreshTasks();
 
     return wasAdded;
   }
@@ -345,15 +261,9 @@ export abstract class Building {
   public tryToAddResource(resource: Resource, task?: Task) {
     const result = this.resourceStorage.tryToAddResource(resource, task);
 
-    this.onResourceStorageChanged();
-
-    return result;
-  }
-
-  public takeResourceByIndex(resourceIndex: number) {
-    const result = this.resourceStorage.takeResourceByIndex(resourceIndex);
-
-    this.onResourceStorageChanged();
+    if (result) {
+      this.onResourceStorageChanged();
+    }
 
     return result;
   }
@@ -366,12 +276,12 @@ export abstract class Building {
     return result;
   }
 
-  public takeResourceByName(resourceName: string) {
-    const result = this.resourceStorage.takeResourceByName(resourceName);
+  public takeResourceByTypeWithoutRefresh(resource: Resource) {
+    return this.resourceStorage.takeResourceByType(resource);
+  }
 
-    this.onResourceStorageChanged();
-
-    return result;
+  private takeResourceByNameWithoutRefresh(resourceName: string) {
+    return this.resourceStorage.takeResourceByName(resourceName);
   }
 
   private onResourceStorageChanged() {
@@ -382,7 +292,7 @@ export abstract class Building {
     this.refreshTasks();
   }
 
-  // CraftSign
+  // RecipeSign
 
   public showRecipeState() {
     if (!this.craft) return;
@@ -416,7 +326,7 @@ export abstract class Building {
     );
   }
 
-  public hideCraftSign() {
+  public hideRecipeSign() {
     this.recipeSign.hide();
   }
 
