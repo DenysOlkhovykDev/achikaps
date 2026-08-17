@@ -310,7 +310,7 @@ export abstract class Building {
   }
 
   private takeResourceByNameWithoutRefresh(resourceName: string) {
-    return this.resourceStorage.takeResourceByName(resourceName);
+    return this.resourceStorage.takeReservedResourceByName(resourceName);
   }
 
   private onResourceStorageChanged() {

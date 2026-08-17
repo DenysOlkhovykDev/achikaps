@@ -239,8 +239,6 @@ export class Aircraft {
         }
       }
 
-      from.refreshTasks();
-
       const source = blueprint.links[0].from;
 
       const unsubscribe = source.onResourceAdded(

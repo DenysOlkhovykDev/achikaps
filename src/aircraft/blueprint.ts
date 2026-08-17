@@ -219,7 +219,6 @@ export class Blueprint extends Building {
 
   public reserveBuildResource(resource: Resource) {
     resource.isReserved = true;
-    resource.isReservedForConstruction = true;
     this.reservedBuildResources.push(resource);
   }
 
@@ -258,7 +257,6 @@ export class Blueprint extends Building {
         source.takeResourceByTypeWithoutRefresh(resource);
       }
       this.reservedBuildResources = [];
-      source.refreshTasks();
 
       aircraft.selectBuilding(source);
       aircraft.addBuilding(this.x, this.y, this.type);
@@ -275,7 +273,6 @@ export class Blueprint extends Building {
 
     for (const resource of this.reservedBuildResources) {
       resource.isReserved = false;
-      resource.isReservedForConstruction = false;
     }
     this.reservedBuildResources = [];
 
@@ -283,8 +280,6 @@ export class Blueprint extends Building {
       source?.taskManager.cancelTask(task);
     }
     this.tasks = [];
-
-    source?.refreshTasks();
   }
 
   public unsubscribe?: () => void;
