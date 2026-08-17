@@ -6,14 +6,14 @@
     "strict": true,
     "types": ["node"],
     "paths": {
-      "@buildings/*": ["./src/buildings/*"],
+      "@aircraft/*": ["./src/aircraft/*"],
       "@dashboard/*": ["./src/dashboard/*"],
       "@resources/*": ["./src/resources/*"],
       "@workers/*": ["./src/workers/*"],
       "@menus/*": ["./src/menus/*"],
       "@roads/*": ["./src/roads/*"],
       "@utils/*": ["./src/utils/*"],
-      "@test-poligons/*": ["./src/test-poligons/*"],
+      "@test-situations/*": ["./src/test-situations/*"],
     }
   }
 }

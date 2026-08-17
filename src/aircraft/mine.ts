@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -32,11 +31,11 @@ export class Mine extends Building {
     super(x, y, 5, "Mine");
     this.draw();
     this.craft = {
-      ingridients: [],
+      ingredients: [],
       result: "Organic",
     };
     this.priorityForTasks = 5;
-    this.generateProductionTask();
+    this.refreshTasks();
   }
 
   draw() {
@@ -62,7 +61,7 @@ export class Mine extends Building {
 
     this.createDecorativePlant(baseGraphics);
 
-    Mine.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Mine.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private createKelpLeaves() {

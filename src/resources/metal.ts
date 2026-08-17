@@ -1,6 +1,5 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 export class Metal extends Resource {
@@ -24,6 +23,6 @@ export class Metal extends Resource {
       .stroke({ width: 3, color: "#000000" })
       .fill("#d15a53");
 
-    Metal.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Metal.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 }

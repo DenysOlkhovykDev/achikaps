@@ -1,6 +1,5 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 export class Gum extends Resource {
@@ -23,6 +22,6 @@ export class Gum extends Resource {
       .stroke({ width: 3, color: "#000000" })
       .fill("#da315b");
 
-    Gum.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Gum.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 }

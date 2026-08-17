@@ -1,13 +1,9 @@
 import { Graphics, Container } from "pixi.js";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 
 import { Resource } from "@resources/resource";
-import {
-  deleteTask,
-  getPosibleTaskWithHighestPriority,
-  releaseTask,
-} from "@dashboard/_dashboard";
-import { Task, JobType } from "@dashboard/task";
+import { getAvailableTaskWithHighestPriority } from "@dashboard/_dashboard";
+import { Task, JobType, TaskStatus } from "@dashboard/task";
 import { delay } from "@utils/delay";
 
 const isTest = import.meta.env.MODE === "test";
@@ -197,22 +193,13 @@ export class Worker {
 
   private pickTask() {
     if (this.profession === "building") {
-      this.task = getPosibleTaskWithHighestPriority(
-        this.currentPlatform,
-        JobType.building,
-      );
+      this.task = this.takeTask(JobType.building);
       this.pickPathForResource();
     } else if (this.profession === "delivering") {
-      this.task = getPosibleTaskWithHighestPriority(
-        this.currentPlatform,
-        JobType.delivering,
-      );
+      this.task = this.takeTask(JobType.delivering);
       this.pickPathForResource();
     } else if (this.profession === "production") {
-      this.task = getPosibleTaskWithHighestPriority(
-        this.currentPlatform,
-        JobType.production,
-      );
+      this.task = this.takeTask(JobType.production);
       if (!this.task) return;
 
       this.path = this.task.getRouteForTarget(this.currentPlatform);
@@ -227,6 +214,19 @@ export class Worker {
         this.handleProductionLogic();
       }
     }
+  }
+
+  private takeTask(jobType: JobType) {
+    const task = getAvailableTaskWithHighestPriority(
+      this.currentPlatform,
+      jobType,
+    );
+
+    if (task) {
+      task.status = TaskStatus.inProgress;
+    }
+
+    return task;
   }
 
   private pickPathForResource() {
@@ -288,7 +288,7 @@ export class Worker {
         if (!result) break;
       }
     } finally {
-      deleteTask(task);
+      task.status = TaskStatus.completed;
       task.target.refreshTasks();
       if (this.task === task) {
         this.task = undefined;
@@ -299,7 +299,7 @@ export class Worker {
 
   private handleResourceLogic() {
     if (this.reservedResource) {
-      const resource = this.currentPlatform.takeResource(
+      const resource = this.currentPlatform.takeResourceByType(
         this.reservedResource,
       );
 
@@ -327,12 +327,18 @@ export class Worker {
     }
 
     if (this.inventory && this.task) {
+      const task = this.task;
+
+      task.status = TaskStatus.completed;
       const wasAdded = this.currentPlatform.tryToAddResource(
         this.inventory,
-        this.task,
+        task,
       );
 
-      if (!wasAdded) return false;
+      if (!wasAdded) {
+        task.status = TaskStatus.inProgress;
+        return false;
+      }
 
       this.inventory = undefined;
       this.task = undefined;
@@ -344,7 +350,11 @@ export class Worker {
 
   private releaseCurrentTask() {
     if (this.task) {
-      releaseTask(this.task);
+      const reservedAt = this.task.reservedAt;
+
+      this.task.releaseResourceReservation();
+      this.task.status = TaskStatus.available;
+      reservedAt?.refreshTasks();
     }
 
     this.task = undefined;

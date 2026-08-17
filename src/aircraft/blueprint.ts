@@ -1,16 +1,11 @@
 import { Container } from "pixi.js";
-import { Building } from "@buildings/building";
-import { buidingParameters, select } from "@buildings/_buildings";
+import { Building } from "@aircraft/building";
+import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
-import { addBuilding } from "@buildings/_buildings";
-import { deleteBlueprint } from "@buildings/_buildings";
 import { Task } from "@dashboard/task";
-import { deleteTask } from "@dashboard/_dashboard";
-import { setIsBuildMode } from "@menus/build-menu";
-import { createResource } from "@resources/_resources";
-import { app } from "../main";
-import { Graphics, Sprite } from "pixi.js";
+import { hideBuildMenuTrigger } from "@menus/build-menu";
+import { Graphics } from "pixi.js";
 
 export class Blueprint extends Building {
   redraws: number = 0;
@@ -238,12 +233,11 @@ export class Blueprint extends Building {
       if (index !== -1) {
         this.tasks.splice(index, 1);
         this.reserveBuildResource(resource);
-        task.target.refreshTasks();
       }
     }
 
-    if (this.craftSign.children.length > 0) {
-      this.updateCraftSign();
+    if (this.recipeSign.isShown()) {
+      this.updateRecipeSign();
     }
 
     this.blueprinToBuilding(container);
@@ -256,20 +250,20 @@ export class Blueprint extends Building {
     const hasAllReservedResources =
       this.reservedBuildResources.length === this.buildResources.length &&
       this.reservedBuildResources.every((resource) =>
-        source.recources.includes(resource),
+        source.resourceStorage.recources.includes(resource),
       );
 
     if (this.tasks.length === 0 && hasAllReservedResources) {
       for (const resource of this.reservedBuildResources) {
-        source.takeResource(resource, false);
+        source.takeResourceByTypeWithoutRefresh(resource);
       }
       this.reservedBuildResources = [];
       source.refreshTasks();
 
-      select(source);
-      addBuilding(this.x, this.y, container, this.type);
-      deleteBlueprint(this);
-      setIsBuildMode(false);
+      aircraft.selectBuilding(source);
+      aircraft.addBuilding(this.x, this.y, this.type);
+      aircraft.deleteBlueprint(this);
+      hideBuildMenuTrigger();
     }
   }
 
@@ -286,9 +280,7 @@ export class Blueprint extends Building {
     this.reservedBuildResources = [];
 
     for (const task of this.tasks) {
-      if (!task.inProgress) {
-        deleteTask(task);
-      }
+      source?.taskManager.cancelTask(task);
     }
     this.tasks = [];
 
@@ -297,43 +289,23 @@ export class Blueprint extends Building {
 
   public unsubscribe?: () => void;
 
-  showCraft() {
-    if (!this.buildResources) return;
-
-    this.prepareBuildCraftSignElements();
-
-    this.drawCraftSign();
+  showRecipeState() {
+    this.recipeSign.show(
+      {
+        ingredients: this.buildResources.map((resourceName) => ({
+          resourceName,
+          count: 1,
+        })),
+      },
+      {
+        availableResources: this.reservedBuildResources.map(
+          (resource) => resource.resourceType,
+        ),
+      },
+    );
   }
 
-  prepareBuildCraftSignElements() {
-    this.craftSignElements = [];
-
-    const remeaningCraftIngredients = structuredClone(this.buildResources);
-
-    for (let i = 0; i < this.tasks.length; i++) {
-      const index = remeaningCraftIngredients.findIndex(
-        (element) => element === this.tasks[i].resource,
-      );
-      if (index !== -1) {
-        remeaningCraftIngredients.splice(index, 1);
-      }
-    }
-
-    for (let i = 0; i < this.buildResources.length; i++) {
-      const index = remeaningCraftIngredients.findIndex(
-        (element) => element === this.buildResources[i],
-      );
-
-      if (index !== -1) {
-        this.craftSignElements.push(
-          createResource(this.buildResources[i]).root,
-        );
-        remeaningCraftIngredients.splice(index, 1);
-      } else {
-        const craftIngredient = createResource(this.buildResources[i]).root;
-        craftIngredient.alpha = this.craftGraphicAlpha;
-        this.craftSignElements.push(craftIngredient);
-      }
-    }
+  updateRecipeSign() {
+    this.showRecipeState();
   }
 }

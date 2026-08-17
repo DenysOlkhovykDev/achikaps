@@ -1,24 +1,17 @@
 import { Application, Container } from "pixi.js";
 import {
-  setIsBuildMode,
-  getIsBuildMode,
+  isVisibleBuildMenuTrigger,
   getBuildingType,
   setBuildingType,
+  hideBuildMenuTrigger,
+  addBuildMenu,
 } from "@menus/build-menu";
-import { moveWorkers } from "@workers/_workers";
-import {
-  addBuilding,
-  addBlueprint,
-  animations,
-  movingBlueprints,
-  hideCrafts,
-  deSelectAllBuildings,
-} from "@buildings/_buildings";
-import { createTestBulding } from "./test-poligons/test-buildings";
-import { createTestWorld } from "@test-poligons/test-world";
+import { aircraft } from "@aircraft/aircraft";
 import { moveWorld } from "./moving/moving";
 import { Joystick } from "./joystick/joystick";
-import { Tutorials } from "./tutorial-overlay/_tutorials";
+import { tutorials, Tutorials } from "./tutorial-overlay/_tutorials";
+import { setTestRandom } from "@utils/initializers";
+import { createTestSituation } from "@test-situations/test-situation";
 
 export const app = new Application();
 
@@ -38,56 +31,66 @@ app.stage.hitArea = app.screen;
 const isTest = import.meta.env.MODE === "test";
 
 if (isTest) {
-  let seed = 123;
-
-  Math.random = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
+  setTestRandom();
 }
 
-const keys = new Set<string>();
+const UIcontainer = new Container(); // Temp
+addBuildMenu(UIcontainer); // Temp
+const joystick = new Joystick(); // Temp
+hideJoystick(); // Temp
 
-window.addEventListener("keydown", (e) => {
-  keys.add(e.key.toLowerCase());
-});
+UIcontainer.addChild(joystick); // Temp
 
-window.addEventListener("keyup", (e) => {
-  keys.delete(e.key.toLowerCase());
-});
+const worldLayer = new Container(); // Temp
+
+createTestSituation(worldLayer, tutorials);
+
+aircraft.initilaizeAircraft(app.stage);
+
+app.stage.addChild(worldLayer); // Temp
+app.stage.addChild(UIcontainer); // Temp
+
+tutorials.initializaTutorials(app.stage);
 
 app.stage.on("pointerdown", (event) => {
-  const { x, y } = event.global;
-  if (getIsBuildMode() && getBuildingType() !== "") {
-    addBlueprint(x, y, buildingsLayer, getBuildingType());
-    setBuildingType("");
+  const buildingType = getBuildingType();
+
+  if (isVisibleBuildMenuTrigger() && buildingType !== undefined) {
+    const { x, y } = event.global;
+
+    aircraft.addBlueprint(x, y, buildingType);
+    setBuildingType(undefined);
   }
-  setIsBuildMode(false);
-  hideCrafts();
-  deSelectAllBuildings();
+
+  aircraft.deSelectAllBuildings();
+
+  hideBuildMenuTrigger();
+  aircraft.hideCraftSigns();
   hideJoystick();
 });
 
-const tutorials = new Tutorials();
-const buildingsLayer = new Container();
-const workersLayer = new Container();
-const UIcontainer = new Container();
+app.ticker.add((delta) => {
+  const deltaTime = isTest ? 1 : delta.deltaTime;
 
-createTestBulding(
-  buildingsLayer,
-  workersLayer,
-  tutorials,
-  UIcontainer,
-  app.stage,
-);
+  const angle = moveWorld(
+    deltaTime,
+    worldLayer,
+    aircraft.airCraftLayer,
+    aircraft.workersLayer,
+    joystick.inputX,
+    joystick.inputY,
+  );
 
-export const worldLayer = new Container();
-createTestWorld(worldLayer, app.stage);
+  aircraft.workers.moveWorkers(deltaTime);
 
-const joystick = new Joystick();
+  if (!isTest) {
+    aircraft.buildingAnimations(deltaTime, angle);
+  }
 
-joystick.position.set(500, 930);
-joystick.hide();
+  aircraft.movingBlueprints(deltaTime);
+
+  tutorials.updateTutorials();
+});
 
 export function showJoystick() {
   joystick.show();
@@ -97,29 +100,15 @@ export function hideJoystick() {
   joystick.hide();
 }
 
-app.stage.addChild(joystick);
+export function getWorldCoordinates() {
+  return { x: worldLayer.pivot.x, y: worldLayer.pivot.y }; // Temp
+}
 
-tutorials.init(app.stage);
+export function getGlobalWorldCoordinates(x: number, y: number) {
+  const global = worldLayer.toGlobal({
+    x: x,
+    y: y,
+  });
 
-app.ticker.add((delta) => {
-  const deltaTime = isTest ? 1 : delta.deltaTime;
-
-  const angle = moveWorld(
-    deltaTime,
-    worldLayer,
-    buildingsLayer,
-    workersLayer,
-    joystick.inputX,
-    joystick.inputY,
-  );
-
-  moveWorkers(deltaTime);
-
-  if (!isTest) {
-    animations(deltaTime, angle);
-  }
-
-  movingBlueprints(deltaTime);
-
-  tutorials.updateTutorials();
-});
+  return { x: global.x, y: global.y }; // Temp
+}

@@ -26,7 +26,7 @@ export async function skipFrames(page: Page, frames: number, step = 16.66) {
 }
 
 export async function initGame(page: Page, query = "") {
-  await page.goto(`http://localhost:5173/${query}`);
+  await page.goto(`http://localhost:5173/?scenario=${query}`);
 
   const canvas = page.locator("canvas");
 

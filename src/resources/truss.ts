@@ -1,6 +1,5 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 const leftSide = -6;
@@ -50,6 +49,6 @@ export class Truss extends Resource {
       .lineTo(rightSide, bottomSide)
       .stroke({ width: 2, color: "#d1b453" });
 
-    Truss.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Truss.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 }

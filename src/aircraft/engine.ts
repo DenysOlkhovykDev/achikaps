@@ -1,7 +1,6 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
 import { showJoystick } from "../main";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -110,7 +109,7 @@ export class Engine extends Building {
 
     this.makeDecorativePropellerBlades(baseGraphics);
 
-    Engine.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Engine.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private makeDecorativePropellerBlades(baseGraphics: Graphics) {

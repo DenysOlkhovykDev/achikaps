@@ -1,8 +1,7 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
-import { Building } from "@buildings/building";
-import { select, showCrafts } from "@buildings/_buildings";
-import { setIsBuildMode } from "@menus/build-menu";
-import { app } from "../main";
+import { Building } from "@aircraft/building";
+import { aircraft } from "@aircraft/aircraft";
+import { showBuildMenuTrigger } from "@menus/build-menu";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -11,10 +10,10 @@ import {
 
 export class Platform extends Building {
   onClick(event: FederatedPointerEvent) {
-    select(this);
+    aircraft.selectBuilding(this);
     super.onClick(event);
-    setIsBuildMode(true);
-    showCrafts();
+    showBuildMenuTrigger();
+    aircraft.showCraftSigns();
   }
 
   constructor(x: number, y: number) {
@@ -38,10 +37,7 @@ export class Platform extends Building {
 
     makeBasicCircle(baseGraphics, this.baseRadius, "#acacac", true);
 
-    Platform.baseTexture = generateTextureFromOrigin(
-      app.renderer,
-      baseGraphics,
-    );
+    Platform.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   animation(delta: number) {}

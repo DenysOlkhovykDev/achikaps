@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 
-export function createTestWorld(worldLayer: Container, stage: Container) {
+export function createTestWorld(worldLayer: Container) {
   const testCircle = new Graphics()
     .circle(500, 100, 100)
     .stroke({ width: 4, color: "#000000" })
@@ -22,6 +22,4 @@ export function createTestWorld(worldLayer: Container, stage: Container) {
     .fill("#00ff00");
 
   worldLayer.addChild(testCircle);
-
-  stage.addChild(worldLayer);
 }

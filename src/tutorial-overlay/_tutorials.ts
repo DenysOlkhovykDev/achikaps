@@ -1,7 +1,7 @@
 import { Container } from "pixi.js";
 import { TutorialPointer, Pointer } from "./tutorial-pointer";
 import { Compass, TutorialCompass } from "./tutorial-compass";
-import { worldLayer } from "../main";
+import { getGlobalWorldCoordinates } from "../main";
 import { Message, TutorialMessage } from "./tutorial-message";
 
 export class Tutorials {
@@ -13,7 +13,7 @@ export class Tutorials {
   compasses: Compass[] = [];
   messages: Message[] = [];
 
-  public init(stage: Container) {
+  public initializaTutorials(stage: Container) {
     stage.addChild(this.tutorialOverlay);
     stage.addChild(this.compassOverlay);
     stage.addChild(this.messagesOverlay);
@@ -93,7 +93,7 @@ export class Tutorials {
       if (
         x === undefined ||
         y === undefined ||
-        pointer.timeout >= 100 ||
+        pointer.timeout >= 200 ||
         pointer.debounce <= 25
       ) {
         if (pointer.debounce <= 25) {
@@ -135,10 +135,7 @@ export class Tutorials {
         return;
       }
 
-      const global = worldLayer.toGlobal({
-        x: x,
-        y: y,
-      });
+      const global = getGlobalWorldCoordinates(x, y);
 
       this.compassOverlay.update(global.x, global.y);
     }
@@ -162,3 +159,5 @@ export class Tutorials {
     }
   }
 }
+
+export const tutorials = new Tutorials();

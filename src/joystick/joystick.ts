@@ -18,6 +18,8 @@ export class Joystick extends Container {
 
     this.eventMode = "static";
 
+    this.position.set(500, 930);
+
     this.hitbox = new Graphics()
       .circle(0, 0, this.radius + this.thumbRadius * 4)
       .fill({ color: "#ffffff", alpha: 0 });

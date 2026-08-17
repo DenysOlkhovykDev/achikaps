@@ -1,6 +1,5 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 export class Gear extends Resource {
@@ -56,6 +55,6 @@ export class Gear extends Resource {
 
     baseGraphics.circle(0, 0, 2.25).fill("#000000");
 
-    Gear.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Gear.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 }

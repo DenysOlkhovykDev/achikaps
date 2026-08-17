@@ -1,8 +1,8 @@
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import { aStar, dijkstra, buildPath } from "@utils/algorithms";
 import { Resource } from "@resources/resource";
 
-import { buildings } from "@buildings/_buildings";
+import { aircraft } from "@aircraft/aircraft";
 
 export const JobType = {
   delivering: "delivering",
@@ -13,8 +13,16 @@ export const JobType = {
 
 export type JobType = (typeof JobType)[keyof typeof JobType];
 
+export const TaskStatus = {
+  available: "available",
+  inProgress: "inProgress",
+  completed: "completed",
+} as const;
+
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
+
 export class Task {
-  inProgress: boolean = false;
+  status: TaskStatus = TaskStatus.available;
   reservedResource?: Resource;
   reservedAt?: Building;
 
@@ -26,7 +34,7 @@ export class Task {
   ) {}
 
   public getEffectivePriority() {
-    return this.priority - this.target.recources.length;
+    return this.priority - this.target.resourceStorage.recources.length;
   }
 
   public getRouteForTarget(current: Building): Building[] {
@@ -44,7 +52,7 @@ export class Task {
     let bestDistance = Infinity;
     let bestResource: Resource | undefined = undefined;
 
-    for (const building of buildings) {
+    for (const building of aircraft.buildings) {
       if (building === this.target) continue;
 
       const resource = this.findNeededResource(building);
@@ -62,8 +70,7 @@ export class Task {
           continue;
         }
 
-        const totalDistance =
-          distanceToResource + distanceFromResourceToTarget;
+        const totalDistance = distanceToResource + distanceFromResourceToTarget;
 
         if (totalDistance < bestDistance) {
           bestDistance = totalDistance;
@@ -87,8 +94,6 @@ export class Task {
   }
 
   public releaseResourceReservation() {
-    const reservedAt = this.reservedAt;
-
     if (this.reservedResource) {
       this.reservedResource.isReserved = false;
       this.reservedResource.isReservedForTransport = false;
@@ -96,11 +101,10 @@ export class Task {
     }
 
     this.reservedAt = undefined;
-    reservedAt?.refreshTasks();
   }
 
   private findNeededResource(building: Building): Resource | undefined {
-    for (const resource of building.recources) {
+    for (const resource of building.resourceStorage.recources) {
       if (resource.resourceType === this.resource && !resource.isReserved) {
         return resource;
       }

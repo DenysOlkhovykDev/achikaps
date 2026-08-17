@@ -1,6 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
-import { Building } from "@buildings/building";
+import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -21,11 +20,11 @@ export class Factory extends Building {
     super(x, y, 5, "Factory");
     this.draw();
     this.craft = {
-      ingridients: [],
+      ingredients: [],
       result: "Water",
     };
     this.priorityForTasks = 5;
-    this.genProductionTask();
+    this.refreshTasks();
   }
 
   draw() {
@@ -116,14 +115,10 @@ export class Factory extends Building {
       baseGraphics.circle(points[i].x, points[i].y, 12).fill("#81bcf3");
     }
 
-    Factory.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Factory.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   animation(delta: number) {
     this.gridsGraphics.rotation -= this.gridsParams.rotationSpeed * delta;
-  }
-
-  genProductionTask() {
-    this.generateProductionTask();
   }
 }

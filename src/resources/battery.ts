@@ -1,6 +1,5 @@
 import { Resource } from "@resources/resource";
 import { Graphics, Sprite } from "pixi.js";
-import { app } from "../main";
 import { generateTextureFromOrigin } from "@utils/basic-graphic";
 
 export class Battery extends Resource {
@@ -30,6 +29,6 @@ export class Battery extends Resource {
       .lineTo(1, 0)
       .stroke({ width: 1, color: "#000000" });
 
-    Battery.baseTexture = generateTextureFromOrigin(app.renderer, baseGraphics);
+    Battery.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 }
