@@ -3,7 +3,7 @@ import { Graphics, Texture, Container } from "pixi.js";
 export abstract class Resource {
   root: Container;
 
-  reservationMark: Graphics = new Graphics();
+  DEBUGReservationMark: Graphics = new Graphics();
 
   private _isReserved = false;
   private _isReservedForTransport = false;
@@ -21,7 +21,7 @@ export abstract class Resource {
 
     this.draw();
 
-    this.root.addChild(this.reservationMark);
+    this.root.addChild(this.DEBUGReservationMark);
   }
 
   get isReserved(): boolean {
@@ -58,23 +58,16 @@ export abstract class Resource {
       return;
     }
 
-    this.reservationMark.clear();
+    this.DEBUGReservationMark.clear();
 
     if (this.isReserved) {
-      this.reservationMark.circle(0, 0, 10).fill("#ff0000");
+      this.DEBUGReservationMark.circle(0, 0, 10).fill("#ff0000");
     }
     if (this.isReservedForTransport) {
-      this.reservationMark.circle(0, 0, 8).fill("#00ff00");
+      this.DEBUGReservationMark.circle(0, 0, 8).fill("#00ff00");
     }
     if (this.isReservedForConstruction) {
-      this.reservationMark.circle(0, 0, 6).fill("#0000ff");
+      this.DEBUGReservationMark.circle(0, 0, 6).fill("#0000ff");
     }
-
-    // console.log(
-    //   this.constructor.name,
-    //   this.isReserved,
-    //   this.isReservedForTransport,
-    //   this.isReservedForConstruction,
-    // );
   }
 }
