@@ -27,6 +27,7 @@ import { createAirCraftByScenario } from "./test-aircraft";
 import { createTestWorld } from "./test-world";
 import { getWorldCoordinates } from "../main";
 import { createTutorialsByScenario } from "./test-tutorials";
+import { multipleDelivering } from "../../tests/scenarios/multiple-delivering";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -252,6 +253,7 @@ const scenarios: Record<string, Scenario> = {
   "multiple-construction-of-buildings": multipleConstructionOfBuildings,
   "multiple-construction-of-different-buildings":
     multipleConstructionOfDifferentBuildings,
+  "multiple-delivering": multipleDelivering,
   "showing-pointers": showingPointers,
   "production-resources": productionResources,
   "scene-render": sceneRender,

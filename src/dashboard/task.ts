@@ -84,10 +84,8 @@ export class Task {
 
     if (reserve) {
       bestResource.isReserved = true;
-      bestResource.isReservedForTransport = true;
       this.reservedResource = bestResource;
       this.reservedAt = bestBuilding;
-      bestBuilding.refreshTasks();
     }
 
     return [buildPath(previous, bestBuilding), bestResource, bestDistance];
@@ -96,7 +94,6 @@ export class Task {
   public releaseResourceReservation() {
     if (this.reservedResource) {
       this.reservedResource.isReserved = false;
-      this.reservedResource.isReservedForTransport = false;
       this.reservedResource = undefined;
     }
 

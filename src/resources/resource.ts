@@ -6,8 +6,6 @@ export abstract class Resource {
   DEBUGReservationMark: Graphics = new Graphics();
 
   private _isReserved = false;
-  private _isReservedForTransport = false;
-  private _isReservedForConstruction = false;
 
   static baseTexture: Texture;
 
@@ -16,8 +14,6 @@ export abstract class Resource {
     this.root.x = 0;
     this.root.y = 0;
     this.isReserved = false;
-    this.isReservedForTransport = false;
-    this.isReservedForConstruction = false;
 
     this.draw();
 
@@ -33,24 +29,6 @@ export abstract class Resource {
     this.updateReservation();
   }
 
-  get isReservedForTransport(): boolean {
-    return this._isReservedForTransport;
-  }
-
-  set isReservedForTransport(value: boolean) {
-    this._isReservedForTransport = value;
-    this.updateReservation();
-  }
-
-  get isReservedForConstruction(): boolean {
-    return this._isReservedForConstruction;
-  }
-
-  set isReservedForConstruction(value: boolean) {
-    this._isReservedForConstruction = value;
-    this.updateReservation();
-  }
-
   protected abstract draw(): void;
 
   protected updateReservation() {
@@ -61,13 +39,11 @@ export abstract class Resource {
     this.DEBUGReservationMark.clear();
 
     if (this.isReserved) {
-      this.DEBUGReservationMark.circle(0, 0, 10).fill("#ff0000");
-    }
-    if (this.isReservedForTransport) {
-      this.DEBUGReservationMark.circle(0, 0, 8).fill("#00ff00");
-    }
-    if (this.isReservedForConstruction) {
-      this.DEBUGReservationMark.circle(0, 0, 6).fill("#0000ff");
+      this.DEBUGReservationMark.moveTo(-5, -5)
+        .lineTo(5, 5)
+        .moveTo(5, -5)
+        .lineTo(-5, 5)
+        .stroke({ width: 2, color: "#ff0000", cap: "round" });
     }
   }
 }

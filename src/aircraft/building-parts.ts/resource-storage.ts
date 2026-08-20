@@ -18,10 +18,7 @@ export class ResourceStorage {
 
   getAvailableResourceCount(resourceName: string) {
     return this.recources.filter(
-      (resource) =>
-        resource.resourceType === resourceName &&
-        !resource.isReservedForTransport &&
-        !resource.isReservedForConstruction,
+      (resource) => resource.resourceType === resourceName,
     ).length;
   }
 
@@ -76,9 +73,6 @@ export class ResourceStorage {
   tryToAddResource(resource: Resource, task?: Task) {
     if (this.recources.length >= this.inventorySize) return false;
 
-    resource.isReserved = task !== undefined;
-    resource.isReservedForTransport = false;
-    resource.isReservedForConstruction = false;
     this.recources.push(resource);
     this.resourcesContainer.addChild(resource.root);
 
@@ -114,9 +108,6 @@ export class ResourceStorage {
     const [resource] = this.recources.splice(resourceIndex, 1);
 
     this.resourcesContainer.removeChild(resource.root);
-    resource.isReserved = false;
-    resource.isReservedForTransport = false;
-    resource.isReservedForConstruction = false;
 
     return resource;
   }
@@ -127,17 +118,21 @@ export class ResourceStorage {
     return this.takeResourceByIndex(index);
   }
 
+  takeReservedResourceByName(resourceName: string) {
+    const index = this.recources.findIndex(
+      (resource) =>
+        resource.resourceType === resourceName && resource.isReserved,
+    );
+
+    return this.takeResourceByIndex(index);
+  }
+
   takeResourceByName(resourceName: string) {
     const index = this.recources.findIndex(
       (resource) =>
-        resource.resourceType === resourceName &&
-        !resource.isReservedForTransport &&
-        !resource.isReservedForConstruction,
+        resource.resourceType === resourceName && !resource.isReserved,
     );
 
-    if (index === -1) return false;
-
-    this.takeResourceByIndex(index);
-    return true;
+    return this.takeResourceByIndex(index);
   }
 }

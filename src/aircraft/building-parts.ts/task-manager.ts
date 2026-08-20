@@ -142,8 +142,6 @@ export class TaskManager {
   }
 
   private removeTask(task: Task) {
-    task.releaseResourceReservation();
-
     const taskList = this.getTaskList(task.jobType);
     const localIndex = taskList.indexOf(task);
     if (localIndex !== -1) {

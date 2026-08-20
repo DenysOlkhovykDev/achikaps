@@ -289,7 +289,6 @@ export class Worker {
       }
     } finally {
       task.status = TaskStatus.completed;
-      task.target.refreshTasks();
       if (this.task === task) {
         this.task = undefined;
       }
@@ -308,7 +307,6 @@ export class Worker {
         return true;
       }
 
-      this.task?.releaseResourceReservation();
       this.reservedResource = undefined;
       this.inventory = resource;
 
@@ -354,7 +352,6 @@ export class Worker {
 
       this.task.releaseResourceReservation();
       this.task.status = TaskStatus.available;
-      reservedAt?.refreshTasks();
     }
 
     this.task = undefined;
