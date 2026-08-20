@@ -1,4 +1,4 @@
-import { FederatedPointerEvent, Container, Texture } from "pixi.js";
+import { FederatedPointerEvent, Container, Texture, Graphics } from "pixi.js";
 import { Resource } from "@resources/resource";
 import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
@@ -10,6 +10,7 @@ import { hideJoystick } from "../main";
 import { Recipe, RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
 import { ResourceStorage } from "@aircraft/building-parts.ts/resource-storage";
 import { TaskManager } from "@aircraft/building-parts.ts/task-manager";
+import { getRadialPoint } from "@utils/basic-geometry";
 
 export abstract class Building {
   root: Container = new Container();
@@ -35,6 +36,7 @@ export abstract class Building {
 
   priorityForTasks: number = -1;
   taskManager: TaskManager;
+  DEBUGTaskDisplay: Graphics = new Graphics();
 
   constructor(
     public x: number,
@@ -61,6 +63,7 @@ export abstract class Building {
     this.root.addChild(this.contentContainer);
     this.root.addChild(this.resourceStorage.resourcesContainer);
     this.root.addChild(this.recipeSign.root);
+    this.root.addChild(this.DEBUGTaskDisplay);
 
     this.applyGeometryTransform();
   }
@@ -177,6 +180,32 @@ export abstract class Building {
 
   public refreshTasks() {
     this.taskManager.refreshTasks();
+
+    if (import.meta.env.VITE_IS_DEBUG === "true") {
+      this.updateTaskDisplay();
+    }
+  }
+
+  private updateTaskDisplay() {
+    this.DEBUGTaskDisplay.clear();
+
+    const taskList = [
+      ...this.taskManager.deliveringTasks,
+      ...this.taskManager.productionTasks,
+      ...this.taskManager.buildingTasks,
+    ];
+
+    for (let i = 0; i < taskList.length; i++) {
+      const { x, y } = getRadialPoint(i, 16, this.baseRadius + 16);
+
+      if (taskList[i].jobType === "delivering") {
+        this.DEBUGTaskDisplay.circle(x, y, 10).fill("#ffff00");
+      } else if (taskList[i].jobType === "production") {
+        this.DEBUGTaskDisplay.circle(x, y, 10).fill("#00ff00");
+      } else if (taskList[i].jobType === "building") {
+        this.DEBUGTaskDisplay.circle(x, y, 10).fill("#0000ff");
+      }
+    }
   }
 
   // ResourceProduction
