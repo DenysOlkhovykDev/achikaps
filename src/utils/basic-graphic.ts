@@ -1,7 +1,7 @@
-import { Graphics, Container, Rectangle, type Texture } from "pixi.js";
+import { Graphics, Container, Rectangle } from "pixi.js";
 import { app } from "../main";
 
-export function generateTextureFromOrigin(target: Container): Texture {
+export function generateTextureFromOrigin(target: Container) {
   const bounds = target.getLocalBounds();
 
   const left = Math.floor(bounds.minX);

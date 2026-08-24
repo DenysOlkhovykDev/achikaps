@@ -154,7 +154,7 @@ export const buidingParameters = {
   },
 };
 
-export class Aircraft {
+class Aircraft {
   public buildings: Building[] = [];
   public blueprints: Blueprint[] = [];
   public workers: Workers = new Workers();

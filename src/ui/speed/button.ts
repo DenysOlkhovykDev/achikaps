@@ -1,7 +1,7 @@
 import { Container, Graphics } from "pixi.js";
 import { speedManager } from "./manager";
 
-export class SpeedButton extends Container {
+class SpeedButton extends Container {
   private symbol = new Graphics();
   private background = new Graphics();
 

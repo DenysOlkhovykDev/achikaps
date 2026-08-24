@@ -1,6 +1,6 @@
 import { Container, Graphics, FederatedPointerEvent } from "pixi.js";
 
-export class Joystick extends Container {
+class Joystick extends Container {
   private base: Graphics;
   private thumb: Graphics;
   private hitbox: Graphics;
@@ -41,6 +41,8 @@ export class Joystick extends Container {
     this.on("pointerup", this.onUp);
     this.on("pointerupoutside", this.onUp);
     this.on("pointerleave", this.onUp);
+
+    this.hide();
   }
 
   private onDown = (event: FederatedPointerEvent) => {
@@ -110,13 +112,4 @@ export class Joystick extends Container {
   }
 }
 
-export function showJoystick() {
-  joystick.show();
-}
-
-export function hideJoystick() {
-  joystick.hide();
-}
-
 export const joystick = new Joystick();
-hideJoystick();

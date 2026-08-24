@@ -4,13 +4,13 @@ import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
 import { Task } from "@dashboard/task";
 import { createResource } from "@resources/_resources";
-import { hideBuildMenuTrigger } from "@build-menu/build-menu";
+import { constructionManager } from "@construction/manager";
 import { makeRoundShadow } from "@utils/basic-graphic";
 import { Recipe, RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
 import { ResourceStorage } from "@aircraft/building-parts.ts/resource-storage";
 import { TaskManager } from "@aircraft/building-parts.ts/task-manager";
 import { getRadialPoint } from "@utils/basic-geometry";
-import { hideJoystick } from "@joystick/joystick";
+import { joystick } from "@joystick/joystick";
 
 export abstract class Building {
   root: Container = new Container();
@@ -161,8 +161,8 @@ export abstract class Building {
   onClick(event: FederatedPointerEvent) {
     aircraft.hideCraftSigns();
     this.showRecipeState();
-    hideJoystick();
-    hideBuildMenuTrigger();
+    joystick.hide();
+    constructionManager.hideButton();
     aircraft.deSelectAllBuildings();
     makeRoundShadow(
       this.decorativeRadius + 1,
