@@ -1,7 +1,7 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
 import { Building } from "@aircraft/building";
 import { aircraft } from "@aircraft/aircraft";
-import { showBuildMenuTrigger } from "@menus/build-menu";
+import { showBuildMenuTrigger } from "@build-menu/build-menu";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,

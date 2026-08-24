@@ -4,7 +4,7 @@ import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
 import { Task } from "@dashboard/task";
-import { hideBuildMenuTrigger } from "@menus/build-menu";
+import { hideBuildMenuTrigger } from "@build-menu/build-menu";
 import { Graphics } from "pixi.js";
 
 export class Blueprint extends Building {

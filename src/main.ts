@@ -5,13 +5,17 @@ import {
   setBuildingType,
   hideBuildMenuTrigger,
   addBuildMenu,
-} from "@menus/build-menu";
+} from "@build-menu/build-menu";
 import { aircraft } from "@aircraft/aircraft";
 import { moveWorld } from "./moving/moving";
-import { Joystick } from "./joystick/joystick";
+import { hideJoystick, joystick } from "@joystick/joystick";
 import { tutorials, Tutorials } from "./tutorial-overlay/_tutorials";
 import { setTestRandom } from "@utils/initializers";
 import { createTestSituation } from "@test-situations/test-situation";
+import { pauseButton } from "@pause/button";
+import { pauseManager } from "@pause/manager";
+import { speedButton } from "@speed/button";
+import { speedManager } from "@speed/manager";
 
 export const app = new Application();
 
@@ -36,10 +40,10 @@ if (isTest) {
 
 const UIcontainer = new Container(); // Temp
 addBuildMenu(UIcontainer); // Temp
-const joystick = new Joystick(); // Temp
-hideJoystick(); // Temp
 
-UIcontainer.addChild(joystick); // Temp
+UIcontainer.addChild(joystick);
+UIcontainer.addChild(pauseButton);
+UIcontainer.addChild(speedButton);
 
 const worldLayer = new Container(); // Temp
 
@@ -70,35 +74,29 @@ app.stage.on("pointerdown", (event) => {
 });
 
 app.ticker.add((delta) => {
-  const deltaTime = isTest ? 1 : delta.deltaTime;
+  if (!pauseManager.isPaused()) {
+    const deltaTime = isTest ? 1 : delta.deltaTime * speedManager.getSpeed();
 
-  const angle = moveWorld(
-    deltaTime,
-    worldLayer,
-    aircraft.airCraftLayer,
-    aircraft.workersLayer,
-    joystick.inputX,
-    joystick.inputY,
-  );
+    const angle = moveWorld(
+      deltaTime,
+      worldLayer,
+      aircraft.airCraftLayer,
+      aircraft.workersLayer,
+      joystick.inputX,
+      joystick.inputY,
+    );
 
-  aircraft.workers.moveWorkers(deltaTime);
+    aircraft.workers.moveWorkers(deltaTime);
 
-  if (!isTest) {
-    aircraft.buildingAnimations(deltaTime, angle);
+    if (!isTest) {
+      aircraft.buildingAnimations(deltaTime, angle);
+    }
+
+    aircraft.movingBlueprints(deltaTime);
+
+    tutorials.updateTutorials();
   }
-
-  aircraft.movingBlueprints(deltaTime);
-
-  tutorials.updateTutorials();
 });
-
-export function showJoystick() {
-  joystick.show();
-}
-
-export function hideJoystick() {
-  joystick.hide();
-}
 
 export function getWorldCoordinates() {
   return { x: worldLayer.pivot.x, y: worldLayer.pivot.y }; // Temp
