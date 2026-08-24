@@ -1,5 +1,5 @@
 import { Container, Graphics } from "pixi.js";
-import { Menu, MenuItem } from "@menus/menu";
+import { Menu, MenuItem } from "@build-menu/menu";
 
 export class MenuTrigger {
   graphic = new Graphics();

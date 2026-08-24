@@ -4,7 +4,7 @@ import {
   isVisibleBuildMenuTrigger,
   getIsMenuActive,
   hideBuildMenuTrigger,
-} from "@menus/build-menu";
+} from "@build-menu/build-menu";
 
 import { aircraft } from "@aircraft/aircraft";
 

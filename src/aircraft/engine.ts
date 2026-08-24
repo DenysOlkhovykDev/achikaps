@@ -1,5 +1,5 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
-import { showJoystick } from "../main";
+import { showJoystick } from "@joystick/joystick";
 import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,

@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
-import { MenuTrigger } from "@menus/menu-trigger";
-import { MenuItem } from "@menus/menu";
+import { MenuTrigger } from "@build-menu/menu-trigger";
+import { MenuItem } from "@build-menu/menu";
 
 let isBuildMode = false;
 let menuTrigger: MenuTrigger;

@@ -109,3 +109,14 @@ export class Joystick extends Container {
     this.thumb.position.set(0, 0);
   }
 }
+
+export function showJoystick() {
+  joystick.show();
+}
+
+export function hideJoystick() {
+  joystick.hide();
+}
+
+export const joystick = new Joystick();
+hideJoystick();
