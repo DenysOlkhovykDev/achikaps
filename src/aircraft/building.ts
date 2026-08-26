@@ -3,15 +3,14 @@ import { Resource } from "@resources/resource";
 import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
 import { Task } from "@dashboard/task";
-import { createResource } from "@resources/_resources";
 import { constructionManager } from "@construction/manager";
 import { makeRoundShadow } from "@utils/basic-graphic";
-import { Recipe, RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
-import { ResourceStorage } from "@aircraft/building-parts.ts/resource-storage";
-import { TaskManager } from "@aircraft/building-parts.ts/task-manager";
+import { Recipe, RecipeSign } from "@aircraft/building-parts/recipe-sign";
+import { ResourceStorage } from "@aircraft/building-parts/resource-storage";
+import { TaskManager } from "@aircraft/building-parts/task-manager";
 import { getRadialPoint } from "@utils/basic-geometry";
 import { joystick } from "@joystick/joystick";
-import { CraftingProcessor } from "./building-parts.ts/crafting-processor";
+import { CraftingProcessor } from "./building-parts/crafting-processor";
 
 export abstract class Building {
   root: Container = new Container();
@@ -246,7 +245,7 @@ export abstract class Building {
     return result;
   }
 
-  protected takeResourceByTypeWithoutRefresh(resource: Resource) {
+  public takeResourceByTypeWithoutRefresh(resource: Resource) {
     return this.resourceStorage.takeResourceByType(resource);
   }
 
