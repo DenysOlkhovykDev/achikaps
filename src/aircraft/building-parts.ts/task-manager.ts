@@ -65,16 +65,15 @@ export class TaskManager {
   }
 
   private syncDeliveryTasks() {
-    const requiredResources = this.building.getRequiredResourceCounts();
+    const requiredResources =
+      this.building.craftingProcessor.getRequiredResourceCounts();
     const missingResources = [...requiredResources].map(
       ([resourceName, requiredCount]) => ({
         resourceName,
         count: Math.max(
           0,
           requiredCount -
-            this.building.resourceStorage.getAvailableResourceCount(
-              resourceName,
-            ),
+            this.building.resourceStorage.getResourceCount(resourceName),
         ),
       }),
     );
@@ -123,7 +122,7 @@ export class TaskManager {
   }
 
   private syncProductionTask() {
-    if (!this.building.canProduce()) {
+    if (!this.building.craftingProcessor.canProduce()) {
       for (const task of [...this.productionTasks]) {
         if (task.status === TaskStatus.available) {
           this.removeTask(task);

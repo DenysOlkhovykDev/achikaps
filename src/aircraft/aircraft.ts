@@ -241,7 +241,7 @@ class Aircraft {
 
       const source = blueprint.links[0].from;
 
-      const unsubscribe = source.onResourceAdded(
+      const unsubscribe = source.unsubscribeResourceListners(
         (task: Task, resource: Resource) => {
           blueprint.onBlueprintResourceAdded(
             task,
