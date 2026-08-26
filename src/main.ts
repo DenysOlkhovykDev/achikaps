@@ -1,14 +1,7 @@
 import { Application, Container } from "pixi.js";
-import {
-  isVisibleBuildMenuTrigger,
-  getBuildingType,
-  setBuildingType,
-  hideBuildMenuTrigger,
-  addBuildMenu,
-} from "@build-menu/build-menu";
 import { aircraft } from "@aircraft/aircraft";
 import { moveWorld } from "./moving/moving";
-import { hideJoystick, joystick } from "@joystick/joystick";
+import { joystick } from "@joystick/joystick";
 import { tutorials, Tutorials } from "./tutorial-overlay/_tutorials";
 import { setTestRandom } from "@utils/initializers";
 import { createTestSituation } from "@test-situations/test-situation";
@@ -16,6 +9,7 @@ import { pauseButton } from "@pause/button";
 import { pauseManager } from "@pause/manager";
 import { speedButton } from "@speed/button";
 import { speedManager } from "@speed/manager";
+import { constructionManager } from "@construction/manager";
 
 export const app = new Application();
 
@@ -39,11 +33,12 @@ if (isTest) {
 }
 
 const UIcontainer = new Container(); // Temp
-addBuildMenu(UIcontainer); // Temp
 
 UIcontainer.addChild(joystick);
 UIcontainer.addChild(pauseButton);
 UIcontainer.addChild(speedButton);
+constructionManager.initialize();
+UIcontainer.addChild(constructionManager);
 
 const worldLayer = new Container(); // Temp
 
@@ -57,20 +52,21 @@ app.stage.addChild(UIcontainer); // Temp
 tutorials.initializaTutorials(app.stage);
 
 app.stage.on("pointerdown", (event) => {
-  const buildingType = getBuildingType();
+  const buildingType = constructionManager.getBuildingType();
 
-  if (isVisibleBuildMenuTrigger() && buildingType !== undefined) {
+  if (constructionManager.isButtonVisible() && buildingType !== undefined) {
     const { x, y } = event.global;
 
     aircraft.addBlueprint(x, y, buildingType);
-    setBuildingType(undefined);
+    constructionManager.setBuildingType(undefined);
   }
 
   aircraft.deSelectAllBuildings();
 
-  hideBuildMenuTrigger();
+  constructionManager.hideButton();
+  constructionManager.hideMenu();
   aircraft.hideCraftSigns();
-  hideJoystick();
+  joystick.hide();
 });
 
 app.ticker.add((delta) => {

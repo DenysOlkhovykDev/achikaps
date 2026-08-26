@@ -1,4 +1,4 @@
-export class PauseManager {
+class PauseManager {
   private paused = false;
 
   public isPaused() {

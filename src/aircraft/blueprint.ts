@@ -4,7 +4,7 @@ import { buidingParameters, aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
 import { Task } from "@dashboard/task";
-import { hideBuildMenuTrigger } from "@build-menu/build-menu";
+import { constructionManager } from "@construction/manager";
 import { Graphics } from "pixi.js";
 
 export class Blueprint extends Building {
@@ -261,7 +261,7 @@ export class Blueprint extends Building {
       aircraft.selectBuilding(source);
       aircraft.addBuilding(this.x, this.y, this.type);
       aircraft.deleteBlueprint(this);
-      hideBuildMenuTrigger();
+      constructionManager.hideButton();
     }
   }
 

@@ -1,10 +1,5 @@
 import { Container } from "pixi.js";
-import {
-  getBuildingType,
-  isVisibleBuildMenuTrigger,
-  getIsMenuActive,
-  hideBuildMenuTrigger,
-} from "@build-menu/build-menu";
+import { constructionManager } from "@construction/manager";
 
 import { aircraft } from "@aircraft/aircraft";
 
@@ -162,21 +157,21 @@ const scenarios: Record<string, Scenario> = {
         },
         {
           condition: () => {
-            return isVisibleBuildMenuTrigger();
+            return constructionManager.isButtonVisible();
           },
           x: 500,
           y: 950,
         },
         {
           condition: () => {
-            return getIsMenuActive();
+            return constructionManager.isMenuVisible();
           },
           x: 500,
           y: 800,
         },
         {
           condition: () => {
-            return getBuildingType() !== undefined;
+            return constructionManager.getBuildingType() !== undefined;
           },
           x: 600,
           y: 500,
@@ -277,5 +272,5 @@ export function createTestSituation(
   createTestWorld(worldLayer);
 
   aircraft.hideCraftSigns();
-  hideBuildMenuTrigger();
+  constructionManager.hideButton();
 }

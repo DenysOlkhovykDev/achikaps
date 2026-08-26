@@ -1,4 +1,4 @@
-export class SpeedManager {
+class SpeedManager {
   private speedModifier = 1;
 
   public getSpeed() {

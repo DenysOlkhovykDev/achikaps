@@ -1,7 +1,7 @@
 import { Container, Graphics } from "pixi.js";
 import { pauseManager } from "./manager";
 
-export class PauseButton extends Container {
+class PauseButton extends Container {
   private symbol = new Graphics();
   private background = new Graphics();
 

@@ -1,5 +1,5 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
-import { showJoystick } from "@joystick/joystick";
+import { joystick } from "@joystick/joystick";
 import { Building } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
@@ -46,7 +46,7 @@ export class Engine extends Building {
 
   onClick(event: FederatedPointerEvent) {
     super.onClick(event);
-    showJoystick();
+    joystick.show();
   }
 
   draw() {
