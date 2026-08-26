@@ -11,6 +11,7 @@ import { ResourceStorage } from "@aircraft/building-parts.ts/resource-storage";
 import { TaskManager } from "@aircraft/building-parts.ts/task-manager";
 import { getRadialPoint } from "@utils/basic-geometry";
 import { joystick } from "@joystick/joystick";
+import { CraftingProcessor } from "./building-parts.ts/crafting-processor";
 
 export abstract class Building {
   root: Container = new Container();
@@ -21,10 +22,7 @@ export abstract class Building {
   contentContainer: Container;
   static baseTexture: Texture;
 
-  resourceStorage: ResourceStorage;
-
-  recipeSign = new RecipeSign();
-  craft: Recipe | undefined;
+  links: Road[] = [];
 
   baseRadius: number = 0;
   decorativeRadius: number = 0;
@@ -32,10 +30,16 @@ export abstract class Building {
   decorativeCenter = { x: 0, y: 0 };
   orientation: number = 0;
 
-  links: Road[] = [];
+  craftingProcessor: CraftingProcessor;
+
+  resourceStorage: ResourceStorage;
+
+  recipeSign = new RecipeSign();
+  craft: Recipe | undefined;
 
   priorityForTasks: number = -1;
   taskManager: TaskManager;
+
   DEBUGTaskDisplay: Graphics = new Graphics();
 
   constructor(
@@ -47,6 +51,8 @@ export abstract class Building {
     this.contentContainer = new Container();
 
     this.configureGeometry(this.buildingType);
+
+    this.craftingProcessor = new CraftingProcessor(this);
 
     this.resourceStorage = new ResourceStorage(
       this.inventorySize,
@@ -178,7 +184,7 @@ export abstract class Building {
 
   // TaskManager
 
-  public refreshTasks() {
+  protected refreshTasks() {
     this.taskManager.refreshTasks();
 
     if (import.meta.env.VITE_IS_DEBUG === "true") {
@@ -211,80 +217,15 @@ export abstract class Building {
   // ResourceProduction
 
   public tryToDoProduction() {
-    if (!this.canProduce()) {
-      return false;
-    }
-
-    const craft = this.craft!;
-
-    for (const ingredient of craft.ingredients) {
-      for (let i = 0; i < ingredient.count; i++) {
-        this.takeResourceByNameWithoutRefresh(ingredient.resourceName);
-      }
-    }
-
-    const result = craft.result !== undefined ? craft.result : "";
-    const newResource = createResource(result);
-    const wasAdded = this.tryToAddResource(newResource, undefined);
-
-    return wasAdded;
-  }
-
-  public checkIsEnoughResourcesForCraft() {
-    if (this.craft) {
-      return [...this.getRequiredResourceCounts()].every(
-        ([resourceName, requiredCount]) =>
-          this.resourceStorage.getAvailableResourceCount(resourceName) >=
-          requiredCount,
-      );
-    }
-
-    return false;
-  }
-
-  public hasSpaceForProductionResult() {
-    if (!this.craft) return false;
-
-    const consumedResources = this.craft.ingredients.reduce(
-      (total, ingredient) => total + ingredient.count,
-      0,
-    );
-
-    return (
-      this.resourceStorage.recources.length - consumedResources + 1 <=
-      this.inventorySize
-    );
-  }
-
-  public getRequiredResourceCounts() {
-    const requiredResources = new Map<string, number>();
-
-    if (!this.craft) return requiredResources;
-
-    for (const ingredient of this.craft.ingredients) {
-      requiredResources.set(
-        ingredient.resourceName,
-        (requiredResources.get(ingredient.resourceName) ?? 0) +
-          ingredient.count,
-      );
-    }
-
-    return requiredResources;
-  }
-
-  public canProduce() {
-    return (
-      this.craft !== undefined &&
-      this.priorityForTasks >= 0 &&
-      this.checkIsEnoughResourcesForCraft() &&
-      this.hasSpaceForProductionResult()
-    );
+    return this.craftingProcessor.tryToDoProduction();
   }
 
   // ResourceStorage
 
-  public onResourceAdded(fn: (task: Task, resource: Resource) => void) {
-    return this.resourceStorage.onResourceAdded(fn);
+  public unsubscribeResourceListners(
+    fn: (task: Task, resource: Resource) => void,
+  ) {
+    return this.resourceStorage.unsubscribeResourceListners(fn);
   }
 
   public tryToAddResource(resource: Resource, task?: Task) {
@@ -305,12 +246,8 @@ export abstract class Building {
     return result;
   }
 
-  public takeResourceByTypeWithoutRefresh(resource: Resource) {
+  protected takeResourceByTypeWithoutRefresh(resource: Resource) {
     return this.resourceStorage.takeResourceByType(resource);
-  }
-
-  private takeResourceByNameWithoutRefresh(resourceName: string) {
-    return this.resourceStorage.takeReservedResourceByName(resourceName);
   }
 
   private onResourceStorageChanged() {

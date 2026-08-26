@@ -16,7 +16,7 @@ export class ResourceStorage {
     private placementRadius: number,
   ) {}
 
-  getAvailableResourceCount(resourceName: string) {
+  getResourceCount(resourceName: string) {
     return this.recources.filter(
       (resource) => resource.resourceType === resourceName,
     ).length;
@@ -59,7 +59,7 @@ export class ResourceStorage {
     resource.root.rotation = Math.random() * Math.PI * 2;
   }
 
-  onResourceAdded(fn: ResourceListener) {
+  unsubscribeResourceListners(fn: ResourceListener) {
     this.resourceListeners.push(fn);
 
     return () => {
