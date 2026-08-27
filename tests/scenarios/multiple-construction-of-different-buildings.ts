@@ -8,9 +8,9 @@ export const multipleConstructionOfDifferentBuildings: Scenario = {
       { from: "p0", id: "p2", type: "Platform", x: 500, y: 550 },
     ],
     resources: [
-      { buildingId: "p1", type: "Organic", count: 8 },
-      { buildingId: "p2", type: "Water", count: 2 },
-      { buildingId: "p2", type: "Metal", count: 1 },
+      { buildingId: "p1", resourceName: "Organic", amount: 8 },
+      { buildingId: "p2", resourceName: "Water", amount: 2 },
+      { buildingId: "p2", resourceName: "Metal", amount: 1 },
     ],
     workers: [{ buildingId: "p0", profession: "building" }],
     buildingTasks: [

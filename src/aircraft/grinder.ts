@@ -1,5 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -8,6 +8,36 @@ import {
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Grinder extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 32,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 43,
+
+    baseGraphicalSize: 40,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 3 },
+    { resourceName: "Metal", amount: 1 },
+  ];
+
+  static craftRecipe = {
+    ingredients: [
+      { resourceName: "Water", amount: 1 },
+      { resourceName: "Metal", amount: 2 },
+    ],
+    result: "Truss",
+  };
+
+  // contentContainer
+  // ├── bladesGraphics
+  // ├── baseGraphics
+
   bladesGraphics: Graphics[] = [];
   bladesParams = {
     amount: 4,
@@ -17,19 +47,17 @@ export class Grinder extends Building {
   constructor(x: number, y: number) {
     super(x, y, 4, "Grinder");
     this.draw();
-    this.craft = {
-      ingredients: [
-        { resourceName: "Water", count: 1 },
-        { resourceName: "Metal", count: 2 },
-      ],
-      result: "Truss",
-    };
+
     this.priorityForTasks = 5;
     this.refreshTasks();
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Grinder.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.createBlades();
 
@@ -46,7 +74,7 @@ export class Grinder extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        this.baseRadius + 4,
+        Grinder.config.baseGraphicalSize + 4,
       );
 
       this.bladesGraphics[i].position.set(x, y);
@@ -92,12 +120,27 @@ export class Grinder extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#d2aa8a", true);
+    makeBasicCircle(
+      baseGraphics,
+      Grinder.config.baseGraphicalSize,
+      "#d2aa8a",
+      true,
+    );
 
     this.makeBladeConnectors(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseRadius - 12, "#846c5b", false);
-    makeBasicCircle(baseGraphics, this.baseRadius - 14, "#ce9e81", false);
+    makeBasicCircle(
+      baseGraphics,
+      Grinder.config.baseGraphicalSize - 12,
+      "#846c5b",
+      false,
+    );
+    makeBasicCircle(
+      baseGraphics,
+      Grinder.config.baseGraphicalSize - 14,
+      "#ce9e81",
+      false,
+    );
 
     Grinder.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
@@ -107,13 +150,13 @@ export class Grinder extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        this.baseRadius - 14,
+        Grinder.config.baseGraphicalSize - 14,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        this.baseRadius + 2,
+        Grinder.config.baseGraphicalSize + 2,
       );
 
       baseGraphics.moveTo(x1, y1).lineTo(x2, y2);

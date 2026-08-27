@@ -8,8 +8,8 @@ export const movingResources: Scenario = {
       { from: "p0", id: "p2", type: "Platform", x: 500, y: 550 },
     ],
     resources: [
-      { buildingId: "p1", type: "Organic", count: 1 },
-      { buildingId: "p2", type: "Water", count: 1 },
+      { buildingId: "p1", resourceName: "Organic", amount: 1 },
+      { buildingId: "p2", resourceName: "Water", amount: 1 },
     ],
     workers: [{ buildingId: "p0", profession: "delivering" }],
     deliveryTasks: [
@@ -17,13 +17,13 @@ export const movingResources: Scenario = {
         target: "p2",
         priority: 5,
         resource: "Organic",
-        count: 1,
+        amount: 1,
       },
       {
         target: "p1",
         priority: 5,
         resource: "Water",
-        count: 1,
+        amount: 1,
       },
     ],
   },

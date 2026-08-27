@@ -1,6 +1,6 @@
 import { Scenario } from "@test-situations/test-situation";
 
-export const productionResources: Scenario = {
+export const craftingResourcesForConstruction: Scenario = {
   aircraft: {
     buildings: [
       { from: "", id: "p0", type: "Platform", x: 500, y: 500 },

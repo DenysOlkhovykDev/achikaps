@@ -1,45 +1,91 @@
 import { FederatedPointerEvent, Container, Texture, Graphics } from "pixi.js";
 import { Resource } from "@resources/resource";
-import { buidingParameters, aircraft } from "@aircraft/aircraft";
+import { aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
 import { Task } from "@dashboard/task";
 import { constructionManager } from "@construction/manager";
 import { makeRoundShadow } from "@utils/basic-graphic";
-import { Recipe, RecipeSign } from "@aircraft/building-parts/recipe-sign";
+import {
+  Recipe,
+  RecipeIngredient,
+  RecipeSign,
+} from "@aircraft/building-parts/recipe-sign";
 import { ResourceStorage } from "@aircraft/building-parts/resource-storage";
 import { TaskManager } from "@aircraft/building-parts/task-manager";
 import { getRadialPoint } from "@utils/basic-geometry";
 import { joystick } from "@joystick/joystick";
 import { CraftingProcessor } from "./building-parts/crafting-processor";
+import { GeometryCalulator } from "./building-parts/geometry-calculator";
+
+export interface BuildingConfig {
+  storageCenter: {
+    x: number;
+    y: number;
+  };
+
+  storageRadius: number;
+
+  boundsCenter: {
+    x: number;
+    y: number;
+  };
+
+  boundsRadius: number;
+
+  baseGraphicalSize: number;
+
+  minLinkLength: number;
+  maxLinkLength: number;
+}
 
 export abstract class Building {
+  // root
+  // ├── recipeSign.root
+  // ├── DEBUGTaskDisplay
+  // └── buildingContainer
+  //     ├── shadowContainer
+  //     ├── selectShadowContainer
+  //     ├── contentContainer
+  //     └── resourcesContainer
+
   root: Container = new Container();
+
+  buildingContainer: Container;
 
   shadowContainer: Container = new Container();
   selectShadowContainer: Container = new Container();
 
   contentContainer: Container;
+  static readonly config: BuildingConfig;
   static baseTexture: Texture;
+  geometry: GeometryCalulator;
 
   links: Road[] = [];
 
-  baseRadius: number = 0;
-  decorativeRadius: number = 0;
-  baseCenter = { x: 0, y: 0 };
-  decorativeCenter = { x: 0, y: 0 };
-  orientation: number = 0;
+  priorityForTasks: number = -1;
+  taskManager: TaskManager;
 
   craftingProcessor: CraftingProcessor;
 
   resourceStorage: ResourceStorage;
 
   recipeSign = new RecipeSign();
-  craft: Recipe | undefined;
-
-  priorityForTasks: number = -1;
-  taskManager: TaskManager;
+  static craftRecipe: Recipe | undefined;
+  static constructionRecipe: RecipeIngredient[];
 
   DEBUGTaskDisplay: Graphics = new Graphics();
+
+  public get config(): BuildingConfig {
+    return (this.constructor as typeof Building).config;
+  }
+
+  public get constructionRecipe(): RecipeIngredient[] {
+    return (this.constructor as typeof Building).constructionRecipe;
+  }
+
+  public get craftRecipe(): Recipe | undefined {
+    return (this.constructor as typeof Building).craftRecipe;
+  }
 
   constructor(
     public x: number,
@@ -47,110 +93,36 @@ export abstract class Building {
     public inventorySize: number,
     public buildingType: string,
   ) {
+    this.initEvents();
+
+    this.buildingContainer = new Container();
     this.contentContainer = new Container();
 
-    this.configureGeometry(this.buildingType);
-
+    this.geometry = new GeometryCalulator(this);
     this.craftingProcessor = new CraftingProcessor(this);
-
     this.resourceStorage = new ResourceStorage(
       this.inventorySize,
-      this.baseRadius - 8,
+      this.config.storageRadius,
     );
     this.taskManager = new TaskManager(this);
-    this.initEvents();
 
     this.root.x = this.x;
     this.root.y = this.y;
 
-    this.root.addChild(this.shadowContainer);
-    this.root.addChild(this.selectShadowContainer);
-    this.root.addChild(this.contentContainer);
-    this.root.addChild(this.resourceStorage.resourcesContainer);
     this.root.addChild(this.recipeSign.root);
     this.root.addChild(this.DEBUGTaskDisplay);
+    this.buildingContainer.addChild(this.shadowContainer);
+    this.buildingContainer.addChild(this.selectShadowContainer);
+    this.buildingContainer.addChild(this.contentContainer);
+    this.buildingContainer.addChild(this.resourceStorage.resourcesContainer);
+    this.root.addChild(this.buildingContainer);
 
-    this.applyGeometryTransform();
+    this.geometry.applyGeometryTransform();
   }
 
-  // Geometry // Fix
+  protected abstract draw(): void;
 
-  protected configureGeometry(buildingType: string) {
-    const parameters =
-      buidingParameters[buildingType as keyof typeof buidingParameters];
-
-    this.baseRadius = parameters.baseRadius;
-    this.decorativeRadius = parameters.decorativeRadius;
-    this.baseCenter = { ...parameters.baseCenter };
-    this.decorativeCenter = { ...parameters.decorativeCenter };
-  }
-
-  private getDecorativeCenterInRoot() {
-    const offsetX = this.decorativeCenter.x - this.baseCenter.x;
-    const offsetY = this.decorativeCenter.y - this.baseCenter.y;
-    const cos = Math.cos(this.orientation);
-    const sin = Math.sin(this.orientation);
-
-    return {
-      x: this.baseCenter.x + offsetX * cos - offsetY * sin,
-      y: this.baseCenter.y + offsetX * sin + offsetY * cos,
-    };
-  }
-
-  private applyGeometryTransform() {
-    const decorativeCenter = this.getDecorativeCenterInRoot();
-
-    this.resourceStorage.resourcesContainer.position.set(
-      this.baseCenter.x,
-      this.baseCenter.y,
-    );
-    this.shadowContainer.position.set(decorativeCenter.x, decorativeCenter.y);
-    this.selectShadowContainer.position.set(
-      decorativeCenter.x,
-      decorativeCenter.y,
-    );
-    this.contentContainer.position.set(decorativeCenter.x, decorativeCenter.y);
-    this.recipeSign.root.position.set(
-      decorativeCenter.x,
-      decorativeCenter.y - this.decorativeRadius - 15,
-    );
-
-    this.shadowContainer.rotation = this.orientation;
-    this.selectShadowContainer.rotation = this.orientation;
-    this.contentContainer.rotation = this.orientation;
-  }
-
-  public setOrientation(angle: number) {
-    this.orientation = angle;
-    this.applyGeometryTransform();
-  }
-
-  public orientByBuildDirection(from: Building) {
-    const fromCenter = from.getBaseCenterInWorld();
-    const toCenter = this.getBaseCenterInWorld();
-    const dx = toCenter.x - fromCenter.x;
-    const dy = toCenter.y - fromCenter.y;
-
-    if (dx === 0 && dy === 0) return;
-
-    this.setOrientation(Math.atan2(dy, dx));
-  }
-
-  public getBaseCenterInWorld() {
-    return {
-      x: this.x + this.baseCenter.x,
-      y: this.y + this.baseCenter.y,
-    };
-  }
-
-  public getDecorativeCenterInWorld() {
-    const center = this.getDecorativeCenterInRoot();
-
-    return {
-      x: this.x + center.x,
-      y: this.y + center.y,
-    };
-  }
+  public abstract animation(delta: number, movingAngle?: number): void;
 
   protected initEvents() {
     this.root.eventMode = "static";
@@ -159,27 +131,40 @@ export abstract class Building {
     );
   }
 
-  addLinkedBuilding(line: Road) {
-    this.links.push(line);
-  }
-
   onClick(event: FederatedPointerEvent) {
-    aircraft.hideCraftSigns();
-    this.showRecipeState();
+    event.stopPropagation();
+
     joystick.hide();
     constructionManager.hideButton();
+
+    aircraft.hideCraftSigns();
     aircraft.deSelectAllBuildings();
+
     makeRoundShadow(
-      this.decorativeRadius + 1,
+      this.config.boundsRadius + 1,
       "#00ff00",
       this.selectShadowContainer,
     );
-    event.stopPropagation();
+    this.showRecipeState();
   }
 
-  protected abstract draw(): void;
+  // Geometry
 
-  public abstract animation(delta: number, movingAngle?: number): void;
+  public orientByBuildDirection(from: Building) {
+    this.geometry.orientByBuildDirection(from);
+  }
+
+  public getBaseCenterInWorld() {
+    return this.geometry.getBaseCenterInWorld();
+  }
+
+  public getBoundsCenterInWorld() {
+    return this.geometry.getBoundsCenterInWorld();
+  }
+
+  addLinkedBuilding(line: Road) {
+    this.links.push(line);
+  }
 
   // TaskManager
 
@@ -201,7 +186,7 @@ export abstract class Building {
     ];
 
     for (let i = 0; i < taskList.length; i++) {
-      const { x, y } = getRadialPoint(i, 16, this.baseRadius + 16);
+      const { x, y } = getRadialPoint(i, 16, this.config.boundsRadius + 16);
 
       if (taskList[i].jobType === "delivering") {
         this.DEBUGTaskDisplay.circle(x, y, 10).fill("#ffff00");
@@ -260,12 +245,12 @@ export abstract class Building {
   // RecipeSign
 
   public showRecipeState() {
-    if (!this.craft) return;
+    if (!this.craftRecipe) return;
 
     this.recipeSign.show(
       {
-        ingredients: this.craft.ingredients,
-        result: this.craft.result,
+        ingredients: this.craftRecipe.ingredients,
+        result: this.craftRecipe.result,
       },
       {
         availableResources: this.resourceStorage.recources.map(
@@ -277,12 +262,12 @@ export abstract class Building {
   }
 
   public showRecipeInfo() {
-    if (!this.craft) return;
+    if (!this.craftRecipe) return;
 
     this.recipeSign.show(
       {
-        ingredients: this.craft.ingredients,
-        result: this.craft.result,
+        ingredients: this.craftRecipe.ingredients,
+        result: this.craftRecipe.result,
       },
       {
         availableResources: undefined,

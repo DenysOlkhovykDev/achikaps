@@ -1,5 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -8,6 +8,28 @@ import {
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class House extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 17,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 30,
+
+    baseGraphicalSize: 25,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 1 },
+    { resourceName: "Water", amount: 5 },
+  ];
+
+  // contentContainer
+  // ├── antennasGraphics
+  // ├── baseGraphics
+
   antennasGraphics: Graphics[] = [];
   antennasParams = {
     totalAmount: 3,
@@ -27,12 +49,16 @@ export class House extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      House.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.makeAntennas(
       this.antennasGraphics,
       this.antennasParams.angleOffset,
-      this.baseRadius,
+      House.config.baseGraphicalSize,
       this.antennasParams.totalAmount,
       this.antennasParams.currentAmount,
     );
@@ -82,9 +108,19 @@ export class House extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#72ac4a", true);
+    makeBasicCircle(
+      baseGraphics,
+      House.config.baseGraphicalSize,
+      "#72ac4a",
+      true,
+    );
 
-    makeBasicCircle(baseGraphics, this.baseRadius - 18, "#5b8937", false);
+    makeBasicCircle(
+      baseGraphics,
+      House.config.baseGraphicalSize - 18,
+      "#5b8937",
+      false,
+    );
 
     House.baseTexture = generateTextureFromOrigin(baseGraphics);
   }

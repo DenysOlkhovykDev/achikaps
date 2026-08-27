@@ -15,8 +15,8 @@ export function getRandomCoordinate(size: number, modifier: number) {
   return -size + modifier + Math.random() * (size - modifier);
 }
 
-export function getRadialPoint(index: number, count: number, radius: number) {
-  const angle = (Math.PI * 2 * index) / count;
+export function getRadialPoint(index: number, amount: number, radius: number) {
+  const angle = (Math.PI * 2 * index) / amount;
 
   return {
     angle,
@@ -27,11 +27,11 @@ export function getRadialPoint(index: number, count: number, radius: number) {
 
 export function getRadialLine(
   index: number,
-  count: number,
+  amount: number,
   startRadius: number,
   endRadius: number,
 ) {
-  const angle = (Math.PI * 2 * index) / count;
+  const angle = (Math.PI * 2 * index) / amount;
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
 

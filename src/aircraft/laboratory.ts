@@ -1,5 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -8,6 +8,37 @@ import {
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Laboratory extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 32,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 45,
+
+    baseGraphicalSize: 40,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 2 },
+    { resourceName: "Metal", amount: 1 },
+    { resourceName: "Water", amount: 1 },
+  ];
+
+  static craftRecipe = {
+    ingredients: [
+      { resourceName: "Organic", amount: 1 },
+      { resourceName: "Water", amount: 2 },
+    ],
+    result: "Gum",
+  };
+
+  // contentContainer
+  // ├── satelitesGraphics
+  // ├── baseGraphics
+
   satelitesGraphics: Graphics[] = [];
   satelitesParams = {
     amount: 8,
@@ -20,19 +51,17 @@ export class Laboratory extends Building {
   constructor(x: number, y: number) {
     super(x, y, 4, "Laboratory");
     this.draw();
-    this.craft = {
-      ingredients: [
-        { resourceName: "Organic", count: 1 },
-        { resourceName: "Water", count: 2 },
-      ],
-      result: "Gum",
-    };
+
     this.priorityForTasks = 5;
     this.refreshTasks();
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Laboratory.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.createSatelites();
 
@@ -49,7 +78,7 @@ export class Laboratory extends Building {
       const { x: cx, y: cy } = getRadialPoint(
         i,
         this.satelitesParams.amount,
-        this.baseRadius - 5,
+        Laboratory.config.baseGraphicalSize - 5,
       );
 
       this.satelitesGraphics[i].position.set(cx, cy);
@@ -73,7 +102,12 @@ export class Laboratory extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#cc92c3", true);
+    makeBasicCircle(
+      baseGraphics,
+      Laboratory.config.baseGraphicalSize,
+      "#cc92c3",
+      true,
+    );
 
     this.makeDecorativeCircles(baseGraphics);
 
@@ -87,7 +121,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i * 2 - 1,
         this.amountOfDecorativeCircles * 2,
-        this.baseRadius - 24,
+        Laboratory.config.baseGraphicalSize - 24,
       );
 
       baseGraphics.circle(x, y, 6).fill("#b762ac");
@@ -97,7 +131,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.amountOfDecorativeCircles,
-        this.baseRadius - 12,
+        Laboratory.config.baseGraphicalSize - 12,
       );
 
       baseGraphics.circle(x, y, 8).fill("#b762ac");

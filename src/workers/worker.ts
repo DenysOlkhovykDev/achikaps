@@ -8,11 +8,11 @@ import { delay } from "@utils/delay";
 
 const isTest = import.meta.env.MODE === "test";
 
-type Leg = {
+interface Leg {
   x: number;
   y: number;
   isMovingForward: boolean;
-};
+}
 
 export class Worker {
   root: Container = new Container();

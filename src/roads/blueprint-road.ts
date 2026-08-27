@@ -23,7 +23,7 @@ export class BlueprintRoad {
   public drawDashedLine(from: Building, to: Building, dash = 10, gap = 10) {
     const fromCenter = from.getBaseCenterInWorld();
     const toCenter = to.getBaseCenterInWorld();
-    const decorationCenter = to.getDecorativeCenterInWorld();
+    const decorationCenter = to.getBoundsCenterInWorld();
 
     const dx = toCenter.x - fromCenter.x;
     const dy = toCenter.y - fromCenter.y;
@@ -41,7 +41,7 @@ export class BlueprintRoad {
       decorationDx * decorationDx +
       decorationDy * decorationDy -
       projection * projection;
-    const radiusSquared = to.decorativeRadius * to.decorativeRadius;
+    const radiusSquared = to.config.boundsRadius * to.config.boundsRadius;
 
     let effectiveDistance = distance;
     if (perpendicularDistanceSquared <= radiusSquared) {
@@ -55,9 +55,9 @@ export class BlueprintRoad {
     }
 
     const step = dash + gap;
-    const count = Math.floor(effectiveDistance / step) + 1;
+    const amount = Math.floor(effectiveDistance / step) + 1;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < amount; i++) {
       const start = i * step;
       const end = Math.min(start + dash, effectiveDistance);
 

@@ -1,21 +1,21 @@
 import { Container, Graphics, Text } from "pixi.js";
 import { createResource } from "@resources/_resources";
 
-export type RecipeIngredient = {
+export interface RecipeIngredient {
   resourceName: string;
-  count: number;
-};
+  amount: number;
+}
 
-export type Recipe = {
+export interface Recipe {
   ingredients: RecipeIngredient[];
   result?: string;
-};
+}
 
-export type RecipeSignOptions = {
+export interface RecipeSignOptions {
   layout?: "horizontal" | "vertical";
   availableResources?: string[];
   isAvailableResult?: boolean;
-};
+}
 
 export class RecipeSign {
   root = new Container();
@@ -53,11 +53,11 @@ export class RecipeSign {
       : undefined;
 
     for (const ingredient of recipe.ingredients) {
-      for (let i = 0; i < ingredient.count; i++) {
+      for (let i = 0; i < ingredient.amount; i++) {
         const resource = createResource(ingredient.resourceName).root;
         const availableCount = availableCounts
           ? (availableCounts.get(ingredient.resourceName) ?? 0)
-          : ingredient.count;
+          : ingredient.amount;
 
         if (availableCounts && availableCount > 0) {
           availableCounts.set(ingredient.resourceName, availableCount - 1);
@@ -115,7 +115,7 @@ export class RecipeSign {
       resource.position.set(21, 10 + index * this.spacing);
 
       const amount = new Text({
-        text: ingredient.count,
+        text: ingredient.amount,
         style: {
           fill: "#000000",
           fontSize: 14,

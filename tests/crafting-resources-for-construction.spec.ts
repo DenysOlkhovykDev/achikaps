@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 import { testSettings, skipFrames, initGame } from "./test-infra";
 
-const testName = "production-resources";
+const testName = "crafting-resources-for-construction";
 
 test(testName, async ({ page }) => {
   await initGame(page, testName);

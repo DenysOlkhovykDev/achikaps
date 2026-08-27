@@ -6,8 +6,8 @@ import { Gum } from "@resources/gum";
 import { Gear } from "@resources/gear";
 import { Truss } from "@resources/truss";
 
-export function createResource(type: string) {
-  switch (type) {
+export function createResource(resourceName: string) {
+  switch (resourceName) {
     case "Organic":
       return new Organic("Organic");
     case "Metal":
@@ -23,6 +23,6 @@ export function createResource(type: string) {
     case "Truss":
       return new Truss("Truss");
     default:
-      throw new Error("Unknown resource: " + type);
+      throw new Error("Unknown resource: " + resourceName);
   }
 }

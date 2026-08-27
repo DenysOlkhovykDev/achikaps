@@ -1,5 +1,5 @@
-import { Container } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Container, Texture } from "pixi.js";
+import { Building, BuildingConfig } from "@aircraft/building";
 import { Road } from "@roads/road";
 import { BlueprintRoad } from "@roads/blueprint-road";
 import { JobType, Task } from "@dashboard/task";
@@ -18,18 +18,16 @@ import { Engine } from "@aircraft/engine";
 import { Blueprint } from "@aircraft/blueprint";
 import { GlassMaker } from "@aircraft/glassMaker";
 import { Workers } from "@workers/_workers";
+import { RecipeIngredient } from "./building-parts/recipe-sign";
 
-const centeredGeometry = (baseRadius: number, decorativeRadius: number) => ({
-  baseRadius: baseRadius,
-  decorativeRadius: decorativeRadius,
-  baseCenter: { x: 0, y: 0 },
-  decorativeCenter: { x: 0, y: 0 },
-});
+export type BuildingClass = {
+  new (x: number, y: number): Building;
+  config: BuildingConfig;
+  baseTexture: Texture;
+  constructionRecipe: RecipeIngredient[];
+};
 
-export const buildingMap: Record<
-  string,
-  new (x: number, y: number) => Building
-> = {
+export const buildingMap: Record<string, BuildingClass> = {
   Platform,
   Factory,
   Mine,
@@ -41,117 +39,6 @@ export const buildingMap: Record<
   Smelter,
   Engine,
   GlassMaker,
-};
-
-export const buidingParameters = {
-  Blueprint: {
-    ...centeredGeometry(0, 0),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [],
-  },
-  Platform: {
-    ...centeredGeometry(40, 40),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 1 },
-      { type: "Water", amount: 1 },
-    ],
-  },
-  Factory: {
-    ...centeredGeometry(40, 45),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 2 },
-      { type: "Water", amount: 1 },
-    ],
-  },
-  Mine: {
-    ...centeredGeometry(40, 43),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [{ type: "Organic", amount: 3 }],
-  },
-  Farm: {
-    ...centeredGeometry(40, 43),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 1 },
-      { type: "Water", amount: 2 },
-    ],
-  },
-  Grinder: {
-    ...centeredGeometry(40, 43),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 3 },
-      { type: "Metal", amount: 1 },
-    ],
-  },
-  Laboratory: {
-    ...centeredGeometry(40, 45),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 2 },
-      { type: "Metal", amount: 1 },
-      { type: "Water", amount: 1 },
-    ],
-  },
-  Smelter: {
-    ...centeredGeometry(40, 50),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 2 },
-      { type: "Water", amount: 2 },
-    ],
-  },
-  Engine: {
-    ...centeredGeometry(20, 27),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Gum", amount: 1 },
-      { type: "Gear", amount: 1 },
-      { type: "Truss", amount: 1 },
-    ],
-  },
-  Junkuard: {
-    ...centeredGeometry(60, 60),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 5 },
-      { type: "Water", amount: 2 },
-    ],
-  },
-  House: {
-    ...centeredGeometry(25, 30),
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 1 },
-      { type: "Water", amount: 5 },
-    ],
-  },
-  GlassMaker: {
-    baseRadius: 20,
-    decorativeRadius: 35,
-    baseCenter: { x: 0, y: 0 },
-    decorativeCenter: { x: 15, y: 0 },
-    minLinkLength: 120,
-    maxLinkLength: 200,
-    craft: [
-      { type: "Organic", amount: 1 },
-      { type: "Water", amount: 2 },
-      { type: "Metal", amount: 3 },
-    ],
-  },
 };
 
 class Aircraft {
@@ -197,7 +84,9 @@ class Aircraft {
   }
 
   public addBlueprint(x: number, y: number, buildingType: string) {
-    const blueprint = new Blueprint(x, y, buildingType);
+    const BuildingClass = buildingMap[buildingType] || Platform;
+
+    const blueprint = new Blueprint(x, y, BuildingClass);
 
     this.blueprints.push(blueprint);
     this.airCraftLayer.addChild(blueprint.root);
@@ -212,14 +101,14 @@ class Aircraft {
       blueprint.addLinkedBuilding(line);
 
       this.airCraftLayer.addChildAt(line.graphic, 0);
-      const craft =
-        buidingParameters[buildingType as keyof typeof buidingParameters].craft;
+      const constructionRecipe = BuildingClass.constructionRecipe;
 
-      for (let i = 0; i < craft.length; i++) {
-        for (let j = 0; j < craft[i].amount; j++) {
+      for (let i = 0; i < constructionRecipe.length; i++) {
+        for (let j = 0; j < constructionRecipe[i].amount; j++) {
           const availableResource = from.resourceStorage.recources.find(
             (resource) =>
-              resource.resourceType === craft[i].type && !resource.isReserved,
+              resource.resourceType === constructionRecipe[i].resourceName &&
+              !resource.isReserved,
           );
 
           if (availableResource) {
@@ -228,14 +117,14 @@ class Aircraft {
             const [task] = from.taskManager.addTasks(
               JobType.building,
               5,
-              craft[i].type,
+              constructionRecipe[i].resourceName,
             );
             if (task) {
               blueprint.tasks.push(task);
             }
           }
 
-          blueprint.buildResources.push(craft[i].type);
+          blueprint.buildResources.push(constructionRecipe[i].resourceName);
         }
       }
 
