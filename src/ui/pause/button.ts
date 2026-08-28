@@ -15,7 +15,7 @@ class PauseButton extends Container {
   }
 
   private createBackground() {
-    this.background.rect(20, 20, 30, 40).fill({ color: "#e5ecea" });
+    this.background.rect(20, 20, 30, 40).fill({ color: "#e5ecea", alpha: 0 });
 
     this.background.eventMode = "static";
 

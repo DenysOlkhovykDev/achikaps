@@ -15,7 +15,7 @@ class SpeedButton extends Container {
   }
 
   private createBackground(): void {
-    this.background.rect(60, 20, 30, 40).fill({ color: "#e5ecea" });
+    this.background.rect(60, 20, 30, 40).fill({ color: "#e5ecea", alpha: 0 });
 
     this.background.eventMode = "static";
 
