@@ -1,6 +1,6 @@
 import { Graphics, Container } from "pixi.js";
 
-export type Pointer = {
+export interface Pointer {
   condition: Function;
 
   debounce: number;
@@ -10,7 +10,7 @@ export type Pointer = {
   y?: number;
 
   findTarget?: Function;
-};
+}
 
 export class TutorialPointer extends Container {
   private graphics = new Graphics();

@@ -1,42 +1,67 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
+  makeCircle,
   makeRoundShadow,
 } from "@utils/basic-graphic";
 
 export class GlassMaker extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 12,
+
+    boundsCenter: { x: 15, y: 0 },
+    boundsRadius: 35,
+
+    baseGraphicalSize: 20,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 1 },
+    { resourceName: "Water", amount: 2 },
+    { resourceName: "Metal", amount: 3 },
+  ];
+
   constructor(x: number, y: number) {
     super(x, y, 10, "GlassMaker");
     this.draw();
   }
 
   draw() {
-    makeRoundShadow(this.decorativeRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      GlassMaker.config.boundsRadius,
+      "#000000",
+      this.shadowContainer,
+    );
 
-    this.createDecorativeTexture();
+    this.createBaseTexture();
 
-    const decoration = new Sprite(GlassMaker.baseTexture);
-    this.contentContainer.addChild(decoration);
-
-    const base = new Graphics();
-    makeBasicCircle(base, this.baseRadius, "#74f6ff", true);
-    this.resourceStorage.resourcesContainer.addChildAt(base, 0);
+    const base = new Sprite(GlassMaker.baseTexture);
+    this.contentContainer.addChild(base);
   }
 
-  private createDecorativeTexture() {
+  private createBaseTexture() {
     if (GlassMaker.baseTexture) return;
 
-    const decorationGraphics = new Graphics();
-    makeBasicCircle(
-      decorationGraphics,
-      this.decorativeRadius,
+    const base = new Graphics();
+
+    makeCircle(
+      0 + 15,
+      0,
+      base,
+      GlassMaker.config.boundsRadius,
       "#beff74",
       false,
     );
 
-    GlassMaker.baseTexture = generateTextureFromOrigin(decorationGraphics);
+    makeBasicCircle(base, GlassMaker.config.baseGraphicalSize, "#74f6ff", true);
+
+    GlassMaker.baseTexture = generateTextureFromOrigin(base);
   }
 
   animation(delta: number) {}

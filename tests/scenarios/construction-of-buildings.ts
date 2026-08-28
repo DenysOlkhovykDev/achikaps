@@ -8,8 +8,8 @@ export const constructionOfBuildings: Scenario = {
       { from: "p0", id: "p2", type: "Platform", x: 500, y: 550 },
     ],
     resources: [
-      { buildingId: "p1", type: "Organic", count: 5 },
-      { buildingId: "p2", type: "Water", count: 5 },
+      { buildingId: "p1", resourceName: "Organic", amount: 5 },
+      { buildingId: "p2", resourceName: "Water", amount: 5 },
     ],
     workers: [{ buildingId: "p0", profession: "building" }],
     buildingTasks: [

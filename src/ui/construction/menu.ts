@@ -1,8 +1,8 @@
-import { buildingMap, buidingParameters } from "@aircraft/aircraft";
+import { buildingMap } from "@aircraft/aircraft";
 import { Container, Graphics, Text } from "pixi.js";
 import { Platform } from "@aircraft/platform";
 import { Building } from "@aircraft/building";
-import { RecipeSign } from "@aircraft/building-parts.ts/recipe-sign";
+import { RecipeSign } from "@aircraft/building-parts/recipe-sign";
 
 export interface MenuItem {
   label: string;
@@ -172,7 +172,7 @@ export class ConstructionMenu extends Container {
   }
 
   private createCraftRecipe(building: Building, container: Container) {
-    if (building.craft) {
+    if (building.craftRecipe) {
       building.showRecipeInfo();
 
       building.recipeSign.root.position.set(
@@ -185,16 +185,14 @@ export class ConstructionMenu extends Container {
   }
 
   private createBuildingRecipe(building: Building, container: Container) {
-    const buildingRecipe =
-      buidingParameters[building.buildingType as keyof typeof buidingParameters]
-        .craft;
+    const buildingRecipe = building.constructionRecipe;
 
     const recipeSign = new RecipeSign();
     recipeSign.show(
       {
         ingredients: buildingRecipe.map((ingredient) => ({
-          resourceName: ingredient.type,
-          count: ingredient.amount,
+          resourceName: ingredient.resourceName,
+          amount: ingredient.amount,
         })),
       },
       { layout: "vertical" },

@@ -55,7 +55,18 @@ export function makeBasicCircle(
   color: string,
   isStroke: boolean,
 ) {
-  graphic.circle(0, 0, size);
+  makeCircle(0, 0, graphic, size, color, isStroke);
+}
+
+export function makeCircle(
+  x: number,
+  y: number,
+  graphic: Graphics,
+  size: number,
+  color: string,
+  isStroke: boolean,
+) {
+  graphic.circle(x, y, size);
   if (isStroke) {
     graphic.stroke({ width: 3, color: "#000000" });
   }

@@ -1,5 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -8,6 +8,32 @@ import {
 import { getRadialLine } from "@utils/basic-geometry";
 
 export class Smelter extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 32,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 50,
+
+    baseGraphicalSize: 40,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 2 },
+    { resourceName: "Water", amount: 2 },
+  ];
+
+  static craftRecipe = {
+    ingredients: [
+      { resourceName: "Metal", amount: 1 },
+      { resourceName: "Organic", amount: 2 },
+    ],
+    result: "Gear",
+  };
+
   buildingParams = {
     amountOfChemnies: 4,
     rotationSpeed: 0.005,
@@ -16,19 +42,17 @@ export class Smelter extends Building {
   constructor(x: number, y: number) {
     super(x, y, 4, "Smelter");
     this.draw();
-    this.craft = {
-      ingredients: [
-        { resourceName: "Metal", count: 1 },
-        { resourceName: "Organic", count: 2 },
-      ],
-      result: "Gear",
-    };
+
     this.priorityForTasks = 5;
     this.refreshTasks();
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Smelter.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.createBaseTexture();
 
@@ -41,7 +65,12 @@ export class Smelter extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#dec6a4", true);
+    makeBasicCircle(
+      baseGraphics,
+      Smelter.config.baseGraphicalSize,
+      "#dec6a4",
+      true,
+    );
 
     this.makeChimneyPart(baseGraphics, -1, 15, 20, "#000000");
     this.makeChimneyPart(baseGraphics, -1, 14, 16, "#dec6a4");
@@ -58,13 +87,23 @@ export class Smelter extends Building {
 
       baseGraphics
         .moveTo(0, 0)
-        .arc(0, 0, this.baseRadius, startAngle, endAngle)
+        .arc(0, 0, Smelter.config.baseGraphicalSize, startAngle, endAngle)
         .fill("#d4b58d");
     }
 
-    makeBasicCircle(baseGraphics, this.baseRadius - 8, "#dec6a4", false);
+    makeBasicCircle(
+      baseGraphics,
+      Smelter.config.baseGraphicalSize - 8,
+      "#dec6a4",
+      false,
+    );
 
-    makeBasicCircle(baseGraphics, this.baseRadius - 18, "#dbb39e", true);
+    makeBasicCircle(
+      baseGraphics,
+      Smelter.config.baseGraphicalSize - 18,
+      "#dbb39e",
+      true,
+    );
 
     Smelter.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
@@ -80,8 +119,8 @@ export class Smelter extends Building {
       const line = getRadialLine(
         i,
         this.buildingParams.amountOfChemnies,
-        this.baseRadius + start,
-        this.baseRadius + end,
+        Smelter.config.baseGraphicalSize + start,
+        Smelter.config.baseGraphicalSize + end,
       );
 
       baseGraphics

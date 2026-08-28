@@ -14,7 +14,7 @@ import { craftingResources } from "../../tests/scenarios/crafting-resources";
 import { constructionOfBuildings } from "../../tests/scenarios/construction-of-buildings";
 import { multipleConstructionOfBuildings } from "../../tests/scenarios/multiple-construction-of-buildings";
 import { multipleConstructionOfDifferentBuildings } from "../../tests/scenarios/multiple-construction-of-different-buildings";
-import { productionResources } from "../../tests/scenarios/production-resources";
+import { craftingResourcesForConstruction } from "../../tests/scenarios/crafting-resources-for-construction";
 import { sceneRender } from "../../tests/scenarios/scene-render";
 import { showingPointers } from "../../tests/scenarios/showing-pointers";
 import { differentAngles } from "../../tests/scenarios/different-angles";
@@ -29,7 +29,7 @@ function getScenarioName() {
   return params.get("scenario") || "default";
 }
 
-export type AircraftScenario = {
+export interface AircraftScenario {
   buildings: {
     from: string;
     id: string;
@@ -40,8 +40,8 @@ export type AircraftScenario = {
 
   resources?: {
     buildingId: string;
-    type: string;
-    count: number;
+    resourceName: string;
+    amount: number;
   }[];
 
   workers?: {
@@ -53,7 +53,7 @@ export type AircraftScenario = {
     target: string;
     priority: number;
     resource: string;
-    count: number;
+    amount: number;
   }[];
 
   buildingTasks?: {
@@ -62,9 +62,9 @@ export type AircraftScenario = {
     y: number;
     buildingType: string;
   }[];
-};
+}
 
-export type TutorialsScenario = {
+export interface TutorialsScenario {
   pointers?: {
     condition: Function;
     x?: number;
@@ -84,13 +84,13 @@ export type TutorialsScenario = {
     text: string;
     fontSize: number;
   }[];
-};
+}
 
-export type Scenario = {
+export interface Scenario {
   aircraft: AircraftScenario;
 
   tutorials?: TutorialsScenario;
-};
+}
 
 const scenarios: Record<string, Scenario> = {
   default: {
@@ -250,7 +250,7 @@ const scenarios: Record<string, Scenario> = {
     multipleConstructionOfDifferentBuildings,
   "multiple-delivering": multipleDelivering,
   "showing-pointers": showingPointers,
-  "production-resources": productionResources,
+  "crafting-resources-for-construction": craftingResourcesForConstruction,
   "scene-render": sceneRender,
 };
 

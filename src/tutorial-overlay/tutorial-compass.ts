@@ -1,11 +1,11 @@
 import { getDistance } from "@utils/basic-geometry";
 import { Graphics, Container } from "pixi.js";
 
-export type Compass = {
+export interface Compass {
   condition: Function;
 
   findTarget: Function;
-};
+}
 
 export class TutorialCompass extends Container {
   private graphics = new Graphics();

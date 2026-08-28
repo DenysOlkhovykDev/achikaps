@@ -1,6 +1,6 @@
 import { Container } from "pixi.js";
-import { Building } from "@aircraft/building";
-import { buidingParameters, aircraft } from "@aircraft/aircraft";
+import { Building, BuildingConfig } from "@aircraft/building";
+import { BuildingClass, aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { Resource } from "@resources/resource";
 import { Task } from "@dashboard/task";
@@ -8,20 +8,42 @@ import { constructionManager } from "@construction/manager";
 import { Graphics } from "pixi.js";
 
 export class Blueprint extends Building {
+  static readonly blueprintConfig: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 0,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 0,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+
+    baseGraphicalSize: 0,
+  };
+
+  static constructionRecipe = [];
+
+  private targetBuilding: BuildingClass;
+
   redraws: number = 0;
 
   tasks: Task[] = [];
   buildResources: string[] = [];
   reservedBuildResources: Resource[] = [];
 
-  constructor(
-    x: number,
-    y: number,
-    public type: string,
-  ) {
+  constructor(x: number, y: number, targetBuilding: BuildingClass) {
     super(x, y, 10, "Blueprint");
-    this.configureGeometry(type);
+
+    this.targetBuilding = targetBuilding;
     this.draw();
+  }
+
+  public get config(): BuildingConfig {
+    if (this.targetBuilding) {
+      return this.targetBuilding.config;
+    } else {
+      return Blueprint.blueprintConfig;
+    }
   }
 
   draw() {
@@ -32,10 +54,19 @@ export class Blueprint extends Building {
     const baseGraphics = new Graphics();
 
     baseGraphics
-      .circle(0, 0, this.decorativeRadius)
-      .fill({ color: 0xffffff, alpha: 0 });
+      .circle(
+        this.targetBuilding.config.boundsCenter.x,
+        this.targetBuilding.config.boundsCenter.y,
+        this.targetBuilding.config.boundsRadius,
+      )
+      .fill({ color: "#ffffff", alpha: 0 });
 
-    this.drawDashedCircle(baseGraphics, this.decorativeRadius);
+    this.drawDashedCircle(
+      baseGraphics,
+      this.targetBuilding.config.boundsCenter.x,
+      this.targetBuilding.config.boundsCenter.y,
+      this.targetBuilding.config.boundsRadius,
+    );
 
     this.contentContainer.addChild(baseGraphics);
   }
@@ -43,30 +74,32 @@ export class Blueprint extends Building {
   animation(delta: number) {}
 
   private drawDashedCircle(
-    baseGraphics: Graphics,
+    graphics: Graphics,
+    centerX: number,
+    centerY: number,
     radius: number,
     dash = 8,
     gap = 6,
   ) {
     const step = dash + gap;
     const circumference = 2 * Math.PI * radius;
-    const count = Math.floor(circumference / step) + 1;
+    const amount = Math.floor(circumference / step) + 1;
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < amount; i++) {
       const startAngle = (i * step) / radius;
       const endAngle = (i * step + dash) / radius;
 
-      const x1 = Math.cos(startAngle) * radius;
-      const y1 = Math.sin(startAngle) * radius;
+      const x1 = centerX + Math.cos(startAngle) * radius;
+      const y1 = centerY + Math.sin(startAngle) * radius;
 
-      const x2 = Math.cos(endAngle) * radius;
-      const y2 = Math.sin(endAngle) * radius;
+      const x2 = centerX + Math.cos(endAngle) * radius;
+      const y2 = centerY + Math.sin(endAngle) * radius;
 
-      baseGraphics.moveTo(x1, y1);
-      baseGraphics.lineTo(x2, y2);
+      graphics.moveTo(x1, y1);
+      graphics.lineTo(x2, y2);
     }
 
-    baseGraphics.stroke({ width: 3 });
+    graphics.stroke({ width: 3 });
   }
 
   private moveAwayFrom(
@@ -113,15 +146,17 @@ export class Blueprint extends Building {
   }
 
   public checkAndMove(building: Building, delta: number) {
-    const thisDecorativeCenter = this.getDecorativeCenterInWorld();
-    const otherDecorativeCenter = building.getDecorativeCenterInWorld();
+    const thisBoundsCenter = this.getBoundsCenterInWorld();
+    const otherBoundsCenter = building.getBoundsCenterInWorld();
     const minDistanceToBuilding =
-      this.decorativeRadius + building.decorativeRadius + 20;
+      this.targetBuilding.config.boundsRadius +
+      building.config.boundsRadius +
+      20;
     const distanceBetween = getDistance(
-      otherDecorativeCenter.x,
-      otherDecorativeCenter.y,
-      thisDecorativeCenter.x,
-      thisDecorativeCenter.y,
+      otherBoundsCenter.x,
+      otherBoundsCenter.y,
+      thisBoundsCenter.x,
+      thisBoundsCenter.y,
     );
 
     const baseCenter = this.getBaseCenterInWorld();
@@ -133,32 +168,25 @@ export class Blueprint extends Building {
       baseCenter.y,
     );
 
-    const minLinkLength =
-      buidingParameters[this.type as keyof typeof buidingParameters]
-        .minLinkLength;
-    const maxLinkLength =
-      buidingParameters[this.type as keyof typeof buidingParameters]
-        .maxLinkLength;
-
     const prevRedraws = this.redraws;
 
     if (distanceBetween <= minDistanceToBuilding) {
       this.redraws += 5;
       this.moveAwayFrom(
-        otherDecorativeCenter.x,
-        otherDecorativeCenter.y,
+        otherBoundsCenter.x,
+        otherBoundsCenter.y,
         delta,
         2,
-        thisDecorativeCenter,
+        thisBoundsCenter,
       );
     }
 
-    if (linkLength <= minLinkLength) {
+    if (linkLength <= this.targetBuilding.config.minLinkLength) {
       this.redraws++;
       this.moveAwayFrom(sourceBaseCenter.x, sourceBaseCenter.y, delta, 0.5);
     }
 
-    if (linkLength >= maxLinkLength) {
+    if (linkLength >= this.targetBuilding.config.maxLinkLength) {
       this.redraws++;
       this.moveTowards(sourceBaseCenter.x, sourceBaseCenter.y, delta, 0.5);
     }
@@ -177,7 +205,7 @@ export class Blueprint extends Building {
   }
 
   private checkLinksCollision(building: Building, delta: number) {
-    const minDist = this.decorativeRadius + 25;
+    const minDist = this.targetBuilding.config.boundsRadius + 25;
     for (const link of building.links) {
       const fromCenter = link.from.getBaseCenterInWorld();
       const toCenter = link.to.getBaseCenterInWorld();
@@ -187,9 +215,9 @@ export class Blueprint extends Building {
       const bx = toCenter.x;
       const by = toCenter.y;
 
-      const decorativeCenter = this.getDecorativeCenterInWorld();
-      const px = decorativeCenter.x;
-      const py = decorativeCenter.y;
+      const boundsCenter = this.getBoundsCenterInWorld();
+      const px = boundsCenter.x;
+      const py = boundsCenter.y;
 
       const abx = bx - ax;
       const aby = by - ay;
@@ -212,7 +240,7 @@ export class Blueprint extends Building {
 
       if (dist < minDist) {
         this.redraws += 5;
-        this.moveAwayFrom(closestX, closestY, delta, 2, decorativeCenter);
+        this.moveAwayFrom(closestX, closestY, delta, 2, boundsCenter);
       }
     }
   }
@@ -259,7 +287,7 @@ export class Blueprint extends Building {
       this.reservedBuildResources = [];
 
       aircraft.selectBuilding(source);
-      aircraft.addBuilding(this.x, this.y, this.type);
+      aircraft.addBuilding(this.x, this.y, this.targetBuilding.name);
       aircraft.deleteBlueprint(this);
       constructionManager.hideButton();
     }
@@ -289,7 +317,7 @@ export class Blueprint extends Building {
       {
         ingredients: this.buildResources.map((resourceName) => ({
           resourceName,
-          count: 1,
+          amount: 1,
         })),
       },
       {

@@ -13,14 +13,14 @@ export class TaskManager {
     jobType: JobType,
     priority: number,
     resource?: string,
-    count = 1,
+    amount = 1,
   ) {
-    const taskCount = resource ? count : 1;
+    const taskCount = resource ? amount : 1;
     const tasks: Task[] = [];
 
     if (
       taskCount <= 0 ||
-      (jobType === JobType.production && !this.building.craft)
+      (jobType === JobType.production && !this.building.craftRecipe)
     ) {
       return tasks;
     }
@@ -48,7 +48,8 @@ export class TaskManager {
   public refreshTasks() {
     this.removeCompletedTasks();
 
-    if (!this.building.craft || this.building.priorityForTasks < 0) return;
+    if (!this.building.craftRecipe || this.building.priorityForTasks < 0)
+      return;
 
     this.syncDeliveryTasks();
     this.syncProductionTask();
@@ -70,7 +71,7 @@ export class TaskManager {
     const missingResources = [...requiredResources].map(
       ([resourceName, requiredCount]) => ({
         resourceName,
-        count: Math.max(
+        amount: Math.max(
           0,
           requiredCount -
             this.building.resourceStorage.getResourceCount(resourceName),
@@ -78,7 +79,7 @@ export class TaskManager {
       }),
     );
     const totalMissingResources = missingResources.reduce(
-      (total, resource) => total + resource.count,
+      (total, resource) => total + resource.amount,
       0,
     );
     const canFitMissingResources =
@@ -94,7 +95,7 @@ export class TaskManager {
         (task) => task.status === TaskStatus.inProgress,
       ).length;
       const desiredTaskCount = canFitMissingResources
-        ? missingResource.count
+        ? missingResource.amount
         : inProgressCount;
       const desiredAvailableCount = Math.max(
         0,

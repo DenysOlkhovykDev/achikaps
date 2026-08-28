@@ -30,8 +30,8 @@ export function createAirCraftByScenario(scenario: AircraftScenario) {
   for (const resource of scenario.resources || []) {
     const newBuilding = buildingsMap.get(resource.buildingId);
 
-    for (let i = 0; i < resource.count; i++) {
-      const newResource = createResource(resource.type);
+    for (let i = 0; i < resource.amount; i++) {
+      const newResource = createResource(resource.resourceName);
       newBuilding.tryToAddResource(newResource);
     }
   }
@@ -54,7 +54,7 @@ export function createAirCraftByScenario(scenario: AircraftScenario) {
       JobType.delivering,
       task.priority,
       task.resource,
-      task.count,
+      task.amount,
     );
   }
 

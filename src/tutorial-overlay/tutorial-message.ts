@@ -1,6 +1,6 @@
 import { Graphics, Container, Text, TextStyle } from "pixi.js";
 
-export type Message = {
+export interface Message {
   condition: Function;
 
   x: number;
@@ -8,7 +8,7 @@ export type Message = {
 
   text: string;
   fontSize: number;
-};
+}
 
 export class TutorialMessage extends Container {
   private graphics = new Graphics();

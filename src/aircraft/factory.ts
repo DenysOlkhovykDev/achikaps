@@ -1,5 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -8,6 +8,33 @@ import {
 import { getRadialPoint, getRadialLine } from "@utils/basic-geometry";
 
 export class Factory extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 32,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 45,
+
+    baseGraphicalSize: 40,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 2 },
+    { resourceName: "Water", amount: 1 },
+  ];
+
+  static craftRecipe = {
+    ingredients: [],
+    result: "Water",
+  };
+
+  // contentContainer
+  // ├── gridsGraphics
+  // ├── baseGraphics
+
   gridsGraphics: Graphics = new Graphics();
   gridsParams = {
     amount: 3,
@@ -19,16 +46,16 @@ export class Factory extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5, "Factory");
     this.draw();
-    this.craft = {
-      ingredients: [],
-      result: "Water",
-    };
     this.priorityForTasks = 5;
     this.refreshTasks();
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Factory.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.createSatelites();
 
@@ -43,22 +70,22 @@ export class Factory extends Building {
       const small = getRadialLine(
         i * 4 + 2,
         this.gridsParams.amount * 4,
-        this.baseRadius,
-        this.baseRadius + this.gridsParams.sizes[0],
+        Factory.config.baseGraphicalSize,
+        Factory.config.baseGraphicalSize + this.gridsParams.sizes[0],
       );
 
       const medium = getRadialLine(
         i * 4 + 1,
         this.gridsParams.amount * 4,
-        this.baseRadius,
-        this.baseRadius + this.gridsParams.sizes[1],
+        Factory.config.baseGraphicalSize,
+        Factory.config.baseGraphicalSize + this.gridsParams.sizes[1],
       );
 
       const large = getRadialLine(
         i * 4,
         this.gridsParams.amount * 4,
-        this.baseRadius,
-        this.baseRadius + this.gridsParams.sizes[2],
+        Factory.config.baseGraphicalSize,
+        Factory.config.baseGraphicalSize + this.gridsParams.sizes[2],
       );
 
       this.gridsGraphics
@@ -72,7 +99,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          this.baseRadius + this.gridsParams.sizes[0],
+          Factory.config.baseGraphicalSize + this.gridsParams.sizes[0],
           small.angle,
           small.angle - this.gridsParams.angleOffsets.small,
           true,
@@ -81,7 +108,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          this.baseRadius + this.gridsParams.sizes[1],
+          Factory.config.baseGraphicalSize + this.gridsParams.sizes[1],
           medium.angle,
           medium.angle - this.gridsParams.angleOffsets.medium,
           true,
@@ -96,11 +123,20 @@ export class Factory extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#a8d0db", true);
+    makeBasicCircle(
+      baseGraphics,
+      Factory.config.baseGraphicalSize,
+      "#a8d0db",
+      true,
+    );
 
     const points = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i, 3, this.baseRadius - 16);
+      const { x, y } = getRadialPoint(
+        i,
+        3,
+        Factory.config.baseGraphicalSize - 16,
+      );
       points.push({ x, y });
     }
 

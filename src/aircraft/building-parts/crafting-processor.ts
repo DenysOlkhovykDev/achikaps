@@ -9,17 +9,17 @@ export class CraftingProcessor {
       return false;
     }
 
-    const craft = this.building.craft!;
+    const craftRecipe = this.building.craftRecipe!;
 
-    for (const ingredient of craft.ingredients) {
-      for (let i = 0; i < ingredient.count; i++) {
+    for (const ingredient of craftRecipe.ingredients) {
+      for (let i = 0; i < ingredient.amount; i++) {
         this.building.resourceStorage.takeReservedResourceByName(
           ingredient.resourceName,
         );
       }
     }
 
-    const result = craft.result !== undefined ? craft.result : "";
+    const result = craftRecipe.result !== undefined ? craftRecipe.result : "";
     const newResource = createResource(result);
     const wasAdded = this.building.tryToAddResource(newResource, undefined);
 
@@ -29,13 +29,13 @@ export class CraftingProcessor {
   public getRequiredResourceCounts() {
     const requiredResources = new Map<string, number>();
 
-    if (!this.building.craft) return requiredResources;
+    if (!this.building.craftRecipe) return requiredResources;
 
-    for (const ingredient of this.building.craft.ingredients) {
+    for (const ingredient of this.building.craftRecipe.ingredients) {
       requiredResources.set(
         ingredient.resourceName,
         (requiredResources.get(ingredient.resourceName) ?? 0) +
-          ingredient.count,
+          ingredient.amount,
       );
     }
 
@@ -44,7 +44,7 @@ export class CraftingProcessor {
 
   public canProduce() {
     return (
-      this.building.craft !== undefined &&
+      this.building.craftRecipe !== undefined &&
       this.building.priorityForTasks >= 0 &&
       this.checkIsEnoughResourcesForCraft() &&
       this.hasSpaceForProductionResult()
@@ -52,7 +52,7 @@ export class CraftingProcessor {
   }
 
   private checkIsEnoughResourcesForCraft() {
-    if (this.building.craft) {
+    if (this.building.craftRecipe) {
       return [...this.getRequiredResourceCounts()].every(
         ([resourceName, requiredCount]) =>
           this.building.resourceStorage.getResourceCount(resourceName) >=
@@ -64,10 +64,10 @@ export class CraftingProcessor {
   }
 
   private hasSpaceForProductionResult() {
-    if (!this.building.craft) return false;
+    if (!this.building.craftRecipe) return false;
 
-    const consumedResources = this.building.craft.ingredients.reduce(
-      (total, ingredient) => total + ingredient.count,
+    const consumedResources = this.building.craftRecipe.ingredients.reduce(
+      (total, ingredient) => total + ingredient.amount,
       0,
     );
 

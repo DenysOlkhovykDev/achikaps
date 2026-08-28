@@ -1,5 +1,5 @@
 import { Graphics, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -16,6 +16,28 @@ type Particle = {
 };
 
 export class Junkuard extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 52,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 60,
+
+    baseGraphicalSize: 60,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 5 },
+    { resourceName: "Water", amount: 2 },
+  ];
+
+  // contentContainer
+  // ├── particles
+  // ├── baseGraphics
+
   particles: Particle[] = [];
   amountOfParticles: number = 4;
 
@@ -25,7 +47,11 @@ export class Junkuard extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Junkuard.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.createBaseTexture();
 
@@ -40,7 +66,12 @@ export class Junkuard extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#cac8a5", true);
+    makeBasicCircle(
+      baseGraphics,
+      Junkuard.config.baseGraphicalSize,
+      "#cac8a5",
+      true,
+    );
 
     Junkuard.baseTexture = generateTextureFromOrigin(baseGraphics);
   }

@@ -1,5 +1,5 @@
 import { Graphics, Triangle, Sprite } from "pixi.js";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -12,6 +12,33 @@ import {
 } from "@utils/basic-geometry";
 
 export class Farm extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 32,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 43,
+
+    baseGraphicalSize: 40,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Organic", amount: 1 },
+    { resourceName: "Water", amount: 2 },
+  ];
+
+  static craftRecipe = {
+    ingredients: [],
+    result: "Metal",
+  };
+
+  // contentContainer
+  // ├── antennasGraphics
+  // ├── baseGraphics
+
   antennasGraphics: Graphics[] = [];
   antennasParams = {
     amount: 4,
@@ -28,21 +55,22 @@ export class Farm extends Building {
   constructor(x: number, y: number) {
     super(x, y, 5, "Farm");
     this.draw();
-    this.craft = {
-      ingredients: [],
-      result: "Metal",
-    };
+
     this.priorityForTasks = 5;
     this.refreshTasks();
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Farm.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.makeAntennas(
       this.antennasGraphics,
       this.antennasParams.angleOffset,
-      this.baseRadius,
+      Farm.config.baseGraphicalSize,
       this.antennasParams.amount,
     );
 
@@ -91,13 +119,28 @@ export class Farm extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#b06667", true);
+    makeBasicCircle(
+      baseGraphics,
+      Farm.config.baseGraphicalSize,
+      "#b06667",
+      true,
+    );
 
     this.makeSpikes(baseGraphics);
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#965859", false);
+    makeBasicCircle(
+      baseGraphics,
+      Farm.config.baseGraphicalSize,
+      "#965859",
+      false,
+    );
 
-    makeBasicCircle(baseGraphics, this.baseRadius - 5, "#c08484", false);
+    makeBasicCircle(
+      baseGraphics,
+      Farm.config.baseGraphicalSize - 5,
+      "#c08484",
+      false,
+    );
 
     this.makeDecorativeTriangles(baseGraphics);
 
@@ -114,14 +157,14 @@ export class Farm extends Building {
       } = getRadialLine(
         i * 10 + 4,
         this.spikeParams.amount * 10,
-        this.baseRadius - 1,
-        this.baseRadius + 8,
+        Farm.config.baseGraphicalSize - 1,
+        Farm.config.baseGraphicalSize + 8,
       );
 
       const { x: x1, y: y1 } = getRadialPoint(
         i * 10 + 1,
         this.spikeParams.amount * 10,
-        this.baseRadius,
+        Farm.config.baseGraphicalSize,
       );
 
       baseGraphics
@@ -141,14 +184,14 @@ export class Farm extends Building {
       } = getRadialLine(
         i * 10 + 6,
         this.spikeParams.amount * 10,
-        this.baseRadius - 1,
-        this.baseRadius + 8,
+        Farm.config.baseGraphicalSize - 1,
+        Farm.config.baseGraphicalSize + 8,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i * 10 + 9,
         this.spikeParams.amount * 10,
-        this.baseRadius,
+        Farm.config.baseGraphicalSize,
       );
 
       baseGraphics
@@ -165,7 +208,11 @@ export class Farm extends Building {
   private makeDecorativeTriangles(baseGraphics: Graphics) {
     const points = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i * 2 - 1, 3 * 2, this.baseRadius - 7);
+      const { x, y } = getRadialPoint(
+        i * 2 - 1,
+        3 * 2,
+        Farm.config.baseGraphicalSize - 7,
+      );
       points.push({ x, y });
     }
 
@@ -178,7 +225,7 @@ export class Farm extends Building {
 
     const points2 = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i, 3, this.baseRadius - 21);
+      const { x, y } = getRadialPoint(i, 3, Farm.config.baseGraphicalSize - 21);
       points2.push({ x, y });
     }
 

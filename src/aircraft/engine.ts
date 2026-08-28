@@ -1,6 +1,6 @@
 import { FederatedPointerEvent, Graphics, Sprite } from "pixi.js";
 import { joystick } from "@joystick/joystick";
-import { Building } from "@aircraft/building";
+import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
@@ -9,16 +9,40 @@ import {
 import { getRandomDelay } from "@utils/delay";
 import { getRadialPoint, getRandomCoordinate } from "@utils/basic-geometry";
 
-type Particle = {
+interface Particle {
   gfx: Graphics;
   angle: number;
   speed: number;
   scale: number;
   delay: number;
   isActive: boolean;
-};
+}
 
 export class Engine extends Building {
+  static readonly config: BuildingConfig = {
+    storageCenter: { x: 0, y: 0 },
+    storageRadius: 12,
+
+    boundsCenter: { x: 0, y: 0 },
+    boundsRadius: 27,
+
+    baseGraphicalSize: 20,
+
+    minLinkLength: 120,
+    maxLinkLength: 200,
+  };
+
+  static constructionRecipe = [
+    { resourceName: "Gum", amount: 1 },
+    { resourceName: "Gear", amount: 1 },
+    { resourceName: "Truss", amount: 1 },
+  ];
+
+  // contentContainer
+  // ├── particle
+  // ├── propellerGraphics
+  // ├── baseGraphics
+
   propellerGraphics: Graphics = new Graphics();
   propellerParams = {
     amount: 3,
@@ -30,9 +54,9 @@ export class Engine extends Building {
     amount: 3,
     tracesWidth: 1.6,
     traceRadiuses: [
-      this.baseRadius - 14,
-      this.baseRadius - 10,
-      this.baseRadius - 5,
+      Engine.config.baseGraphicalSize - 14,
+      Engine.config.baseGraphicalSize - 10,
+      Engine.config.baseGraphicalSize - 5,
     ],
   };
 
@@ -50,7 +74,11 @@ export class Engine extends Building {
   }
 
   draw() {
-    makeRoundShadow(this.baseRadius, "#000000", this.shadowContainer);
+    makeRoundShadow(
+      Engine.config.baseGraphicalSize,
+      "#000000",
+      this.shadowContainer,
+    );
 
     this.createPropellerBlades();
 
@@ -79,13 +107,13 @@ export class Engine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i * 8,
         this.propellerParams.amount * 8,
-        this.baseRadius,
+        Engine.config.baseGraphicalSize,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i * 8 - 1,
         this.propellerParams.amount * 8,
-        this.baseRadius + this.propellerParams.size,
+        Engine.config.baseGraphicalSize + this.propellerParams.size,
       );
 
       this.propellerGraphics
@@ -105,7 +133,12 @@ export class Engine extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(baseGraphics, this.baseRadius, "#c9c9c9", true);
+    makeBasicCircle(
+      baseGraphics,
+      Engine.config.baseGraphicalSize,
+      "#c9c9c9",
+      true,
+    );
 
     this.makeDecorativePropellerBlades(baseGraphics);
 
@@ -119,13 +152,13 @@ export class Engine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i,
         this.decoPropellerParams.amount,
-        this.baseRadius - 15,
+        Engine.config.baseGraphicalSize - 15,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i,
         this.decoPropellerParams.amount,
-        this.baseRadius - 4,
+        Engine.config.baseGraphicalSize - 4,
       );
 
       baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
@@ -193,8 +226,8 @@ export class Engine extends Building {
   }
 
   private resetParticle(particle: Particle) {
-    particle.gfx.x = getRandomCoordinate(this.baseRadius, 7);
-    particle.gfx.y = getRandomCoordinate(this.baseRadius, 7);
+    particle.gfx.x = getRandomCoordinate(Engine.config.baseGraphicalSize, 7);
+    particle.gfx.y = getRandomCoordinate(Engine.config.baseGraphicalSize, 7);
 
     particle.scale = 1;
     particle.delay = getRandomDelay(1, 64);

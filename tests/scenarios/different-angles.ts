@@ -11,15 +11,24 @@ export const differentAngles: Scenario = {
       { from: "p0", id: "glassMaker4", type: "GlassMaker", x: 400, y: 600 },
     ],
     resources: [
-      { buildingId: "p0", type: "Water", count: 2 },
-      { buildingId: "p0", type: "Organic", count: 1 },
-      { buildingId: "p0", type: "Metal", count: 3 },
+      { buildingId: "p0", resourceName: "Water", amount: 2 },
+      { buildingId: "p0", resourceName: "Organic", amount: 1 },
+      { buildingId: "p0", resourceName: "Metal", amount: 3 },
+      { buildingId: "glassMaker1", resourceName: "Water", amount: 2 },
+      { buildingId: "glassMaker2", resourceName: "Organic", amount: 1 },
+      { buildingId: "glassMaker3", resourceName: "Metal", amount: 2 },
     ],
     buildingTasks: [
       {
         from: "p0",
         x: 500,
         y: 600,
+        buildingType: "GlassMaker",
+      },
+      {
+        from: "p0",
+        x: 500,
+        y: 400,
         buildingType: "GlassMaker",
       },
     ],
