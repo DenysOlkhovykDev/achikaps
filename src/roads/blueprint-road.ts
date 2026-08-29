@@ -41,7 +41,8 @@ export class BlueprintRoad {
       decorationDx * decorationDx +
       decorationDy * decorationDy -
       projection * projection;
-    const radiusSquared = to.config.boundsRadius * to.config.boundsRadius;
+    const radiusSquared =
+      to.buildingConfig.boundsRadius * to.buildingConfig.boundsRadius;
 
     let effectiveDistance = distance;
     if (perpendicularDistanceSquared <= radiusSquared) {

@@ -38,9 +38,9 @@ export class Blueprint extends Building {
     this.draw();
   }
 
-  public get config(): BuildingConfig {
+  public get buildingConfig(): BuildingConfig {
     if (this.targetBuilding) {
-      return this.targetBuilding.config;
+      return this.targetBuilding.buildingConfig;
     } else {
       return Blueprint.blueprintConfig;
     }
@@ -55,17 +55,17 @@ export class Blueprint extends Building {
 
     baseGraphics
       .circle(
-        this.targetBuilding.config.boundsCenter.x,
-        this.targetBuilding.config.boundsCenter.y,
-        this.targetBuilding.config.boundsRadius,
+        this.targetBuilding.buildingConfig.boundsCenter.x,
+        this.targetBuilding.buildingConfig.boundsCenter.y,
+        this.targetBuilding.buildingConfig.boundsRadius,
       )
       .fill({ color: "#ffffff", alpha: 0 });
 
     this.drawDashedCircle(
       baseGraphics,
-      this.targetBuilding.config.boundsCenter.x,
-      this.targetBuilding.config.boundsCenter.y,
-      this.targetBuilding.config.boundsRadius,
+      this.targetBuilding.buildingConfig.boundsCenter.x,
+      this.targetBuilding.buildingConfig.boundsCenter.y,
+      this.targetBuilding.buildingConfig.boundsRadius,
     );
 
     this.contentContainer.addChild(baseGraphics);
@@ -149,8 +149,8 @@ export class Blueprint extends Building {
     const thisBoundsCenter = this.getBoundsCenterInWorld();
     const otherBoundsCenter = building.getBoundsCenterInWorld();
     const minDistanceToBuilding =
-      this.targetBuilding.config.boundsRadius +
-      building.config.boundsRadius +
+      this.targetBuilding.buildingConfig.boundsRadius +
+      building.buildingConfig.boundsRadius +
       20;
     const distanceBetween = getDistance(
       otherBoundsCenter.x,
@@ -181,12 +181,12 @@ export class Blueprint extends Building {
       );
     }
 
-    if (linkLength <= this.targetBuilding.config.minLinkLength) {
+    if (linkLength <= this.targetBuilding.buildingConfig.minLinkLength) {
       this.redraws++;
       this.moveAwayFrom(sourceBaseCenter.x, sourceBaseCenter.y, delta, 0.5);
     }
 
-    if (linkLength >= this.targetBuilding.config.maxLinkLength) {
+    if (linkLength >= this.targetBuilding.buildingConfig.maxLinkLength) {
       this.redraws++;
       this.moveTowards(sourceBaseCenter.x, sourceBaseCenter.y, delta, 0.5);
     }
@@ -205,7 +205,7 @@ export class Blueprint extends Building {
   }
 
   private checkLinksCollision(building: Building, delta: number) {
-    const minDist = this.targetBuilding.config.boundsRadius + 25;
+    const minDist = this.targetBuilding.buildingConfig.boundsRadius + 25;
     for (const link of building.links) {
       const fromCenter = link.from.getBaseCenterInWorld();
       const toCenter = link.to.getBaseCenterInWorld();

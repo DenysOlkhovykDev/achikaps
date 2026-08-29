@@ -3,12 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRadialLine } from "@utils/basic-geometry";
 
 export class Smelter extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -48,10 +47,8 @@ export class Smelter extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Smelter.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Smelter.buildingConfig.baseGraphicalSize,
     );
 
     this.createBaseTexture();
@@ -67,7 +64,7 @@ export class Smelter extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Smelter.config.baseGraphicalSize,
+      Smelter.buildingConfig.baseGraphicalSize,
       "#dec6a4",
       true,
     );
@@ -87,20 +84,26 @@ export class Smelter extends Building {
 
       baseGraphics
         .moveTo(0, 0)
-        .arc(0, 0, Smelter.config.baseGraphicalSize, startAngle, endAngle)
+        .arc(
+          0,
+          0,
+          Smelter.buildingConfig.baseGraphicalSize,
+          startAngle,
+          endAngle,
+        )
         .fill("#d4b58d");
     }
 
     makeBasicCircle(
       baseGraphics,
-      Smelter.config.baseGraphicalSize - 8,
+      Smelter.buildingConfig.baseGraphicalSize - 8,
       "#dec6a4",
       false,
     );
 
     makeBasicCircle(
       baseGraphics,
-      Smelter.config.baseGraphicalSize - 18,
+      Smelter.buildingConfig.baseGraphicalSize - 18,
       "#dbb39e",
       true,
     );
@@ -119,8 +122,8 @@ export class Smelter extends Building {
       const line = getRadialLine(
         i,
         this.buildingParams.amountOfChemnies,
-        Smelter.config.baseGraphicalSize + start,
-        Smelter.config.baseGraphicalSize + end,
+        Smelter.buildingConfig.baseGraphicalSize + start,
+        Smelter.buildingConfig.baseGraphicalSize + end,
       );
 
       baseGraphics

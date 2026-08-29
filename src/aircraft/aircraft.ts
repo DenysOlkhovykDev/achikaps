@@ -22,7 +22,7 @@ import { RecipeIngredient } from "./building-parts/recipe-sign";
 
 export type BuildingClass = {
   new (x: number, y: number): Building;
-  config: BuildingConfig;
+  buildingConfig: BuildingConfig;
   baseTexture: Texture;
   constructionRecipe: RecipeIngredient[];
 };
@@ -154,11 +154,11 @@ class Aircraft {
 
   public deSelectAllBuildings() {
     for (const building of this.buildings) {
-      building.selectShadowContainer.removeChildren();
+      building.backgroundDisplay.removeSelectShadow();
     }
 
     for (const blueprint of this.blueprints) {
-      blueprint.selectShadowContainer.removeChildren();
+      blueprint.backgroundDisplay.removeSelectShadow();
     }
   }
 

@@ -14,17 +14,17 @@ export class GeometryCalulator {
 
   public getBoundsCenterInWorld() {
     return {
-      x: this.building.x + this.building.config.boundsCenter.x,
-      y: this.building.y + this.building.config.boundsCenter.y,
+      x: this.building.x + this.building.buildingConfig.boundsCenter.x,
+      y: this.building.y + this.building.buildingConfig.boundsCenter.y,
     };
   }
 
   public getBoundsRadius() {
-    return this.building.config.boundsRadius;
+    return this.building.buildingConfig.boundsRadius;
   }
 
   public getStorageRadius() {
-    return this.building.config.storageRadius;
+    return this.building.buildingConfig.storageRadius;
   }
 
   public orientByBuildDirection(from: Building) {
@@ -41,24 +41,20 @@ export class GeometryCalulator {
   }
 
   public applyGeometryTransform() {
-    this.building.shadowContainer.position.set(
-      this.building.config.boundsCenter.x,
-      this.building.config.boundsCenter.y,
-    );
-    this.building.selectShadowContainer.position.set(
-      this.building.config.boundsCenter.x,
-      this.building.config.boundsCenter.y,
+    this.building.backgroundDisplay.position.set(
+      this.building.buildingConfig.boundsCenter.x,
+      this.building.buildingConfig.boundsCenter.y,
     );
 
-    this.building.resourceStorage.resourcesContainer.position.set(
-      this.building.config.storageCenter.x,
-      this.building.config.storageCenter.y,
+    this.building.resourceStorage.position.set(
+      this.building.buildingConfig.storageCenter.x,
+      this.building.buildingConfig.storageCenter.y,
     );
 
-    this.building.recipeSign.root.position.set(
-      this.building.config.boundsCenter.x,
-      this.building.config.boundsCenter.y -
-        this.building.config.boundsRadius -
+    this.building.recipeSign.position.set(
+      this.building.buildingConfig.boundsCenter.x,
+      this.building.buildingConfig.boundsCenter.y -
+        this.building.buildingConfig.boundsRadius -
         15,
     );
 

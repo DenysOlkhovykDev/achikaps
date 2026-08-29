@@ -3,12 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Grinder extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -53,10 +52,8 @@ export class Grinder extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Grinder.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Grinder.buildingConfig.baseGraphicalSize,
     );
 
     this.createBlades();
@@ -74,7 +71,7 @@ export class Grinder extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        Grinder.config.baseGraphicalSize + 4,
+        Grinder.buildingConfig.baseGraphicalSize + 4,
       );
 
       this.bladesGraphics[i].position.set(x, y);
@@ -122,7 +119,7 @@ export class Grinder extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Grinder.config.baseGraphicalSize,
+      Grinder.buildingConfig.baseGraphicalSize,
       "#d2aa8a",
       true,
     );
@@ -131,13 +128,13 @@ export class Grinder extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Grinder.config.baseGraphicalSize - 12,
+      Grinder.buildingConfig.baseGraphicalSize - 12,
       "#846c5b",
       false,
     );
     makeBasicCircle(
       baseGraphics,
-      Grinder.config.baseGraphicalSize - 14,
+      Grinder.buildingConfig.baseGraphicalSize - 14,
       "#ce9e81",
       false,
     );
@@ -150,13 +147,13 @@ export class Grinder extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        Grinder.config.baseGraphicalSize - 14,
+        Grinder.buildingConfig.baseGraphicalSize - 14,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i,
         this.bladesParams.amount,
-        Grinder.config.baseGraphicalSize + 2,
+        Grinder.buildingConfig.baseGraphicalSize + 2,
       );
 
       baseGraphics.moveTo(x1, y1).lineTo(x2, y2);

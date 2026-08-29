@@ -5,11 +5,10 @@ import { constructionManager } from "@construction/manager";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 
 export class Platform extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -33,10 +32,8 @@ export class Platform extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Platform.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Platform.buildingConfig.baseGraphicalSize,
     );
 
     this.createBaseTexture();
@@ -52,7 +49,7 @@ export class Platform extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Platform.config.baseGraphicalSize,
+      Platform.buildingConfig.baseGraphicalSize,
       "#acacac",
       true,
     );

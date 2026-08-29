@@ -3,7 +3,6 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRandomDelay } from "@utils/delay";
 
@@ -16,7 +15,7 @@ type Particle = {
 };
 
 export class Junkuard extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 52,
 
@@ -47,10 +46,8 @@ export class Junkuard extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Junkuard.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Junkuard.buildingConfig.baseGraphicalSize,
     );
 
     this.createBaseTexture();
@@ -68,7 +65,7 @@ export class Junkuard extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Junkuard.config.baseGraphicalSize,
+      Junkuard.buildingConfig.baseGraphicalSize,
       "#cac8a5",
       true,
     );

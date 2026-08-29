@@ -175,12 +175,12 @@ export class ConstructionMenu extends Container {
     if (building.craftRecipe) {
       building.showRecipeInfo();
 
-      building.recipeSign.root.position.set(
+      building.recipeSign.position.set(
         this.columnWidth / 2,
         this.columnHeight - 18,
       );
 
-      container.addChild(building.recipeSign.root);
+      container.addChild(building.recipeSign);
     }
   }
 
@@ -197,8 +197,8 @@ export class ConstructionMenu extends Container {
       },
       { layout: "vertical" },
     );
-    recipeSign.root.position.set(this.columnWidth - 31, this.columnHeight - 90);
+    recipeSign.position.set(this.columnWidth - 31, this.columnHeight - 90);
 
-    container.addChild(recipeSign.root);
+    container.addChild(recipeSign);
   }
 }

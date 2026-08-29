@@ -4,7 +4,6 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRandomDelay } from "@utils/delay";
 import { getRadialPoint, getRandomCoordinate } from "@utils/basic-geometry";
@@ -19,7 +18,7 @@ interface Particle {
 }
 
 export class Engine extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 12,
 
@@ -54,9 +53,9 @@ export class Engine extends Building {
     amount: 3,
     tracesWidth: 1.6,
     traceRadiuses: [
-      Engine.config.baseGraphicalSize - 14,
-      Engine.config.baseGraphicalSize - 10,
-      Engine.config.baseGraphicalSize - 5,
+      Engine.buildingConfig.baseGraphicalSize - 14,
+      Engine.buildingConfig.baseGraphicalSize - 10,
+      Engine.buildingConfig.baseGraphicalSize - 5,
     ],
   };
 
@@ -74,10 +73,8 @@ export class Engine extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Engine.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Engine.buildingConfig.baseGraphicalSize,
     );
 
     this.createPropellerBlades();
@@ -107,13 +104,13 @@ export class Engine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i * 8,
         this.propellerParams.amount * 8,
-        Engine.config.baseGraphicalSize,
+        Engine.buildingConfig.baseGraphicalSize,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i * 8 - 1,
         this.propellerParams.amount * 8,
-        Engine.config.baseGraphicalSize + this.propellerParams.size,
+        Engine.buildingConfig.baseGraphicalSize + this.propellerParams.size,
       );
 
       this.propellerGraphics
@@ -135,7 +132,7 @@ export class Engine extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Engine.config.baseGraphicalSize,
+      Engine.buildingConfig.baseGraphicalSize,
       "#c9c9c9",
       true,
     );
@@ -152,13 +149,13 @@ export class Engine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i,
         this.decoPropellerParams.amount,
-        Engine.config.baseGraphicalSize - 15,
+        Engine.buildingConfig.baseGraphicalSize - 15,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i,
         this.decoPropellerParams.amount,
-        Engine.config.baseGraphicalSize - 4,
+        Engine.buildingConfig.baseGraphicalSize - 4,
       );
 
       baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
@@ -226,8 +223,14 @@ export class Engine extends Building {
   }
 
   private resetParticle(particle: Particle) {
-    particle.gfx.x = getRandomCoordinate(Engine.config.baseGraphicalSize, 7);
-    particle.gfx.y = getRandomCoordinate(Engine.config.baseGraphicalSize, 7);
+    particle.gfx.x = getRandomCoordinate(
+      Engine.buildingConfig.baseGraphicalSize,
+      7,
+    );
+    particle.gfx.y = getRandomCoordinate(
+      Engine.buildingConfig.baseGraphicalSize,
+      7,
+    );
 
     particle.scale = 1;
     particle.delay = getRandomDelay(1, 64);

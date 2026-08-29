@@ -3,12 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRadialPoint, getRadialLine } from "@utils/basic-geometry";
 
 export class Factory extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -51,10 +50,8 @@ export class Factory extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Factory.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Factory.buildingConfig.baseGraphicalSize,
     );
 
     this.createSatelites();
@@ -70,22 +67,22 @@ export class Factory extends Building {
       const small = getRadialLine(
         i * 4 + 2,
         this.gridsParams.amount * 4,
-        Factory.config.baseGraphicalSize,
-        Factory.config.baseGraphicalSize + this.gridsParams.sizes[0],
+        Factory.buildingConfig.baseGraphicalSize,
+        Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[0],
       );
 
       const medium = getRadialLine(
         i * 4 + 1,
         this.gridsParams.amount * 4,
-        Factory.config.baseGraphicalSize,
-        Factory.config.baseGraphicalSize + this.gridsParams.sizes[1],
+        Factory.buildingConfig.baseGraphicalSize,
+        Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[1],
       );
 
       const large = getRadialLine(
         i * 4,
         this.gridsParams.amount * 4,
-        Factory.config.baseGraphicalSize,
-        Factory.config.baseGraphicalSize + this.gridsParams.sizes[2],
+        Factory.buildingConfig.baseGraphicalSize,
+        Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[2],
       );
 
       this.gridsGraphics
@@ -99,7 +96,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          Factory.config.baseGraphicalSize + this.gridsParams.sizes[0],
+          Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[0],
           small.angle,
           small.angle - this.gridsParams.angleOffsets.small,
           true,
@@ -108,7 +105,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          Factory.config.baseGraphicalSize + this.gridsParams.sizes[1],
+          Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[1],
           medium.angle,
           medium.angle - this.gridsParams.angleOffsets.medium,
           true,
@@ -125,7 +122,7 @@ export class Factory extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Factory.config.baseGraphicalSize,
+      Factory.buildingConfig.baseGraphicalSize,
       "#a8d0db",
       true,
     );
@@ -135,7 +132,7 @@ export class Factory extends Building {
       const { x, y } = getRadialPoint(
         i,
         3,
-        Factory.config.baseGraphicalSize - 16,
+        Factory.buildingConfig.baseGraphicalSize - 16,
       );
       points.push({ x, y });
     }
