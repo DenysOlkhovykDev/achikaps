@@ -3,10 +3,10 @@ import { Scenario } from "@test-situations/test-situation";
 export const craftingResourcesForConstruction: Scenario = {
   aircraft: {
     buildings: [
-      { from: "", id: "p0", type: "Platform", x: 500, y: 500 },
-      { from: "p0", id: "factory", type: "Factory", x: 300, y: 500 },
-      { from: "p0", id: "farm", type: "Farm", x: 700, y: 500 },
-      { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
+      { from: "", id: "p0", type: "Platform", x: 360, y: 600 },
+      { from: "p0", id: "factory", type: "Factory", x: 260, y: 600 },
+      { from: "p0", id: "farm", type: "Farm", x: 460, y: 600 },
+      { from: "p0", id: "mine", type: "Mine", x: 360, y: 500 },
     ],
     workers: [
       { buildingId: "p0", profession: "production" },
@@ -15,8 +15,8 @@ export const craftingResourcesForConstruction: Scenario = {
     buildingTasks: [
       {
         from: "p0",
-        x: 500,
-        y: 700,
+        x: 360,
+        y: 800,
         buildingType: "Platform",
       },
     ],

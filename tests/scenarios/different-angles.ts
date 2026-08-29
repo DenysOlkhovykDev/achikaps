@@ -3,12 +3,12 @@ import { Scenario } from "@test-situations/test-situation";
 export const differentAngles: Scenario = {
   aircraft: {
     buildings: [
-      { from: "", id: "p0", type: "Platform", x: 400, y: 500 },
+      { from: "", id: "p0", type: "Platform", x: 360, y: 600 },
 
-      { from: "p0", id: "glassMaker1", type: "GlassMaker", x: 500, y: 500 },
-      { from: "p0", id: "glassMaker2", type: "GlassMaker", x: 300, y: 500 },
-      { from: "p0", id: "glassMaker3", type: "GlassMaker", x: 400, y: 400 },
-      { from: "p0", id: "glassMaker4", type: "GlassMaker", x: 400, y: 600 },
+      { from: "p0", id: "glassMaker1", type: "GlassMaker", x: 460, y: 600 },
+      { from: "p0", id: "glassMaker2", type: "GlassMaker", x: 260, y: 600 },
+      { from: "p0", id: "glassMaker3", type: "GlassMaker", x: 360, y: 500 },
+      { from: "p0", id: "glassMaker4", type: "GlassMaker", x: 360, y: 700 },
     ],
     resources: [
       { buildingId: "p0", resourceName: "Water", amount: 2 },
@@ -21,14 +21,14 @@ export const differentAngles: Scenario = {
     buildingTasks: [
       {
         from: "p0",
-        x: 500,
-        y: 600,
+        x: 460,
+        y: 700,
         buildingType: "GlassMaker",
       },
       {
         from: "p0",
-        x: 500,
-        y: 400,
+        x: 460,
+        y: 500,
         buildingType: "GlassMaker",
       },
     ],
