@@ -2,15 +2,16 @@ import { aircraft } from "@aircraft/aircraft";
 import { getDistance } from "@utils/basic-geometry";
 import { getWorldCoordinates } from "../../src/main";
 import { Scenario } from "@test-situations/test-situation";
+import { gameScreen } from "../../src/game-config";
 
 export const showingPointers: Scenario = {
   aircraft: {
-    buildings: [{ from: "", id: "p0", type: "Platform", x: 500, y: 500 }],
+    buildings: [{ from: "", id: "p0", type: "Platform", x: 360, y: 600 }],
     buildingTasks: [
       {
         from: "p0",
-        x: 500,
-        y: 350,
+        x: 360,
+        y: 450,
         buildingType: "Platform",
       },
     ],
@@ -62,8 +63,8 @@ export const showingPointers: Scenario = {
             return true;
           }
         },
-        x: 420,
-        y: 500,
+        x: 280,
+        y: gameScreen.height / 2,
         text: "You win",
         fontSize: 44,
       },

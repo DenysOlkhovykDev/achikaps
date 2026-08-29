@@ -23,6 +23,7 @@ import { createTestWorld } from "./test-world";
 import { getWorldCoordinates } from "../main";
 import { createTutorialsByScenario } from "./test-tutorials";
 import { multipleDelivering } from "../../tests/scenarios/multiple-delivering";
+import { gameScreen } from "../game-config";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -96,12 +97,12 @@ const scenarios: Record<string, Scenario> = {
   default: {
     aircraft: {
       buildings: [
-        { from: "", id: "p0", type: "Platform", x: 500, y: 400 },
-        { from: "p0", id: "factory", type: "Factory", x: 400, y: 350 },
-        { from: "p0", id: "farm", type: "Farm", x: 600, y: 350 },
-        { from: "p0", id: "mine", type: "Mine", x: 500, y: 300 },
-        { from: "p0", id: "p1", type: "Platform", x: 500, y: 500 },
-        { from: "p1", id: "p2", type: "Platform", x: 500, y: 600 },
+        { from: "", id: "p0", type: "Platform", x: 360, y: 600 },
+        { from: "p0", id: "factory", type: "Factory", x: 260, y: 550 },
+        { from: "p0", id: "farm", type: "Farm", x: 460, y: 550 },
+        { from: "p0", id: "mine", type: "Mine", x: 360, y: 500 },
+        { from: "p0", id: "p1", type: "Platform", x: 360, y: 700 },
+        { from: "p1", id: "p2", type: "Platform", x: 360, y: 800 },
       ],
       workers: [
         { buildingId: "p0", profession: "building" },
@@ -111,8 +112,8 @@ const scenarios: Record<string, Scenario> = {
       buildingTasks: [
         {
           from: "p2",
-          x: 500,
-          y: 700,
+          x: 360,
+          y: 900,
           buildingType: "Engine",
         },
       ],
@@ -159,22 +160,22 @@ const scenarios: Record<string, Scenario> = {
           condition: () => {
             return constructionManager.isButtonVisible();
           },
-          x: 500,
-          y: 950,
+          x: gameScreen.width / 2,
+          y: gameScreen.height - gameScreen.height / 20,
         },
         {
           condition: () => {
             return constructionManager.isMenuVisible();
           },
-          x: 500,
-          y: 800,
+          x: 360,
+          y: 1070,
         },
         {
           condition: () => {
             return constructionManager.getBuildingType() !== undefined;
           },
-          x: 600,
-          y: 500,
+          x: 475,
+          y: 675,
         },
         {
           condition: () => {
@@ -229,8 +230,8 @@ const scenarios: Record<string, Scenario> = {
               return true;
             }
           },
-          x: 420,
-          y: 500,
+          x: 280,
+          y: gameScreen.height / 2,
           text: "You win",
           fontSize: 44,
         },

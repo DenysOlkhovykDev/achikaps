@@ -2,7 +2,7 @@ import { Application, Container } from "pixi.js";
 import { aircraft } from "@aircraft/aircraft";
 import { moveWorld } from "./moving/moving";
 import { joystick } from "@joystick/joystick";
-import { tutorials, Tutorials } from "./tutorial-overlay/_tutorials";
+import { tutorials } from "./tutorial-overlay/_tutorials";
 import { setTestRandom } from "@utils/initializers";
 import { createTestSituation } from "@test-situations/test-situation";
 import { pauseButton } from "@pause/button";
@@ -10,12 +10,13 @@ import { pauseManager } from "@pause/manager";
 import { speedButton } from "@speed/button";
 import { speedManager } from "@speed/manager";
 import { constructionManager } from "@construction/manager";
+import { gameScreen } from "./game-config";
 
 export const app = new Application();
 
 await app.init({
-  width: 1000,
-  height: 1000,
+  width: gameScreen.width,
+  height: gameScreen.height,
   background: "#e5ecea",
   resolution: 2,
   antialias: false,

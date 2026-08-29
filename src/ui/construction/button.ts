@@ -1,11 +1,12 @@
 import { Container, Graphics } from "pixi.js";
+import { gameScreen } from "../../game-config";
 
 export class ConstructionButton extends Container {
   graphic = new Graphics();
 
-  private buttonPosition = {
-    x: 500,
-    y: 950,
+  public buttonPosition = {
+    x: gameScreen.width / 2,
+    y: gameScreen.height - gameScreen.height / 20,
   };
 
   constructor() {

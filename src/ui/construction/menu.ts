@@ -3,6 +3,7 @@ import { Container, Graphics, Text } from "pixi.js";
 import { Platform } from "@aircraft/platform";
 import { Building } from "@aircraft/building";
 import { RecipeSign } from "@aircraft/building-parts/recipe-sign";
+import { gameScreen } from "../../game-config";
 
 export interface MenuItem {
   label: string;
@@ -57,8 +58,8 @@ export class ConstructionMenu extends Container {
   private rows = Math.ceil(menuItems.length / this.columns);
 
   private centerBottom = {
-    x: 500,
-    y: 980,
+    x: gameScreen.width / 2,
+    y: gameScreen.height - gameScreen.height / 50,
   };
 
   private menuWidth =

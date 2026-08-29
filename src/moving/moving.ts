@@ -1,7 +1,8 @@
 import { Container } from "pixi.js";
+import { gameScreen } from "../game-config";
 
-let centerX = 1000 / 2;
-let centerY = 1000 / 2;
+let centerX = gameScreen.width / 2;
+let centerY = gameScreen.height / 2;
 
 const ship = {
   x: 0,
@@ -52,8 +53,8 @@ export function moveWorld(
   buildingsLayer.scale.set(ship.m);
   workersLayer.scale.set(ship.m);
 
-  centerX = (1000 / 2) * ship.m;
-  centerY = (1000 / 2) * ship.m;
+  centerX = (gameScreen.width / 2) * ship.m;
+  centerY = (gameScreen.height / 2) * ship.m;
 
   if (vy === 0 && vx === 0) return undefined;
   return Math.atan2(vy, vx);

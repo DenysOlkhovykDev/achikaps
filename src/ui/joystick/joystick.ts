@@ -1,4 +1,5 @@
 import { Container, Graphics, FederatedPointerEvent } from "pixi.js";
+import { gameScreen } from "../../game-config";
 
 class Joystick extends Container {
   private base: Graphics;
@@ -18,7 +19,10 @@ class Joystick extends Container {
 
     this.eventMode = "static";
 
-    this.position.set(500, 930);
+    this.position.set(
+      gameScreen.width / 2,
+      gameScreen.height - gameScreen.height / 15,
+    );
 
     this.hitbox = new Graphics()
       .circle(0, 0, this.radius + this.thumbRadius * 4)

@@ -1,5 +1,6 @@
 import { getDistance } from "@utils/basic-geometry";
 import { Graphics, Container } from "pixi.js";
+import { gameScreen } from "../game-config";
 
 export interface Compass {
   condition: Function;
@@ -25,8 +26,8 @@ export class TutorialCompass extends Container {
       return;
     }
 
-    const centerX = 1000 / 2;
-    const centerY = 1000 / 2;
+    const centerX = gameScreen.width / 2;
+    const centerY = gameScreen.height / 2;
 
     if (getDistance(targetX, targetY, centerX, centerY) > 300) {
       const dx = targetX - centerX;

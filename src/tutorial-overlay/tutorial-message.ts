@@ -1,4 +1,5 @@
 import { Graphics, Container, Text, TextStyle } from "pixi.js";
+import { gameScreen } from "../game-config";
 
 export interface Message {
   condition: Function;
@@ -32,8 +33,8 @@ export class TutorialMessage extends Container {
 
     this.visible = true;
 
-    const width = 1000;
-    const height = 1000;
+    const width = gameScreen.width;
+    const height = gameScreen.height;
 
     this.graphics.rect(0, 0, width, height);
     this.graphics.fill({

@@ -1,4 +1,5 @@
 import { Graphics, Container } from "pixi.js";
+import { gameScreen } from "../game-config";
 
 export interface Pointer {
   condition: Function;
@@ -33,8 +34,8 @@ export class TutorialPointer extends Container {
 
     this.visible = true;
 
-    const width = 1000;
-    const height = 1000;
+    const width = gameScreen.width;
+    const height = gameScreen.height;
 
     const radius = 50;
 
