@@ -3,12 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRadialLine, getRadialPoint } from "@utils/basic-geometry";
 
 export class Mine extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -61,10 +60,8 @@ export class Mine extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Mine.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Mine.buildingConfig.baseGraphicalSize,
     );
 
     this.createKelpLeaves();
@@ -84,13 +81,13 @@ export class Mine extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Mine.config.baseGraphicalSize,
+      Mine.buildingConfig.baseGraphicalSize,
       "#a3791f",
       true,
     );
     makeBasicCircle(
       baseGraphics,
-      Mine.config.baseGraphicalSize - 2,
+      Mine.buildingConfig.baseGraphicalSize - 2,
       "#c1bf4e",
       false,
     );
@@ -105,7 +102,7 @@ export class Mine extends Building {
       const { angle, x, y } = getRadialPoint(
         i,
         this.kelpsParams.amount,
-        Mine.config.baseGraphicalSize - 6,
+        Mine.buildingConfig.baseGraphicalSize - 6,
       );
 
       const cos = Math.cos(angle);
@@ -132,8 +129,8 @@ export class Mine extends Building {
       const line = getRadialLine(
         i,
         this.kelpsParams.amount,
-        Mine.config.baseGraphicalSize,
-        Mine.config.baseGraphicalSize + 3,
+        Mine.buildingConfig.baseGraphicalSize,
+        Mine.buildingConfig.baseGraphicalSize + 3,
       );
 
       baseGraphics
@@ -146,7 +143,7 @@ export class Mine extends Building {
   private createDecorativePlant(baseGraphics: Graphics) {
     makeBasicCircle(
       baseGraphics,
-      Mine.config.baseGraphicalSize - 18,
+      Mine.buildingConfig.baseGraphicalSize - 18,
       "#77c06a",
       false,
     );
@@ -155,7 +152,7 @@ export class Mine extends Building {
       const { x: x1, y: y1 } = getRadialPoint(
         i * 5 - 1,
         5 * 5,
-        Mine.config.baseGraphicalSize - 20,
+        Mine.buildingConfig.baseGraphicalSize - 20,
       );
 
       baseGraphics.circle(x1, y1, 8).fill("#67a75c");
@@ -163,7 +160,7 @@ export class Mine extends Building {
       const { x: x2, y: y2 } = getRadialPoint(
         i * 5 + 1,
         5 * 5,
-        Mine.config.baseGraphicalSize - 20,
+        Mine.buildingConfig.baseGraphicalSize - 20,
       );
 
       baseGraphics.circle(x2, y2, 8).fill("#67a75c");

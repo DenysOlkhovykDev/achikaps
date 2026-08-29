@@ -3,12 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Laboratory extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -57,10 +56,8 @@ export class Laboratory extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Laboratory.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Laboratory.buildingConfig.baseGraphicalSize,
     );
 
     this.createSatelites();
@@ -78,7 +75,7 @@ export class Laboratory extends Building {
       const { x: cx, y: cy } = getRadialPoint(
         i,
         this.satelitesParams.amount,
-        Laboratory.config.baseGraphicalSize - 5,
+        Laboratory.buildingConfig.baseGraphicalSize - 5,
       );
 
       this.satelitesGraphics[i].position.set(cx, cy);
@@ -104,7 +101,7 @@ export class Laboratory extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Laboratory.config.baseGraphicalSize,
+      Laboratory.buildingConfig.baseGraphicalSize,
       "#cc92c3",
       true,
     );
@@ -121,7 +118,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i * 2 - 1,
         this.amountOfDecorativeCircles * 2,
-        Laboratory.config.baseGraphicalSize - 24,
+        Laboratory.buildingConfig.baseGraphicalSize - 24,
       );
 
       baseGraphics.circle(x, y, 6).fill("#b762ac");
@@ -131,7 +128,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.amountOfDecorativeCircles,
-        Laboratory.config.baseGraphicalSize - 12,
+        Laboratory.buildingConfig.baseGraphicalSize - 12,
       );
 
       baseGraphics.circle(x, y, 8).fill("#b762ac");

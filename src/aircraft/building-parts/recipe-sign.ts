@@ -17,19 +17,18 @@ export interface RecipeSignOptions {
   isAvailableResult?: boolean;
 }
 
-export class RecipeSign {
-  root = new Container();
-
+export class RecipeSign extends Container {
   private unavailableAlpha = 0.45;
   private spacing = 15;
   private padding = 10;
 
   constructor() {
-    this.root.eventMode = "none";
+    super();
+    this.eventMode = "none";
   }
 
   isShown() {
-    return this.root.children.length > 0;
+    return this.children.length > 0;
   }
 
   show(recipe: Recipe, options: RecipeSignOptions = {}) {
@@ -43,7 +42,7 @@ export class RecipeSign {
   }
 
   hide() {
-    this.root.removeChildren();
+    this.removeChildren();
   }
 
   private drawHorizontal(recipe: Recipe, options: RecipeSignOptions) {
@@ -90,11 +89,11 @@ export class RecipeSign {
       .fill("#c9c6bb")
       .stroke({ width: 2, color: "#000000" });
 
-    this.root.addChild(background);
+    this.addChild(background);
 
     elements.forEach((element, index) => {
       element.position.set((index - center) * this.spacing, 0);
-      this.root.addChild(element);
+      this.addChild(element);
     });
   }
 
@@ -108,7 +107,7 @@ export class RecipeSign {
       .fill("#c9c6bb")
       .stroke({ width: 2, color: "#000000" });
 
-    this.root.addChild(background);
+    this.addChild(background);
 
     ingredients.forEach((ingredient, index) => {
       const resource = createResource(ingredient.resourceName).root;
@@ -124,7 +123,7 @@ export class RecipeSign {
         y: 2 + index * this.spacing,
       });
 
-      this.root.addChild(resource, amount);
+      this.addChild(resource, amount);
     });
   }
 

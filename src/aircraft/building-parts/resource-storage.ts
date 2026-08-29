@@ -4,8 +4,7 @@ import { Task } from "@dashboard/task";
 
 type ResourceListener = (task: Task, resource: Resource) => void;
 
-export class ResourceStorage {
-  resourcesContainer: Container = new Container();
+export class ResourceStorage extends Container {
   resourceList: Map<string, number> = new Map<string, number>();
   recources: Resource[] = [];
 
@@ -14,7 +13,9 @@ export class ResourceStorage {
   constructor(
     private inventorySize: number,
     private placementRadius: number,
-  ) {}
+  ) {
+    super();
+  }
 
   getResourceCount(resourceName: string) {
     return this.recources.filter(
@@ -74,7 +75,7 @@ export class ResourceStorage {
     if (this.recources.length >= this.inventorySize) return false;
 
     this.recources.push(resource);
-    this.resourcesContainer.addChild(resource.root);
+    this.addChild(resource.root);
 
     const resourceName = resource.resourceType;
     const current = this.resourceList.get(resourceName) ?? 0;
@@ -107,7 +108,7 @@ export class ResourceStorage {
 
     const [resource] = this.recources.splice(resourceIndex, 1);
 
-    this.resourcesContainer.removeChild(resource.root);
+    this.removeChild(resource.root);
 
     return resource;
   }

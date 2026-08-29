@@ -4,7 +4,6 @@ import { aircraft } from "@aircraft/aircraft";
 import { Road } from "@roads/road";
 import { Task } from "@dashboard/task";
 import { constructionManager } from "@construction/manager";
-import { makeRoundShadow } from "@utils/basic-graphic";
 import {
   Recipe,
   RecipeIngredient,
@@ -16,6 +15,7 @@ import { getRadialPoint } from "@utils/basic-geometry";
 import { joystick } from "@joystick/joystick";
 import { CraftingProcessor } from "./building-parts/crafting-processor";
 import { GeometryCalulator } from "./building-parts/geometry-calculator";
+import { BackgroundDisplay } from "./building-parts/background-display";
 
 export interface BuildingConfig {
   storageCenter: {
@@ -40,23 +40,21 @@ export interface BuildingConfig {
 
 export abstract class Building {
   // root
-  // ├── recipeSign.root
+  // ├── recipeSign
   // ├── DEBUGTaskDisplay
   // └── buildingContainer
-  //     ├── shadowContainer
-  //     ├── selectShadowContainer
+  //     ├── backgroundDisplay
   //     ├── contentContainer
-  //     └── resourcesContainer
+  //     └── resourceStorage
 
   root: Container = new Container();
 
   buildingContainer: Container;
 
-  shadowContainer: Container = new Container();
-  selectShadowContainer: Container = new Container();
+  backgroundDisplay = new BackgroundDisplay();
 
   contentContainer: Container;
-  static readonly config: BuildingConfig;
+  static readonly buildingConfig: BuildingConfig;
   static baseTexture: Texture;
   geometry: GeometryCalulator;
 
@@ -75,8 +73,8 @@ export abstract class Building {
 
   DEBUGTaskDisplay: Graphics = new Graphics();
 
-  public get config(): BuildingConfig {
-    return (this.constructor as typeof Building).config;
+  public get buildingConfig(): BuildingConfig {
+    return (this.constructor as typeof Building).buildingConfig;
   }
 
   public get constructionRecipe(): RecipeIngredient[] {
@@ -102,19 +100,18 @@ export abstract class Building {
     this.craftingProcessor = new CraftingProcessor(this);
     this.resourceStorage = new ResourceStorage(
       this.inventorySize,
-      this.config.storageRadius,
+      this.buildingConfig.storageRadius,
     );
     this.taskManager = new TaskManager(this);
 
     this.root.x = this.x;
     this.root.y = this.y;
 
-    this.root.addChild(this.recipeSign.root);
+    this.root.addChild(this.recipeSign);
     this.root.addChild(this.DEBUGTaskDisplay);
-    this.buildingContainer.addChild(this.shadowContainer);
-    this.buildingContainer.addChild(this.selectShadowContainer);
+    this.buildingContainer.addChild(this.backgroundDisplay);
     this.buildingContainer.addChild(this.contentContainer);
-    this.buildingContainer.addChild(this.resourceStorage.resourcesContainer);
+    this.buildingContainer.addChild(this.resourceStorage);
     this.root.addChild(this.buildingContainer);
 
     this.geometry.applyGeometryTransform();
@@ -140,10 +137,8 @@ export abstract class Building {
     aircraft.hideCraftSigns();
     aircraft.deSelectAllBuildings();
 
-    makeRoundShadow(
-      this.config.boundsRadius + 1,
-      "#00ff00",
-      this.selectShadowContainer,
+    this.backgroundDisplay.createSelectShadow(
+      this.buildingConfig.boundsRadius + 1,
     );
     this.showRecipeState();
   }
@@ -186,7 +181,11 @@ export abstract class Building {
     ];
 
     for (let i = 0; i < taskList.length; i++) {
-      const { x, y } = getRadialPoint(i, 16, this.config.boundsRadius + 16);
+      const { x, y } = getRadialPoint(
+        i,
+        16,
+        this.buildingConfig.boundsRadius + 16,
+      );
 
       if (taskList[i].jobType === "delivering") {
         this.DEBUGTaskDisplay.circle(x, y, 10).fill("#ffff00");

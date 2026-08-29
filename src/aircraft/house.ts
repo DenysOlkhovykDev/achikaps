@@ -3,12 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class House extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 17,
 
@@ -49,16 +48,14 @@ export class House extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      House.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      House.buildingConfig.baseGraphicalSize,
     );
 
     this.makeAntennas(
       this.antennasGraphics,
       this.antennasParams.angleOffset,
-      House.config.baseGraphicalSize,
+      House.buildingConfig.baseGraphicalSize,
       this.antennasParams.totalAmount,
       this.antennasParams.currentAmount,
     );
@@ -110,14 +107,14 @@ export class House extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      House.config.baseGraphicalSize,
+      House.buildingConfig.baseGraphicalSize,
       "#72ac4a",
       true,
     );
 
     makeBasicCircle(
       baseGraphics,
-      House.config.baseGraphicalSize - 18,
+      House.buildingConfig.baseGraphicalSize - 18,
       "#5b8937",
       false,
     );

@@ -4,11 +4,10 @@ import {
   generateTextureFromOrigin,
   makeBasicCircle,
   makeCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
 
 export class GlassMaker extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 12,
 
@@ -33,10 +32,8 @@ export class GlassMaker extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      GlassMaker.config.boundsRadius,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      GlassMaker.buildingConfig.boundsRadius,
     );
 
     this.createBaseTexture();
@@ -54,12 +51,17 @@ export class GlassMaker extends Building {
       0 + 15,
       0,
       base,
-      GlassMaker.config.boundsRadius,
+      GlassMaker.buildingConfig.boundsRadius,
       "#beff74",
       false,
     );
 
-    makeBasicCircle(base, GlassMaker.config.baseGraphicalSize, "#74f6ff", true);
+    makeBasicCircle(
+      base,
+      GlassMaker.buildingConfig.baseGraphicalSize,
+      "#74f6ff",
+      true,
+    );
 
     GlassMaker.baseTexture = generateTextureFromOrigin(base);
   }

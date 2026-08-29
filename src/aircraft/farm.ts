@@ -3,16 +3,11 @@ import { Building, BuildingConfig } from "@aircraft/building";
 import {
   generateTextureFromOrigin,
   makeBasicCircle,
-  makeRoundShadow,
 } from "@utils/basic-graphic";
-import {
-  getRadialPoint,
-  getRadialLine,
-  rotatePoint,
-} from "@utils/basic-geometry";
+import { getRadialPoint, getRadialLine } from "@utils/basic-geometry";
 
 export class Farm extends Building {
-  static readonly config: BuildingConfig = {
+  static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
 
@@ -61,16 +56,14 @@ export class Farm extends Building {
   }
 
   draw() {
-    makeRoundShadow(
-      Farm.config.baseGraphicalSize,
-      "#000000",
-      this.shadowContainer,
+    this.backgroundDisplay.createBasicShadow(
+      Farm.buildingConfig.baseGraphicalSize,
     );
 
     this.makeAntennas(
       this.antennasGraphics,
       this.antennasParams.angleOffset,
-      Farm.config.baseGraphicalSize,
+      Farm.buildingConfig.baseGraphicalSize,
       this.antennasParams.amount,
     );
 
@@ -121,7 +114,7 @@ export class Farm extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Farm.config.baseGraphicalSize,
+      Farm.buildingConfig.baseGraphicalSize,
       "#b06667",
       true,
     );
@@ -130,14 +123,14 @@ export class Farm extends Building {
 
     makeBasicCircle(
       baseGraphics,
-      Farm.config.baseGraphicalSize,
+      Farm.buildingConfig.baseGraphicalSize,
       "#965859",
       false,
     );
 
     makeBasicCircle(
       baseGraphics,
-      Farm.config.baseGraphicalSize - 5,
+      Farm.buildingConfig.baseGraphicalSize - 5,
       "#c08484",
       false,
     );
@@ -157,14 +150,14 @@ export class Farm extends Building {
       } = getRadialLine(
         i * 10 + 4,
         this.spikeParams.amount * 10,
-        Farm.config.baseGraphicalSize - 1,
-        Farm.config.baseGraphicalSize + 8,
+        Farm.buildingConfig.baseGraphicalSize - 1,
+        Farm.buildingConfig.baseGraphicalSize + 8,
       );
 
       const { x: x1, y: y1 } = getRadialPoint(
         i * 10 + 1,
         this.spikeParams.amount * 10,
-        Farm.config.baseGraphicalSize,
+        Farm.buildingConfig.baseGraphicalSize,
       );
 
       baseGraphics
@@ -184,14 +177,14 @@ export class Farm extends Building {
       } = getRadialLine(
         i * 10 + 6,
         this.spikeParams.amount * 10,
-        Farm.config.baseGraphicalSize - 1,
-        Farm.config.baseGraphicalSize + 8,
+        Farm.buildingConfig.baseGraphicalSize - 1,
+        Farm.buildingConfig.baseGraphicalSize + 8,
       );
 
       const { x: x2, y: y2 } = getRadialPoint(
         i * 10 + 9,
         this.spikeParams.amount * 10,
-        Farm.config.baseGraphicalSize,
+        Farm.buildingConfig.baseGraphicalSize,
       );
 
       baseGraphics
@@ -211,7 +204,7 @@ export class Farm extends Building {
       const { x, y } = getRadialPoint(
         i * 2 - 1,
         3 * 2,
-        Farm.config.baseGraphicalSize - 7,
+        Farm.buildingConfig.baseGraphicalSize - 7,
       );
       points.push({ x, y });
     }
@@ -225,7 +218,11 @@ export class Farm extends Building {
 
     const points2 = [];
     for (let i = 0; i < 3; i++) {
-      const { x, y } = getRadialPoint(i, 3, Farm.config.baseGraphicalSize - 21);
+      const { x, y } = getRadialPoint(
+        i,
+        3,
+        Farm.buildingConfig.baseGraphicalSize - 21,
+      );
       points2.push({ x, y });
     }
 
