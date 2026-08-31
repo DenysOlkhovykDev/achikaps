@@ -1,362 +1,118 @@
 import { Graphics, Container } from "pixi.js";
 import { Building } from "@aircraft/building";
 
-import { Resource } from "@resources/resource";
-import { getAvailableTaskWithHighestPriority } from "@dashboard/_dashboard";
-import { Task, JobType, TaskStatus } from "@dashboard/task";
-import { delay } from "@utils/delay";
+import { Inventory } from "./worker-parts/inventory";
+import { LegCoordinator } from "./worker-parts/leg-coordinator";
+import { TaskManager } from "./worker-parts/task-manager";
+import { Navigator } from "./worker-parts/navigator";
 
-const isTest = import.meta.env.MODE === "test";
+export class Worker extends Container {
+  body: Graphics = new Graphics();
 
-interface Leg {
-  x: number;
-  y: number;
-  isMovingForward: boolean;
-}
+  mainColor: string = "#000000";
 
-export class Worker {
-  root: Container = new Container();
-  graphic: Graphics;
-
-  health: number = 100;
-  speed: number = 2;
-  color: string = "#000000";
-  targetPlatform?: Building;
-
-  inventory: Resource | undefined;
-
-  path: Building[] = [];
-  reservedResource?: Resource;
-  task: Task | undefined;
-  isWorking: boolean = false;
-
-  legX = 4;
-  legY = 14;
-  numberOfLegs = 4;
-
-  legCoordinates: Leg[] = [];
-  legs: Graphics[] = [];
-  stepPhase = 0;
-  isMoving = false;
+  inventory: Inventory = new Inventory();
+  legs: LegCoordinator = new LegCoordinator();
+  tasks: TaskManager;
+  navigator: Navigator;
 
   constructor(
-    public x: number,
-    public y: number,
-    public currentPlatform: Building,
-    public profession: string,
+    x: number,
+    y: number,
+    currentPlatform: Building,
+    profession: string,
   ) {
-    this.graphic = new Graphics();
+    super();
+
+    this.navigator = new Navigator(currentPlatform);
+    this.tasks = new TaskManager(profession);
+
+    this.legs.draw();
     this.draw();
     this.initEvents();
 
-    this.root.addChild(this.graphic);
-    this.root.position.set(this.x, this.y);
+    this.addChild(this.legs);
+    this.addChild(this.body);
+    this.addChild(this.inventory);
+
+    this.position.set(x, y);
   }
 
-  protected draw() {
-    this.graphic.clear();
-
-    for (let i = 0; i < this.numberOfLegs; i++) {
-      this.legs[i] = new Graphics();
-    }
-    this.setLegsIdlePose(false);
-    this.drawLegs();
-
-    this.graphic
+  private draw() {
+    this.body
       .circle(0, 0, 8)
       .stroke({ width: 3, color: "#000000" })
-      .fill(this.color);
+      .fill(this.mainColor);
 
-    this.graphic.circle(-5, -4, 2).fill("#ffffff");
-    this.graphic.circle(5, -4, 2).fill("#ffffff");
+    this.body.circle(-5, -4, 2).fill("#ffffff");
+    this.body.circle(5, -4, 2).fill("#ffffff");
 
     let jobColor = "#000000";
-    if (this.profession === "building") {
+    if (this.tasks.profession === "building") {
       jobColor = "#127ce1";
-    } else if (this.profession === "delivering") {
+    } else if (this.tasks.profession === "delivering") {
       jobColor = "#bdb434";
-    } else if (this.profession === "production") {
+    } else if (this.tasks.profession === "production") {
       jobColor = "#2ccb1a";
     }
 
-    this.graphic.circle(0, 3, 4).fill(jobColor);
-
-    this.graphic.position.set(0, 0);
-
-    this.root.addChild(...this.legs);
+    this.body.circle(0, 3, 4).fill(jobColor);
   }
 
-  protected initEvents() {
-    this.root.eventMode = "none";
+  private initEvents() {
+    this.eventMode = "none";
   }
 
   public moveWorker(delta: number) {
-    if (!this.targetPlatform) {
-      if (!this.task) {
-        this.pickTask();
-      }
-
-      if (this.path.length > 0) {
-        this.targetPlatform = this.path.shift();
-      }
-      return;
-    }
-    if (this.targetPlatform) {
-      if (!this.isMoving) {
-        this.isMoving = true;
-        this.setLegsIdlePose(true);
-      }
-    }
-    this.legAnimation(delta);
-
-    const targetCenter = this.targetPlatform.getBaseCenterInWorld();
-
-    if (isTest) {
-      this.x = targetCenter.x;
-      this.y = targetCenter.y;
-      this.onReachPlatform();
+    if (!this.tasks.task) {
+      this.pickTaskAndPath();
     } else {
-      const dx = targetCenter.x - this.x;
-      const dy = targetCenter.y - this.y;
-
-      const angle = Math.atan2(dy, dx);
-      this.root.rotation = angle + Math.PI / 2;
-
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < 3) {
-        this.onReachPlatform();
-        if (!this.task) {
-          this.setLegsIdlePose(false);
-        }
-        this.isMoving = false;
-        this.drawLegs();
-        return;
+      if (this.navigator.state === "moving") {
+        this.handleMoving(delta);
+      } else if (this.navigator.state === "stay") {
+        this.handleStaying(delta);
       }
-
-      const vx = dx / distance;
-      const vy = dy / distance;
-
-      this.x += vx * this.speed * delta;
-      this.y += vy * this.speed * delta;
-    }
-
-    this.root.position.set(this.x, this.y);
-  }
-
-  private legAnimation(delta: number) {
-    this.stepPhase += 0.14 * delta;
-
-    const amplitude = 6;
-
-    const groupA = Math.sin(this.stepPhase);
-    const groupB = Math.sin(this.stepPhase + Math.PI);
-
-    this.legCoordinates[0].y = -this.legY + groupA * amplitude + amplitude;
-    this.legCoordinates[3].y = this.legY + groupA * amplitude + amplitude;
-
-    this.legCoordinates[1].y = -this.legY + groupB * amplitude + amplitude;
-    this.legCoordinates[2].y = this.legY + groupB * amplitude + amplitude;
-
-    this.drawLegs();
-  }
-
-  private drawLegs() {
-    for (let i = 0; i < this.numberOfLegs; i++) {
-      this.legs[i].clear();
-      this.legs[i]
-        .moveTo(0, 0)
-        .lineTo(this.legCoordinates[i].x, this.legCoordinates[i].y)
-        .stroke({ width: 4, color: "#000000" })
-        .circle(this.legCoordinates[i].x, this.legCoordinates[i].y, 2)
-        .stroke({ width: 2, color: "#000000" })
-        .fill("#000000");
     }
   }
 
-  private setLegsIdlePose(isMoving: boolean) {
-    if (isMoving) {
-      this.legCoordinates = [
-        { x: -this.legX, y: -this.legY, isMovingForward: true },
-        { x: this.legX, y: -this.legY, isMovingForward: false },
-        { x: -this.legX, y: this.legY + 4, isMovingForward: true },
-        { x: this.legX, y: this.legY + 4, isMovingForward: false },
-      ];
+  private pickTaskAndPath() {
+    this.tasks.pickTask(this.navigator.currentPlatform);
+    if (this.tasks.task) {
+      if (this.tasks.profession === "production") {
+        this.navigator.pickPathToBuilding(this.tasks.task);
+      } else {
+        this.navigator.pickPathToResource(this.tasks.task);
+      }
+    }
+  }
+
+  private handleMoving(delta: number) {
+    this.legs.startMoving();
+    this.legs.update(delta);
+
+    this.navigator.move(this, delta);
+  }
+
+  private handleStaying(delta: number) {
+    this.legs.stopMoving();
+
+    if (this.tasks.profession === "production") {
+      this.tasks.handleProductionLogic(delta);
     } else {
-      this.legCoordinates = [
-        { x: -this.legX * 2, y: -this.legY, isMovingForward: true },
-        { x: this.legX * 2, y: -this.legY, isMovingForward: false },
-        { x: -this.legX * 2, y: this.legY, isMovingForward: true },
-        { x: this.legX * 2, y: this.legY, isMovingForward: false },
-      ];
-    }
-  }
-
-  private pickTask() {
-    if (this.profession === "building") {
-      this.task = this.takeTask(JobType.building);
-      this.pickPathForResource();
-    } else if (this.profession === "delivering") {
-      this.task = this.takeTask(JobType.delivering);
-      this.pickPathForResource();
-    } else if (this.profession === "production") {
-      this.task = this.takeTask(JobType.production);
-      if (!this.task) return;
-
-      this.path = this.task.getRouteForTarget(this.currentPlatform);
-      if (this.path.length === 0) {
-        this.releaseCurrentTask();
-        return;
-      }
-
-      this.path.shift();
-
-      if (this.path.length === 0) {
-        this.handleProductionLogic();
-      }
-    }
-  }
-
-  private takeTask(jobType: JobType) {
-    const task = getAvailableTaskWithHighestPriority(
-      this.currentPlatform,
-      jobType,
-    );
-
-    if (task) {
-      task.status = TaskStatus.inProgress;
-    }
-
-    return task;
-  }
-
-  private pickPathForResource() {
-    if (!this.task) return;
-
-    const [path, resource] = this.task.getRouteForResource(
-      this.currentPlatform,
-      true,
-    );
-
-    if (path.length === 0 || !resource) {
-      this.releaseCurrentTask();
-      return;
-    }
-
-    this.path = path;
-    this.reservedResource = resource;
-
-    if (path.length === 1) {
-      this.handleResourceLogic();
-    }
-
-    this.path.shift();
-  }
-
-  private onReachPlatform() {
-    this.currentPlatform = this.targetPlatform!;
-
-    if (this.path.length > 0) {
-      this.targetPlatform = this.path.shift();
-      return;
-    }
-
-    if (this.profession === "building" || this.profession === "delivering") {
-      const shouldRetry = !this.handleResourceLogic();
-      if (shouldRetry) {
-        this.targetPlatform = this.currentPlatform;
-        return;
-      }
-    } else {
-      this.handleProductionLogic();
-    }
-    this.targetPlatform = undefined;
-  }
-
-  private async handleProductionLogic() {
-    if (this.isWorking || !this.task) return;
-
-    const task = this.task;
-    this.isWorking = true;
-    try {
-      while (true) {
-        if (!isTest) {
-          await delay(1000);
-        }
-
-        const result = task.target.tryToDoProduction();
-
-        if (!result) break;
-      }
-    } finally {
-      task.status = TaskStatus.completed;
-      if (this.task === task) {
-        this.task = undefined;
-      }
-      this.isWorking = false;
-    }
-  }
-
-  private handleResourceLogic() {
-    if (this.reservedResource) {
-      const resource = this.currentPlatform.takeResourceByType(
-        this.reservedResource,
+      const result = this.tasks.handleResourceLogic(
+        this.navigator.currentPlatform,
+        this.inventory.storage,
       );
 
-      if (!resource) {
-        this.releaseCurrentTask();
-        return true;
+      if (result) {
+        this.inventory.storeResource(result);
+      } else {
+        this.inventory.removeResource();
       }
 
-      this.reservedResource = undefined;
-      this.inventory = resource;
-
-      if (this.inventory) {
-        this.root.addChild(this.inventory.root);
-
-        this.inventory.root.x = 0;
-        this.inventory.root.y = 16;
+      if (this.tasks.task) {
+        this.navigator.pickPathToBuilding(this.tasks.task);
       }
-
-      if (this.task) {
-        this.path = this.task.getRouteForTarget(this.currentPlatform);
-      }
-
-      return true;
     }
-
-    if (this.inventory && this.task) {
-      const task = this.task;
-
-      task.status = TaskStatus.completed;
-      const wasAdded = this.currentPlatform.tryToAddResource(
-        this.inventory,
-        task,
-      );
-
-      if (!wasAdded) {
-        task.status = TaskStatus.inProgress;
-        return false;
-      }
-
-      this.inventory = undefined;
-      this.task = undefined;
-      this.path = [];
-    }
-
-    return true;
-  }
-
-  private releaseCurrentTask() {
-    if (this.task) {
-      const reservedAt = this.task.reservedAt;
-
-      this.task.releaseResourceReservation();
-      this.task.status = TaskStatus.available;
-    }
-
-    this.task = undefined;
-    this.reservedResource = undefined;
-    this.path = [];
-    this.targetPlatform = undefined;
   }
 }
