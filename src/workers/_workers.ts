@@ -14,7 +14,7 @@ export class Workers {
   ) {
     const worker = new Worker(x, y, currentPlatform, profession);
     this.workers.push(worker);
-    container.addChild(worker.root);
+    container.addChild(worker);
   }
 
   public moveWorkers(delta: number) {

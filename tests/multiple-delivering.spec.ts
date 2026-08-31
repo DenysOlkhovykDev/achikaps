@@ -7,7 +7,7 @@ const testName = "multiple-delivering";
 test(testName, async ({ page }) => {
   await initGame(page, testName);
 
-  await skipFrames(page, 85);
+  await skipFrames(page, 90);
 
   const screenshot = await page.locator("canvas").screenshot();
 
