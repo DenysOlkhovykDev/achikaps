@@ -2,7 +2,6 @@ import { Application, Container } from "pixi.js";
 import { aircraft } from "@aircraft/aircraft";
 import { moveWorld } from "./moving/moving";
 import { joystick } from "@joystick/joystick";
-import { tutorials } from "./tutorial-overlay/_tutorials";
 import { setTestRandom } from "@utils/initializers";
 import { createTestSituation } from "@test-situations/test-situation";
 import { pauseButton } from "@pause/button";
@@ -11,6 +10,8 @@ import { speedButton } from "@speed/button";
 import { speedManager } from "@speed/manager";
 import { constructionManager } from "@construction/manager";
 import { gameScreen } from "./game-config";
+import { compasses } from "./ui/compass/manager";
+import { tutorials } from "./ui/tutorial/manager";
 
 export const app = new Application();
 
@@ -40,17 +41,17 @@ UIcontainer.addChild(pauseButton);
 UIcontainer.addChild(speedButton);
 constructionManager.initialize();
 UIcontainer.addChild(constructionManager);
+UIcontainer.addChild(compasses);
+UIcontainer.addChild(tutorials);
 
 const worldLayer = new Container(); // Temp
 
-createTestSituation(worldLayer, tutorials);
+createTestSituation(worldLayer);
 
 aircraft.initilaizeAircraft(app.stage);
 
 app.stage.addChild(worldLayer); // Temp
 app.stage.addChild(UIcontainer); // Temp
-
-tutorials.initializaTutorials(app.stage);
 
 app.stage.on("pointerdown", (event) => {
   const buildingType = constructionManager.getBuildingType();
@@ -90,6 +91,8 @@ app.ticker.add((delta) => {
     }
 
     aircraft.movingBlueprints(deltaTime);
+
+    compasses.updateCompasses();
 
     tutorials.updateTutorials();
   }

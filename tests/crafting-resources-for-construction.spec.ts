@@ -7,7 +7,7 @@ const testName = "crafting-resources-for-construction";
 test(testName, async ({ page }) => {
   await initGame(page, testName);
 
-  await skipFrames(page, 20);
+  await skipFrames(page, 25);
 
   const screenshot = await page.locator("canvas").screenshot();
 

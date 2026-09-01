@@ -3,7 +3,6 @@ import { constructionManager } from "@construction/manager";
 
 import { aircraft } from "@aircraft/aircraft";
 
-import { Tutorials } from "../tutorial-overlay/_tutorials";
 import { getDistance } from "@utils/basic-geometry";
 
 import { autoConstructionOfBuildings } from "../../tests/scenarios/auto-construction-of-buildings";
@@ -21,7 +20,7 @@ import { differentAngles } from "../../tests/scenarios/different-angles";
 import { createAirCraftByScenario } from "./test-aircraft";
 import { createTestWorld } from "./test-world";
 import { getWorldCoordinates } from "../main";
-import { createTutorialsByScenario } from "./test-tutorials";
+import { createUiElementsByScenario } from "./test-ui-elements";
 import { multipleDelivering } from "../../tests/scenarios/multiple-delivering";
 import { gameScreen } from "../game-config";
 
@@ -65,8 +64,9 @@ export interface AircraftScenario {
   }[];
 }
 
-export interface TutorialsScenario {
-  pointers?: {
+export interface UiElementsScenario {
+  tutorials?: {
+    text: string;
     condition: Function;
     x?: number;
     y?: number;
@@ -75,22 +75,15 @@ export interface TutorialsScenario {
 
   compasses?: {
     condition: Function;
-    findTarget?: Function;
-  }[];
-
-  messages?: {
-    condition: Function;
     x: number;
     y: number;
-    text: string;
-    fontSize: number;
   }[];
 }
 
 export interface Scenario {
   aircraft: AircraftScenario;
 
-  tutorials?: TutorialsScenario;
+  uiElements?: UiElementsScenario;
 }
 
 const scenarios: Record<string, Scenario> = {
@@ -118,11 +111,13 @@ const scenarios: Record<string, Scenario> = {
         },
       ],
     },
-    tutorials: {
-      pointers: [
+    uiElements: {
+      tutorials: [
         {
+          text: `This is the
+blueprint 
+of Engine`,
           condition: () => aircraft.blueprints.length > 0,
-
           findTarget: () => {
             const blueprint = aircraft.blueprints[0];
 
@@ -136,13 +131,16 @@ const scenarios: Record<string, Scenario> = {
           },
         },
         {
+          text: `This is the
+Platform.
+You can build
+from it`,
           condition: () => {
             return (
               aircraft.blueprints.length > 0 &&
               aircraft.blueprints[0].recipeSign.children.length > 0
             );
           },
-
           findTarget: () => {
             const building = aircraft.buildings[0];
 
@@ -157,6 +155,8 @@ const scenarios: Record<string, Scenario> = {
           },
         },
         {
+          text: `Click to open
+building menu`,
           condition: () => {
             return constructionManager.isButtonVisible();
           },
@@ -164,6 +164,7 @@ const scenarios: Record<string, Scenario> = {
           y: gameScreen.height - gameScreen.height / 20,
         },
         {
+          text: "Select the Lab",
           condition: () => {
             return constructionManager.isMenuVisible();
           },
@@ -171,6 +172,8 @@ const scenarios: Record<string, Scenario> = {
           y: 1070,
         },
         {
+          text: `Place it 
+here`,
           condition: () => {
             return constructionManager.getBuildingType() !== undefined;
           },
@@ -178,6 +181,30 @@ const scenarios: Record<string, Scenario> = {
           y: 675,
         },
         {
+          text: `Also build
+Smelter and 
+Grinder`,
+          condition: () => {
+            return true;
+          },
+          findTarget: () => {
+            const building = aircraft.buildings[0];
+
+            if (!building) {
+              return;
+            }
+
+            return {
+              x: building.x,
+              y: building.y,
+            };
+          },
+        },
+        {
+          text: `Use Engine
+to follow the
+green compass 
+arrow`,
           condition: () => {
             const engines = aircraft.buildings.filter(
               (b) => b.buildingType === "Engine",
@@ -185,14 +212,16 @@ const scenarios: Record<string, Scenario> = {
 
             return engines.length > 0;
           },
-
           findTarget: () => {
             const engines = aircraft.buildings.filter(
               (b) => b.buildingType === "Engine",
             );
 
             if (engines.length === 0) {
-              return;
+              return {
+                x: 0,
+                y: 0,
+              };
             }
 
             return {
@@ -201,23 +230,8 @@ const scenarios: Record<string, Scenario> = {
             };
           },
         },
-      ],
-
-      compasses: [
         {
-          condition: () => true,
-
-          findTarget: () => {
-            return {
-              x: 1000,
-              y: 100,
-            };
-          },
-        },
-      ],
-
-      messages: [
-        {
+          text: `You Win`,
           condition: () => {
             if (
               getDistance(
@@ -230,10 +244,32 @@ const scenarios: Record<string, Scenario> = {
               return true;
             }
           },
-          x: 280,
-          y: gameScreen.height / 2,
-          text: "You win",
-          fontSize: 44,
+          findTarget: () => {
+            const building = aircraft.buildings[0];
+
+            if (!building) {
+              return;
+            }
+
+            return {
+              x: building.x,
+              y: building.y,
+            };
+          },
+        },
+      ],
+
+      compasses: [
+        {
+          condition: () => {
+            const engines = aircraft.buildings.filter(
+              (b) => b.buildingType === "Engine",
+            );
+
+            return engines.length > 0;
+          },
+          x: 1000,
+          y: 100,
         },
       ],
     },
@@ -255,10 +291,7 @@ const scenarios: Record<string, Scenario> = {
   "scene-render": sceneRender,
 };
 
-export function createTestSituation(
-  worldLayer: Container,
-  tutorials: Tutorials,
-) {
+export function createTestSituation(worldLayer: Container) {
   const scenarioName = getScenarioName();
   const scenario = scenarios[scenarioName];
 
@@ -267,8 +300,8 @@ export function createTestSituation(
   }
 
   createAirCraftByScenario(scenario.aircraft);
-  if (scenario.tutorials) {
-    createTutorialsByScenario(scenario.tutorials, tutorials);
+  if (scenario.uiElements) {
+    createUiElementsByScenario(scenario.uiElements);
   }
   createTestWorld(worldLayer);
 

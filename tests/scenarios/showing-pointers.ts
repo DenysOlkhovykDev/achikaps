@@ -16,11 +16,11 @@ export const showingPointers: Scenario = {
       },
     ],
   },
-  tutorials: {
-    pointers: [
+  uiElements: {
+    tutorials: [
       {
+        text: `Hello world`,
         condition: () => aircraft.blueprints.length > 0,
-
         findTarget: () => {
           const blueprint = aircraft.blueprints[0];
 
@@ -38,35 +38,11 @@ export const showingPointers: Scenario = {
 
     compasses: [
       {
-        condition: () => true,
-
-        findTarget: () => {
-          return {
-            x: 1000,
-            y: 100,
-          };
-        },
-      },
-    ],
-
-    messages: [
-      {
         condition: () => {
-          if (
-            getDistance(
-              getWorldCoordinates().x,
-              getWorldCoordinates().y,
-              1000,
-              100,
-            ) < 5000
-          ) {
-            return true;
-          }
+          return true;
         },
-        x: 280,
-        y: gameScreen.height / 2,
-        text: "You win",
-        fontSize: 44,
+        x: 1000,
+        y: 100,
       },
     ],
   },
