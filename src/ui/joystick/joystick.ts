@@ -4,7 +4,6 @@ import { gameScreen } from "../../game-config";
 class Joystick extends Container {
   private base: Graphics;
   private thumb: Graphics;
-  private hitbox: Graphics;
 
   private radius = 60;
   private thumbRadius = 25;
@@ -24,10 +23,6 @@ class Joystick extends Container {
       gameScreen.height - gameScreen.height / 15,
     );
 
-    this.hitbox = new Graphics()
-      .circle(0, 0, this.radius + this.thumbRadius * 4)
-      .fill({ color: "#ffffff", alpha: 0 });
-
     this.base = new Graphics()
       .circle(0, 0, this.radius)
       .fill({ color: "#ffffff", alpha: 0 })
@@ -38,13 +33,17 @@ class Joystick extends Container {
       .fill({ color: "#444444", alpha: 0.8 })
       .stroke({ width: 3, color: "#000000" });
 
-    this.addChild(this.base, this.thumb, this.hitbox);
+    this.addChild(this.base, this.thumb);
 
-    this.on("pointerdown", this.onDown);
-    this.on("pointermove", this.onMove);
+    this.base.eventMode = "static";
+    this.base.on("pointerdown", this.onDown);
+    this.thumb.eventMode = "static";
+    this.thumb.on("pointerdown", this.onDown);
+
+    this.on("globalpointermove", this.onMove);
+
     this.on("pointerup", this.onUp);
     this.on("pointerupoutside", this.onUp);
-    this.on("pointerleave", this.onUp);
 
     this.hide();
   }
