@@ -33,7 +33,7 @@ export class Navigator {
         worker.rotation = angle + Math.PI / 2;
 
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance > 3) {
+        if (distance > 15) {
           const vx = dx / distance;
           const vy = dy / distance;
 
