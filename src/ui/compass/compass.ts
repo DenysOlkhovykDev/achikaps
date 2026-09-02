@@ -3,15 +3,12 @@ import { gameScreen } from "../../game-config";
 import { getDistance } from "@utils/basic-geometry";
 import { getGlobalWorldCoordinates } from "../../main";
 
-const centerX = gameScreen.width / 2;
-const centerY = gameScreen.height / 2;
-
 export class Compass extends Container {
   graphics = new Graphics();
 
   constructor(
-    public abcX: number,
-    public abcY: number,
+    public compassTargetX: number,
+    public compassTargetY: number,
     public condition: Function,
   ) {
     super();
@@ -19,6 +16,9 @@ export class Compass extends Container {
   }
 
   private draw(x: number, y: number) {
+    const centerX = gameScreen.width / 2;
+    const centerY = gameScreen.height / 2;
+
     const dx = x - centerX;
     const dy = y - centerY;
 
@@ -43,7 +43,13 @@ export class Compass extends Container {
   }
 
   public updateCompassPosition() {
-    const { x, y } = getGlobalWorldCoordinates(this.abcX, this.abcY);
+    const centerX = gameScreen.width / 2;
+    const centerY = gameScreen.height / 2;
+
+    const { x, y } = getGlobalWorldCoordinates(
+      this.compassTargetX,
+      this.compassTargetY,
+    );
 
     if (getDistance(x, y, centerX, centerY) > 300) {
       this.draw(x, y);
