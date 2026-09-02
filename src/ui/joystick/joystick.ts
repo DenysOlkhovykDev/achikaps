@@ -113,6 +113,10 @@ class Joystick extends Container {
 
     this.thumb.position.set(0, 0);
   }
+
+  isVisible() {
+    return this.visible;
+  }
 }
 
 export const joystick = new Joystick();

@@ -30,14 +30,19 @@ export class Tutorial extends Container {
 
   constructor(
     public text: string,
-    public condition: Function,
+    public showCondition: Function,
+    public hideCondition: Function,
+    public needOkButton: boolean,
     public pointerX?: number,
     public pointerY?: number,
     public findTarget?: Function,
   ) {
     super();
 
-    this.overlay.eventMode = "none";
+    this.overlay.eventMode = "static";
+    this.overlay.on("pointerdown", (event) => {
+      event.stopPropagation();
+    });
 
     this.addChild(this.overlay, this.messageContainer);
 
@@ -92,11 +97,17 @@ export class Tutorial extends Container {
 
     this.messageBackGround.clear();
 
+    let messageBackGroundWidth = 20;
+
+    if (this.needOkButton) {
+      messageBackGroundWidth = 60;
+    }
+
     this.messageBackGround
       .roundRect(
         this.pointerX! + this.radius + 10,
         this.pointerY! - this.fontSize / 1.3,
-        width + 60,
+        width + messageBackGroundWidth,
         height + 20,
         10,
       )
@@ -111,15 +122,17 @@ export class Tutorial extends Container {
 
     this.okButton.clear();
 
-    this.okButton
-      .roundRect(buttonX, buttonY, 40, 25, 10)
-      .fill("#a6a4a3")
-      .stroke({
-        width: 4,
-        color: "#000000",
-      });
+    if (this.needOkButton) {
+      this.okButton
+        .roundRect(buttonX, buttonY, 40, 25, 10)
+        .fill("#a6a4a3")
+        .stroke({
+          width: 4,
+          color: "#000000",
+        });
 
-    this.okText.position.set(buttonX + 9, buttonY);
+      this.okText.position.set(buttonX + 9, buttonY);
+    }
   }
 
   public updateTutorial() {
@@ -132,11 +145,12 @@ export class Tutorial extends Container {
       this.draw();
     }
 
-    if (!this.condition() && this.visible) {
+    if ((!this.showCondition() && this.visible) || this.hideCondition()) {
       this.isActive = false;
     }
 
-    this.visible = this.isActive && this.condition();
+    this.visible =
+      this.isActive && this.showCondition() && !this.hideCondition();
 
     return this.visible;
   }

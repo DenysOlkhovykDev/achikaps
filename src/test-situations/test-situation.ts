@@ -23,6 +23,7 @@ import { getWorldCoordinates } from "../main";
 import { createUiElementsByScenario } from "./test-ui-elements";
 import { multipleDelivering } from "../../tests/scenarios/multiple-delivering";
 import { gameScreen } from "../game-config";
+import { joystick } from "@joystick/joystick";
 
 function getScenarioName() {
   const params = new URLSearchParams(window.location.search);
@@ -67,7 +68,9 @@ export interface AircraftScenario {
 export interface UiElementsScenario {
   tutorials?: {
     text: string;
-    condition: Function;
+    showCondition: Function;
+    hideCondition: Function;
+    needOkButton: boolean;
     x?: number;
     y?: number;
     findTarget?: Function;
@@ -117,7 +120,10 @@ const scenarios: Record<string, Scenario> = {
           text: `This is the
 blueprint 
 of Engine`,
-          condition: () => aircraft.blueprints.length > 0,
+          showCondition: () => aircraft.blueprints.length > 0,
+          hideCondition: () =>
+            aircraft.blueprints[0].recipeSign.children.length > 0,
+          needOkButton: false,
           findTarget: () => {
             const blueprint = aircraft.blueprints[0];
 
@@ -135,12 +141,14 @@ of Engine`,
 Platform.
 You can build
 from it`,
-          condition: () => {
+          showCondition: () => {
             return (
               aircraft.blueprints.length > 0 &&
               aircraft.blueprints[0].recipeSign.children.length > 0
             );
           },
+          hideCondition: () => constructionManager.isButtonVisible(),
+          needOkButton: false,
           findTarget: () => {
             const building = aircraft.buildings[0];
 
@@ -157,36 +165,45 @@ from it`,
         {
           text: `Click to open
 building menu`,
-          condition: () => {
+          showCondition: () => {
             return constructionManager.isButtonVisible();
           },
+          hideCondition: () => constructionManager.isMenuVisible(),
+          needOkButton: false,
           x: gameScreen.width / 2,
           y: gameScreen.height - gameScreen.height / 20,
         },
         {
           text: "Select the Lab",
-          condition: () => {
+          showCondition: () => {
             return constructionManager.isMenuVisible();
           },
+          hideCondition: () =>
+            constructionManager.getBuildingType() !== undefined,
+          needOkButton: false,
           x: 360,
           y: 1070,
         },
         {
           text: `Place it 
 here`,
-          condition: () => {
+          showCondition: () => {
             return constructionManager.getBuildingType() !== undefined;
           },
+          hideCondition: () => aircraft.blueprints.length > 1,
+          needOkButton: false,
           x: 475,
           y: 675,
         },
         {
           text: `Also build
-Smelter and 
-Grinder`,
-          condition: () => {
+Smelter  
+and Grinder`,
+          showCondition: () => {
             return true;
           },
+          hideCondition: () => constructionManager.isButtonVisible(),
+          needOkButton: true,
           findTarget: () => {
             const building = aircraft.buildings[0];
 
@@ -205,13 +222,15 @@ Grinder`,
 to follow the
 green compass 
 arrow`,
-          condition: () => {
+          showCondition: () => {
             const engines = aircraft.buildings.filter(
               (b) => b.buildingType === "Engine",
             );
 
             return engines.length > 0;
           },
+          hideCondition: () => joystick.isVisible(),
+          needOkButton: false,
           findTarget: () => {
             const engines = aircraft.buildings.filter(
               (b) => b.buildingType === "Engine",
@@ -232,7 +251,7 @@ arrow`,
         },
         {
           text: `You Win`,
-          condition: () => {
+          showCondition: () => {
             if (
               getDistance(
                 getWorldCoordinates().x,
@@ -244,6 +263,8 @@ arrow`,
               return true;
             }
           },
+          hideCondition: () => constructionManager.isButtonVisible(),
+          needOkButton: true,
           findTarget: () => {
             const building = aircraft.buildings[0];
 

@@ -35,6 +35,7 @@ export class ConstructionManager extends Container {
 
   public showMenu() {
     if (this.menu) {
+      this.hideButton();
       this.menu.visible = true;
     }
   }
