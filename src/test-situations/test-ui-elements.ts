@@ -6,7 +6,9 @@ export function createUiElementsByScenario(scenario: UiElementsScenario) {
   for (const tutorial of scenario.tutorials || []) {
     tutorials.addTutorial(
       tutorial.text,
-      tutorial.condition,
+      tutorial.showCondition,
+      tutorial.hideCondition,
+      tutorial.needOkButton,
       tutorial.x,
       tutorial.y,
       tutorial.findTarget,

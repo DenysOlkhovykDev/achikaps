@@ -56,7 +56,7 @@ app.stage.addChild(UIcontainer); // Temp
 app.stage.on("pointerdown", (event) => {
   const buildingType = constructionManager.getBuildingType();
 
-  if (constructionManager.isButtonVisible() && buildingType !== undefined) {
+  if (buildingType !== undefined) {
     const { x, y } = event.global;
 
     aircraft.addBlueprint(x, y, buildingType);

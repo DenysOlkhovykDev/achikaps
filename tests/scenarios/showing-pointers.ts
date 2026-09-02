@@ -20,7 +20,9 @@ export const showingPointers: Scenario = {
     tutorials: [
       {
         text: `Hello world`,
-        condition: () => aircraft.blueprints.length > 0,
+        showCondition: () => aircraft.blueprints.length > 0,
+        hideCondition: () => false,
+        needOkButton: true,
         findTarget: () => {
           const blueprint = aircraft.blueprints[0];
 
