@@ -88,7 +88,7 @@ export class Mine extends Building {
     makeBasicCircle(
       baseGraphics,
       Mine.buildingConfig.baseGraphicalSize - 2,
-      "#c1bf4e",
+      "#b0ca75",
       false,
     );
 

@@ -1,6 +1,10 @@
 import { Container, Graphics, Sprite } from "pixi.js";
 import { Building, BuildingConfig } from "@aircraft/building";
-import { generateTextureFromOrigin, makeGear } from "@utils/basic-graphic";
+import {
+  generateTextureFromOrigin,
+  makeBasicCircle,
+  makeGear,
+} from "@utils/basic-graphic";
 import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Smelter extends Building {
@@ -30,6 +34,11 @@ export class Smelter extends Building {
     result: "Gear",
   };
 
+  // contentContainer
+  // ├── gearSatelites
+  // └── buildingBase
+  //      ├── baseGraphics
+
   buildingBase: Container = new Container();
 
   buildingParams = {
@@ -37,8 +46,9 @@ export class Smelter extends Building {
     innerRadius: Smelter.buildingConfig.baseGraphicalSize,
     outerRadius: Smelter.buildingConfig.baseGraphicalSize + 8,
     baseColor: "#c5d7d4",
-    centerRadius: Smelter.buildingConfig.baseGraphicalSize - 10,
+    centerRadius: Smelter.buildingConfig.baseGraphicalSize - 3,
     centerColor: "#acc1bd",
+    deepCenterColor: "#9eb0ac",
     rotationSpeed: 0.005,
   };
 
@@ -86,6 +96,7 @@ export class Smelter extends Building {
         this.gearSatelitesParams.innerRadius,
         this.gearSatelitesParams.outerRadius,
         this.gearSatelitesParams.baseColor,
+        2,
         this.gearSatelitesParams.centerRadius,
         this.gearSatelitesParams.centerColor,
       );
@@ -113,8 +124,23 @@ export class Smelter extends Building {
       this.buildingParams.innerRadius,
       this.buildingParams.outerRadius,
       this.buildingParams.baseColor,
+      2,
       this.buildingParams.centerRadius,
       this.buildingParams.centerColor,
+    );
+
+    makeBasicCircle(
+      baseGraphics,
+      Smelter.buildingConfig.baseGraphicalSize - 20,
+      this.buildingParams.baseColor,
+      false,
+    );
+
+    makeBasicCircle(
+      baseGraphics,
+      Smelter.buildingConfig.baseGraphicalSize - 23,
+      this.buildingParams.deepCenterColor,
+      false,
     );
 
     Smelter.baseTexture = generateTextureFromOrigin(baseGraphics);

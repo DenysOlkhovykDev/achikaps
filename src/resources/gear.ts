@@ -17,7 +17,7 @@ export class Gear extends Resource {
 
     baseGraphics.clear();
 
-    makeGear(baseGraphics, 6, 4.5, 7, "#bdd2d3", 2.25, "#000000");
+    makeGear(baseGraphics, 6, 4.5, 7, "#bdd2d3", 1.25, 2.25, "#000000");
 
     Gear.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
