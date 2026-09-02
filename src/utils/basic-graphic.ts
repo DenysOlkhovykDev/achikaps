@@ -44,3 +44,48 @@ export function makeCircle(
   }
   graphic.fill(color);
 }
+
+export function makeGear(
+  graphics: Graphics,
+  teeth: number,
+  innerRadius: number,
+  outerRadius: number,
+  baseColor: string,
+  centerRadius: number,
+  centerColor: string,
+) {
+  const angleOffset = Math.PI / 10.5;
+
+  const points: number[] = [];
+
+  for (let i = 0; i < teeth; i++) {
+    const baseAngle = (i / teeth) * Math.PI * 2;
+
+    const step = (Math.PI * 2) / teeth;
+
+    let angle = baseAngle;
+    points.push(
+      Math.cos(angle + angleOffset) * outerRadius,
+      Math.sin(angle + angleOffset) * outerRadius,
+    );
+
+    angle = baseAngle + step * 0.3;
+    points.push(
+      Math.cos(angle + angleOffset) * outerRadius,
+      Math.sin(angle + angleOffset) * outerRadius,
+    );
+
+    angle = baseAngle + step * 0.65;
+    points.push(
+      Math.cos(angle + angleOffset) * innerRadius,
+      Math.sin(angle + angleOffset) * innerRadius,
+    );
+  }
+
+  graphics
+    .poly(points)
+    .fill(baseColor)
+    .stroke({ width: 1.25, color: "#000000" });
+
+  graphics.circle(0, 0, centerRadius).fill(centerColor);
+}

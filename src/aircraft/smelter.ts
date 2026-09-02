@@ -1,10 +1,7 @@
-import { Graphics, Sprite } from "pixi.js";
+import { Container, Graphics, Sprite } from "pixi.js";
 import { Building, BuildingConfig } from "@aircraft/building";
-import {
-  generateTextureFromOrigin,
-  makeBasicCircle,
-} from "@utils/basic-graphic";
-import { getRadialLine } from "@utils/basic-geometry";
+import { generateTextureFromOrigin, makeGear } from "@utils/basic-graphic";
+import { getRadialPoint } from "@utils/basic-geometry";
 
 export class Smelter extends Building {
   static readonly buildingConfig: BuildingConfig = {
@@ -12,7 +9,7 @@ export class Smelter extends Building {
     storageRadius: 32,
 
     boundsCenter: { x: 0, y: 0 },
-    boundsRadius: 50,
+    boundsRadius: 48,
 
     baseGraphicalSize: 40,
 
@@ -33,9 +30,28 @@ export class Smelter extends Building {
     result: "Gear",
   };
 
+  buildingBase: Container = new Container();
+
   buildingParams = {
-    amountOfChemnies: 4,
+    teeth: 16,
+    innerRadius: Smelter.buildingConfig.baseGraphicalSize,
+    outerRadius: Smelter.buildingConfig.baseGraphicalSize + 8,
+    baseColor: "#c5d7d4",
+    centerRadius: Smelter.buildingConfig.baseGraphicalSize - 10,
+    centerColor: "#acc1bd",
     rotationSpeed: 0.005,
+  };
+
+  gearSatelites: Graphics[] = [];
+  gearSatelitesParams = {
+    amount: 3,
+    teeth: 6,
+    innerRadius: 7,
+    outerRadius: 14,
+    baseColor: "#a3b0ae",
+    centerRadius: 3,
+    centerColor: "#717877",
+    rotationSpeed: -((this.buildingParams.rotationSpeed * 16) / 6),
   };
 
   constructor(x: number, y: number) {
@@ -51,10 +67,39 @@ export class Smelter extends Building {
       Smelter.buildingConfig.baseGraphicalSize,
     );
 
+    this.createGearSatelites();
+
     this.createBaseTexture();
 
     const base = new Sprite(Smelter.baseTexture);
-    this.contentContainer.addChild(base);
+    this.buildingBase.addChild(base);
+    this.contentContainer.addChild(this.buildingBase);
+  }
+
+  private createGearSatelites() {
+    for (let i = 0; i < this.gearSatelitesParams.amount; i++) {
+      this.gearSatelites[i] = new Graphics();
+
+      makeGear(
+        this.gearSatelites[i],
+        this.gearSatelitesParams.teeth,
+        this.gearSatelitesParams.innerRadius,
+        this.gearSatelitesParams.outerRadius,
+        this.gearSatelitesParams.baseColor,
+        this.gearSatelitesParams.centerRadius,
+        this.gearSatelitesParams.centerColor,
+      );
+
+      const { x, y } = getRadialPoint(
+        i,
+        this.gearSatelitesParams.amount,
+        Smelter.buildingConfig.baseGraphicalSize,
+      );
+
+      this.gearSatelites[i].position.set(x, y);
+
+      this.contentContainer.addChild(this.gearSatelites[i]);
+    }
   }
 
   private createBaseTexture() {
@@ -62,79 +107,25 @@ export class Smelter extends Building {
 
     const baseGraphics = new Graphics();
 
-    makeBasicCircle(
+    makeGear(
       baseGraphics,
-      Smelter.buildingConfig.baseGraphicalSize,
-      "#dec6a4",
-      true,
-    );
-
-    this.makeChimneyPart(baseGraphics, -1, 15, 20, "#000000");
-    this.makeChimneyPart(baseGraphics, -1, 14, 16, "#dec6a4");
-    this.makeChimneyPart(baseGraphics, 0, 6, 6, "#da6563");
-    this.makeChimneyPart(baseGraphics, 6, 14, 6, "#000000");
-
-    const segments = 3;
-    const step = (Math.PI * 2) / segments;
-    const gap = 0.65;
-
-    for (let i = 0; i < segments; i++) {
-      const startAngle = i * step + gap;
-      const endAngle = (i + 1) * step - gap;
-
-      baseGraphics
-        .moveTo(0, 0)
-        .arc(
-          0,
-          0,
-          Smelter.buildingConfig.baseGraphicalSize,
-          startAngle,
-          endAngle,
-        )
-        .fill("#d4b58d");
-    }
-
-    makeBasicCircle(
-      baseGraphics,
-      Smelter.buildingConfig.baseGraphicalSize - 8,
-      "#dec6a4",
-      false,
-    );
-
-    makeBasicCircle(
-      baseGraphics,
-      Smelter.buildingConfig.baseGraphicalSize - 18,
-      "#dbb39e",
-      true,
+      this.buildingParams.teeth,
+      this.buildingParams.innerRadius,
+      this.buildingParams.outerRadius,
+      this.buildingParams.baseColor,
+      this.buildingParams.centerRadius,
+      this.buildingParams.centerColor,
     );
 
     Smelter.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
-  private makeChimneyPart(
-    baseGraphics: Graphics,
-    start: number,
-    end: number,
-    width: number,
-    color: string,
-  ) {
-    for (let i = 0; i < this.buildingParams.amountOfChemnies; i++) {
-      const line = getRadialLine(
-        i,
-        this.buildingParams.amountOfChemnies,
-        Smelter.buildingConfig.baseGraphicalSize + start,
-        Smelter.buildingConfig.baseGraphicalSize + end,
-      );
-
-      baseGraphics
-        .moveTo(line.startX, line.startY)
-        .lineTo(line.endX, line.endY);
-    }
-
-    baseGraphics.stroke({ width: width, color: color });
-  }
-
   animation(delta: number) {
-    this.contentContainer.rotation += this.buildingParams.rotationSpeed * delta;
+    this.buildingBase.rotation += this.buildingParams.rotationSpeed * delta;
+
+    for (let i = 0; i < this.gearSatelitesParams.amount; i++) {
+      this.gearSatelites[i].rotation +=
+        this.gearSatelitesParams.rotationSpeed * delta;
+    }
   }
 }
