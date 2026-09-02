@@ -50,8 +50,15 @@ export class Platform extends Building {
     makeBasicCircle(
       baseGraphics,
       Platform.buildingConfig.baseGraphicalSize,
-      "#acacac",
+      "#cccbcb",
       true,
+    );
+
+    makeBasicCircle(
+      baseGraphics,
+      Platform.buildingConfig.baseGraphicalSize - 10,
+      "#a9a9a9",
+      false,
     );
 
     Platform.baseTexture = generateTextureFromOrigin(baseGraphics);
