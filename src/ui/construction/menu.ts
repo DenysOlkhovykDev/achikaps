@@ -17,7 +17,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: "Mine",
-    color: "#d6d1a8",
+    color: "#bad895",
   },
   {
     label: "Farm",
@@ -33,7 +33,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: "Smelter",
-    color: "#aadba8",
+    color: "#b7ded3",
   },
   {
     label: "Platform",

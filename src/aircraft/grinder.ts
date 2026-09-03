@@ -4,7 +4,7 @@ import {
   generateTextureFromOrigin,
   makeBasicCircle,
 } from "@utils/basic-graphic";
-import { getRadialPoint } from "@utils/basic-geometry";
+import { getRadialLine, getRadialPoint } from "@utils/basic-geometry";
 
 export class Grinder extends Building {
   static readonly buildingConfig: BuildingConfig = {
@@ -12,7 +12,7 @@ export class Grinder extends Building {
     storageRadius: 32,
 
     boundsCenter: { x: 0, y: 0 },
-    boundsRadius: 43,
+    boundsRadius: 48,
 
     baseGraphicalSize: 40,
 
@@ -37,10 +37,12 @@ export class Grinder extends Building {
   // ├── bladesGraphics
   // ├── baseGraphics
 
-  bladesGraphics: Graphics[] = [];
-  bladesParams = {
-    amount: 4,
-    rotationSpeed: 0.05,
+  maniulatorsGraphics: Graphics[] = [];
+
+  manipulatorsParams = {
+    amount: 3,
+    rotation: [0.1, 0.15, 0.2],
+    direction: [1, 1, 1],
   };
 
   constructor(x: number, y: number) {
@@ -56,7 +58,7 @@ export class Grinder extends Building {
       Grinder.buildingConfig.baseGraphicalSize,
     );
 
-    this.createBlades();
+    this.drawTrussParts();
 
     this.createBaseTexture();
 
@@ -64,51 +66,66 @@ export class Grinder extends Building {
     this.contentContainer.addChild(base);
   }
 
-  private createBlades() {
-    for (let i = 0; i < this.bladesParams.amount; i++) {
-      this.bladesGraphics[i] = new Graphics();
+  private drawTrussParts() {
+    for (let i = 0; i < 3; i++) {
+      this.maniulatorsGraphics[i] = new Graphics();
 
-      const { x, y } = getRadialPoint(
-        i,
-        this.bladesParams.amount,
-        Grinder.buildingConfig.baseGraphicalSize + 4,
+      const { x: x1, y: y1 } = getRadialPoint(
+        i * 6,
+        3 * 6,
+        Grinder.buildingConfig.baseGraphicalSize + 2,
+      );
+      const { x: x2, y: y2 } = getRadialPoint(
+        i * 6 - 1,
+        3 * 6,
+        Grinder.buildingConfig.baseGraphicalSize + 11,
+      );
+      const { x: x3, y: y3 } = getRadialPoint(
+        i * 6 - 2,
+        3 * 6,
+        Grinder.buildingConfig.baseGraphicalSize + 10,
+      );
+      const { x: x4, y: y4 } = getRadialPoint(
+        i * 6 - 2,
+        3 * 6,
+        Grinder.buildingConfig.baseGraphicalSize,
       );
 
-      this.bladesGraphics[i].position.set(x, y);
+      this.maniulatorsGraphics[i].position.set(x1, y1);
 
-      this.bladesGraphics[i]
-        .moveTo(0, 0)
-        .lineTo(0, -8)
-        .lineTo(2, -6)
-        .lineTo(4, 0)
-        .closePath();
-      this.bladesGraphics[i]
-        .moveTo(0, 0)
-        .lineTo(-8, 0)
-        .lineTo(-6, -2)
-        .lineTo(0, -4)
-        .closePath();
-      this.bladesGraphics[i]
-        .moveTo(0, 0)
-        .lineTo(8, 0)
-        .lineTo(6, 2)
-        .lineTo(0, 4)
-        .closePath();
-      this.bladesGraphics[i]
-        .moveTo(0, 0)
-        .lineTo(0, 8)
-        .lineTo(-2, 6)
-        .lineTo(-4, 0)
-        .closePath();
+      this.maniulatorsGraphics[i].pivot.set(x1, y1);
 
-      this.bladesGraphics[i].stroke({
-        width: 1,
-        color: "#000000",
-        cap: "round",
-      });
-      this.bladesGraphics[i].fill("#000000");
+      this.maniulatorsGraphics[i]
+        .moveTo(x3, y3)
+        .lineTo(x4, y4)
+        .stroke({ width: 2, color: "#000000" });
 
-      this.contentContainer.addChild(this.bladesGraphics[i]);
+      this.maniulatorsGraphics[i]
+        .moveTo(x1, y1)
+        .lineTo(x2, y2)
+        .lineTo(x3, y3)
+        .stroke({ width: 7, color: "#000000", cap: "round" });
+
+      this.maniulatorsGraphics[i]
+        .moveTo(x1, y1)
+        .lineTo(x2, y2)
+        .lineTo(x3, y3)
+        .stroke({ width: 4, color: "#ffe600", cap: "round" });
+
+      this.maniulatorsGraphics[i]
+        .circle(x1, y1, 5)
+        .fill("#ffe600")
+        .stroke({ width: 3, color: "#000000" });
+
+      this.maniulatorsGraphics[i]
+        .circle(x2, y2, 5)
+        .fill("#ffe600")
+        .stroke({ width: 3, color: "#000000" });
+
+      this.maniulatorsGraphics[i].rotation =
+        this.manipulatorsParams.rotation[i];
+
+      this.contentContainer.addChild(this.maniulatorsGraphics[i]);
     }
   }
 
@@ -120,51 +137,46 @@ export class Grinder extends Building {
     makeBasicCircle(
       baseGraphics,
       Grinder.buildingConfig.baseGraphicalSize,
-      "#d2aa8a",
+      "#e1da8b",
       true,
     );
 
-    this.makeBladeConnectors(baseGraphics);
+    makeBasicCircle(
+      baseGraphics,
+      Grinder.buildingConfig.baseGraphicalSize - 6,
+      "#b7b170",
+      false,
+    );
 
-    makeBasicCircle(
-      baseGraphics,
-      Grinder.buildingConfig.baseGraphicalSize - 12,
-      "#846c5b",
-      false,
-    );
-    makeBasicCircle(
-      baseGraphics,
-      Grinder.buildingConfig.baseGraphicalSize - 14,
-      "#ce9e81",
-      false,
-    );
+    baseGraphics.roundRect(-25, -25, 50, 50, 5).fill("#ac9470");
+
+    baseGraphics
+      .moveTo(-11, -30)
+      .lineTo(-11, 30)
+      .moveTo(11, -30)
+      .lineTo(11, 30)
+      .moveTo(-30, -11)
+      .lineTo(30, -11)
+      .moveTo(-30, 11)
+      .lineTo(30, 11)
+      .stroke({ width: 4, color: "#b7b170" });
 
     Grinder.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
-  private makeBladeConnectors(baseGraphics: Graphics) {
-    for (let i = 0; i < this.bladesParams.amount; i++) {
-      const { x: x1, y: y1 } = getRadialPoint(
-        i,
-        this.bladesParams.amount,
-        Grinder.buildingConfig.baseGraphicalSize - 14,
-      );
-
-      const { x: x2, y: y2 } = getRadialPoint(
-        i,
-        this.bladesParams.amount,
-        Grinder.buildingConfig.baseGraphicalSize + 2,
-      );
-
-      baseGraphics.moveTo(x1, y1).lineTo(x2, y2);
-    }
-    baseGraphics.stroke({ width: 8, color: "#bd8e67", cap: "round" });
-  }
-
   animation(delta: number) {
-    for (let i = 0; i < this.bladesParams.amount; i++) {
-      this.bladesGraphics[i].rotation +=
-        this.bladesParams.rotationSpeed * delta;
+    for (let i = 0; i < this.maniulatorsGraphics.length; i++) {
+      if (this.manipulatorsParams.rotation[i] <= 0) {
+        this.manipulatorsParams.direction[i] = 1;
+      } else if (this.manipulatorsParams.rotation[i] >= 0.2) {
+        this.manipulatorsParams.direction[i] = -1;
+      }
+
+      this.manipulatorsParams.rotation[i] +=
+        0.01 * delta * this.manipulatorsParams.direction[i];
+
+      this.maniulatorsGraphics[i].rotation =
+        this.manipulatorsParams.rotation[i];
     }
   }
 }

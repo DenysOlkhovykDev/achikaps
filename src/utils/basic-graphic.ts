@@ -51,6 +51,7 @@ export function makeGear(
   innerRadius: number,
   outerRadius: number,
   baseColor: string,
+  strokeWidth: number,
   centerRadius: number,
   centerColor: string,
 ) {
@@ -85,7 +86,7 @@ export function makeGear(
   graphics
     .poly(points)
     .fill(baseColor)
-    .stroke({ width: 1.25, color: "#000000" });
+    .stroke({ width: strokeWidth, color: "#000000" });
 
   graphics.circle(0, 0, centerRadius).fill(centerColor);
 }
