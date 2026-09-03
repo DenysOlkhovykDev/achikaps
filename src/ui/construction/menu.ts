@@ -12,27 +12,27 @@ export interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    label: "Factory",
+    label: "Pump",
     color: "#a8d0db",
   },
   {
-    label: "Mine",
+    label: "Farm",
     color: "#bad895",
   },
   {
-    label: "Farm",
+    label: "Extractor",
     color: "#dba8a8",
   },
   {
-    label: "Grinder",
-    color: "#c0ac9a",
+    label: "Assembler",
+    color: "#d6de90",
   },
   {
-    label: "Laboratory",
+    label: "Mixer",
     color: "#caa5c3",
   },
   {
-    label: "Smelter",
+    label: "Grinder",
     color: "#b7ded3",
   },
   {

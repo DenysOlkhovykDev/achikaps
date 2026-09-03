@@ -6,7 +6,7 @@ import {
 } from "@utils/basic-graphic";
 import { getRadialPoint } from "@utils/basic-geometry";
 
-export class Laboratory extends Building {
+export class Mixer extends Building {
   static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
@@ -48,7 +48,7 @@ export class Laboratory extends Building {
   amountOfDecorativeCircles: number = 6;
 
   constructor(x: number, y: number) {
-    super(x, y, 4, "Laboratory");
+    super(x, y, 4, "Mixer");
     this.draw();
 
     this.priorityForTasks = 5;
@@ -57,14 +57,14 @@ export class Laboratory extends Building {
 
   draw() {
     this.backgroundDisplay.createBasicShadow(
-      Laboratory.buildingConfig.baseGraphicalSize,
+      Mixer.buildingConfig.baseGraphicalSize,
     );
 
     this.createSatelites();
 
     this.createBaseTexture();
 
-    const base = new Sprite(Laboratory.baseTexture);
+    const base = new Sprite(Mixer.baseTexture);
     this.contentContainer.addChild(base);
   }
 
@@ -75,7 +75,7 @@ export class Laboratory extends Building {
       const { x: cx, y: cy } = getRadialPoint(
         i,
         this.satelitesParams.amount,
-        Laboratory.buildingConfig.baseGraphicalSize - 5,
+        Mixer.buildingConfig.baseGraphicalSize - 5,
       );
 
       this.satelitesGraphics[i].position.set(cx, cy);
@@ -95,20 +95,20 @@ export class Laboratory extends Building {
   }
 
   private createBaseTexture() {
-    if (Laboratory.baseTexture) return;
+    if (Mixer.baseTexture) return;
 
     const baseGraphics = new Graphics();
 
     makeBasicCircle(
       baseGraphics,
-      Laboratory.buildingConfig.baseGraphicalSize,
+      Mixer.buildingConfig.baseGraphicalSize,
       "#cc92c3",
       true,
     );
 
     this.makeDecorativeCircles(baseGraphics);
 
-    Laboratory.baseTexture = generateTextureFromOrigin(baseGraphics);
+    Mixer.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   private makeDecorativeCircles(baseGraphics: Graphics) {
@@ -118,7 +118,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i * 2 - 1,
         this.amountOfDecorativeCircles * 2,
-        Laboratory.buildingConfig.baseGraphicalSize - 24,
+        Mixer.buildingConfig.baseGraphicalSize - 24,
       );
 
       baseGraphics.circle(x, y, 6).fill("#b762ac");
@@ -128,7 +128,7 @@ export class Laboratory extends Building {
       const { x, y } = getRadialPoint(
         i,
         this.amountOfDecorativeCircles,
-        Laboratory.buildingConfig.baseGraphicalSize - 12,
+        Mixer.buildingConfig.baseGraphicalSize - 12,
       );
 
       baseGraphics.circle(x, y, 8).fill("#b762ac");

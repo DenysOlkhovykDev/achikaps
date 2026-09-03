@@ -6,7 +6,7 @@ import {
 } from "@utils/basic-graphic";
 import { getRadialPoint, getRadialLine } from "@utils/basic-geometry";
 
-export class Factory extends Building {
+export class Pump extends Building {
   static readonly buildingConfig: BuildingConfig = {
     storageCenter: { x: 0, y: 0 },
     storageRadius: 32,
@@ -43,7 +43,7 @@ export class Factory extends Building {
   };
 
   constructor(x: number, y: number) {
-    super(x, y, 5, "Factory");
+    super(x, y, 5, "Pump");
     this.draw();
     this.priorityForTasks = 5;
     this.refreshTasks();
@@ -51,14 +51,14 @@ export class Factory extends Building {
 
   draw() {
     this.backgroundDisplay.createBasicShadow(
-      Factory.buildingConfig.baseGraphicalSize,
+      Pump.buildingConfig.baseGraphicalSize,
     );
 
     this.createSatelites();
 
     this.createBaseTexture();
 
-    const base = new Sprite(Factory.baseTexture);
+    const base = new Sprite(Pump.baseTexture);
     this.contentContainer.addChild(base);
   }
 
@@ -67,22 +67,22 @@ export class Factory extends Building {
       const small = getRadialLine(
         i * 4 + 2,
         this.gridsParams.amount * 4,
-        Factory.buildingConfig.baseGraphicalSize,
-        Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[0],
+        Pump.buildingConfig.baseGraphicalSize,
+        Pump.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[0],
       );
 
       const medium = getRadialLine(
         i * 4 + 1,
         this.gridsParams.amount * 4,
-        Factory.buildingConfig.baseGraphicalSize,
-        Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[1],
+        Pump.buildingConfig.baseGraphicalSize,
+        Pump.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[1],
       );
 
       const large = getRadialLine(
         i * 4,
         this.gridsParams.amount * 4,
-        Factory.buildingConfig.baseGraphicalSize,
-        Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[2],
+        Pump.buildingConfig.baseGraphicalSize,
+        Pump.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[2],
       );
 
       this.gridsGraphics
@@ -96,7 +96,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[0],
+          Pump.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[0],
           small.angle,
           small.angle - this.gridsParams.angleOffsets.small,
           true,
@@ -105,7 +105,7 @@ export class Factory extends Building {
         .arc(
           0,
           0,
-          Factory.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[1],
+          Pump.buildingConfig.baseGraphicalSize + this.gridsParams.sizes[1],
           medium.angle,
           medium.angle - this.gridsParams.angleOffsets.medium,
           true,
@@ -116,13 +116,13 @@ export class Factory extends Building {
   }
 
   private createBaseTexture() {
-    if (Factory.baseTexture) return;
+    if (Pump.baseTexture) return;
 
     const baseGraphics = new Graphics();
 
     makeBasicCircle(
       baseGraphics,
-      Factory.buildingConfig.baseGraphicalSize,
+      Pump.buildingConfig.baseGraphicalSize,
       "#a8d0db",
       true,
     );
@@ -132,7 +132,7 @@ export class Factory extends Building {
       const { x, y } = getRadialPoint(
         i,
         3,
-        Factory.buildingConfig.baseGraphicalSize - 16,
+        Pump.buildingConfig.baseGraphicalSize - 16,
       );
       points.push({ x, y });
     }
@@ -148,7 +148,7 @@ export class Factory extends Building {
       baseGraphics.circle(points[i].x, points[i].y, 12).fill("#81bcf3");
     }
 
-    Factory.baseTexture = generateTextureFromOrigin(baseGraphics);
+    Pump.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
 
   animation(delta: number) {

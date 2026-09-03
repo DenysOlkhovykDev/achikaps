@@ -24,7 +24,7 @@ export const multipleConstructionOfDifferentBuildings: Scenario = {
         from: "p0",
         x: 360,
         y: 750,
-        buildingType: "Grinder",
+        buildingType: "Assembler",
       },
     ],
   },
