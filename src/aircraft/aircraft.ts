@@ -6,14 +6,14 @@ import { JobType, Task } from "@dashboard/task";
 import { Resource } from "@resources/resource";
 
 import { Platform } from "@aircraft/platform";
-import { Factory } from "@aircraft/factory";
-import { Mine } from "@aircraft/mine";
+import { Pump } from "@aircraft/pump";
 import { Farm } from "@aircraft/farm";
-import { Grinder } from "@aircraft/grinder";
+import { Extractor } from "@aircraft/extractor";
+import { Assembler } from "@aircraft/assembler";
 import { Junkuard } from "@aircraft/junkuard";
 import { House } from "@aircraft/house";
-import { Laboratory } from "@aircraft/laboratory";
-import { Smelter } from "@aircraft/smelter";
+import { Mixer } from "@aircraft/mixer";
+import { Grinder } from "@aircraft/grinder";
 import { Engine } from "@aircraft/engine";
 import { Blueprint } from "@aircraft/blueprint";
 import { GlassMaker } from "@aircraft/glassMaker";
@@ -29,14 +29,14 @@ export type BuildingClass = {
 
 export const buildingMap: Record<string, BuildingClass> = {
   Platform,
-  Factory,
-  Mine,
+  Pump,
   Farm,
-  Grinder,
+  Extractor,
+  Assembler,
   Junkuard,
   House,
-  Laboratory,
-  Smelter,
+  Mixer,
+  Grinder,
   Engine,
   GlassMaker,
 };

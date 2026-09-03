@@ -94,9 +94,9 @@ const scenarios: Record<string, Scenario> = {
     aircraft: {
       buildings: [
         { from: "", id: "p0", type: "Platform", x: 360, y: 600 },
-        { from: "p0", id: "factory", type: "Factory", x: 260, y: 550 },
-        { from: "p0", id: "farm", type: "Farm", x: 460, y: 550 },
-        { from: "p0", id: "mine", type: "Mine", x: 360, y: 500 },
+        { from: "p0", id: "pump", type: "Pump", x: 260, y: 550 },
+        { from: "p0", id: "extractor", type: "Extractor", x: 460, y: 550 },
+        { from: "p0", id: "farm", type: "Farm", x: 360, y: 500 },
         { from: "p0", id: "p1", type: "Platform", x: 360, y: 700 },
         { from: "p1", id: "p2", type: "Platform", x: 360, y: 800 },
       ],
@@ -174,7 +174,7 @@ building menu`,
           y: gameScreen.height - gameScreen.height / 20,
         },
         {
-          text: "Select the Lab",
+          text: "Select the Mixer",
           showCondition: () => {
             return constructionManager.isMenuVisible();
           },
@@ -197,7 +197,7 @@ here`,
         },
         {
           text: `Also build
-Smelter  
+Assembler  
 and Grinder`,
           showCondition: () => {
             return true;
