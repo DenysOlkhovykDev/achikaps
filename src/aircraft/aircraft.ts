@@ -86,7 +86,7 @@ class Aircraft {
   public addBlueprint(x: number, y: number, buildingType: string) {
     const BuildingClass = buildingMap[buildingType] || Platform;
 
-    const blueprint = new Blueprint(x, y, BuildingClass);
+    const blueprint = new Blueprint(x, y, BuildingClass, buildingType);
 
     this.blueprints.push(blueprint);
     this.airCraftLayer.addChild(blueprint.root);
