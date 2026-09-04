@@ -24,14 +24,18 @@ export class Blueprint extends Building {
   static constructionRecipe = [];
 
   private targetBuilding: BuildingClass;
-
   redraws: number = 0;
 
   tasks: Task[] = [];
   buildResources: string[] = [];
   reservedBuildResources: Resource[] = [];
 
-  constructor(x: number, y: number, targetBuilding: BuildingClass) {
+  constructor(
+    x: number,
+    y: number,
+    targetBuilding: BuildingClass,
+    private targetBuildingType: string,
+  ) {
     super(x, y, 10, "Blueprint");
 
     this.targetBuilding = targetBuilding;
@@ -287,7 +291,7 @@ export class Blueprint extends Building {
       this.reservedBuildResources = [];
 
       aircraft.selectBuilding(source);
-      aircraft.addBuilding(this.x, this.y, this.targetBuilding.name);
+      aircraft.addBuilding(this.x, this.y, this.targetBuildingType);
       aircraft.deleteBlueprint(this);
       constructionManager.hideButton();
     }
