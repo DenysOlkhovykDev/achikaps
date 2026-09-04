@@ -6,7 +6,7 @@ import { JobType, Task } from "@dashboard/task";
 import { Resource } from "@resources/resource";
 
 import { Platform } from "@aircraft/platform";
-import { Pump } from "@aircraft/pump";
+import { Collector } from "@aircraft/collector";
 import { Farm } from "@aircraft/farm";
 import { Extractor } from "@aircraft/extractor";
 import { Assembler } from "@aircraft/assembler";
@@ -29,7 +29,7 @@ export type BuildingClass = {
 
 export const buildingMap: Record<string, BuildingClass> = {
   Platform,
-  Pump,
+  Collector,
   Farm,
   Extractor,
   Assembler,

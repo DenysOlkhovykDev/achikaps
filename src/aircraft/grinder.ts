@@ -126,7 +126,14 @@ export class Grinder extends Building {
       this.buildingParams.baseColor,
       2,
       this.buildingParams.centerRadius,
+      "#414443",
+    );
+
+    makeBasicCircle(
+      baseGraphics,
+      Grinder.buildingConfig.baseGraphicalSize - 5,
       this.buildingParams.centerColor,
+      false,
     );
 
     makeBasicCircle(

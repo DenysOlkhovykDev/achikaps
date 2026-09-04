@@ -94,7 +94,7 @@ const scenarios: Record<string, Scenario> = {
     aircraft: {
       buildings: [
         { from: "", id: "p0", type: "Platform", x: 360, y: 600 },
-        { from: "p0", id: "pump", type: "Pump", x: 260, y: 550 },
+        { from: "p0", id: "collector", type: "Collector", x: 260, y: 550 },
         { from: "p0", id: "extractor", type: "Extractor", x: 460, y: 550 },
         { from: "p0", id: "farm", type: "Farm", x: 360, y: 500 },
         { from: "p0", id: "p1", type: "Platform", x: 360, y: 700 },

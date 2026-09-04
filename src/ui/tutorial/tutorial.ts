@@ -46,12 +46,16 @@ export class Tutorial extends Container {
 
     this.addChild(this.overlay, this.messageContainer);
 
-    this.messageContainer.addChild(
-      this.messageBackGround,
-      this.message,
-      this.okButton,
-      this.okText,
-    );
+    if (this.needOkButton) {
+      this.messageContainer.addChild(
+        this.messageBackGround,
+        this.message,
+        this.okButton,
+        this.okText,
+      );
+    } else {
+      this.messageContainer.addChild(this.messageBackGround, this.message);
+    }
 
     this.okButton.eventMode = "static";
     this.okText.eventMode = "none";
@@ -116,6 +120,9 @@ export class Tutorial extends Container {
         width: 4,
         color: "#000000",
       });
+
+    this.messageBackGround.eventMode = "none";
+    this.message.eventMode = "none";
 
     const buttonX = this.pointerX! + this.radius + 23 + width;
     const buttonY = this.pointerY! - this.fontSize * 1.4 + height;

@@ -57,15 +57,15 @@ export class Assembler extends Building {
   };
 
   buildingParams = {
-    baseColor: "#e1da8b",
-    centerColor: "#b7b170",
+    baseColor: "#bc9c56",
+    centerColor: "#ebdc5d",
     square: {
       x: -25,
       y: -25,
       width: 50,
       height: 50,
       radius: 5,
-      color: "#ac9470",
+      color: "#bc9c56",
     },
     grid: {
       gap: 11,

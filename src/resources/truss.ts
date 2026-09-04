@@ -32,22 +32,22 @@ export class Truss extends Resource {
     baseGraphics
       .moveTo(leftSide - 1, topSide)
       .lineTo(rightSide + 1, topSide)
-      .stroke({ width: 4, color: "#000000" });
+      .stroke({ width: 5, color: "#000000" });
 
     baseGraphics
       .moveTo(leftSide, topSide)
       .lineTo(rightSide, topSide)
-      .stroke({ width: 2, color: "#d1b453" });
+      .stroke({ width: 2, color: "#d6d655" });
 
     baseGraphics
       .moveTo(leftSide - 1, bottomSide)
       .lineTo(rightSide + 1, bottomSide)
-      .stroke({ width: 4, color: "#000000" });
+      .stroke({ width: 5, color: "#000000" });
 
     baseGraphics
       .moveTo(leftSide, bottomSide)
       .lineTo(rightSide, bottomSide)
-      .stroke({ width: 2, color: "#d1b453" });
+      .stroke({ width: 2, color: "#d6d655" });
 
     Truss.baseTexture = generateTextureFromOrigin(baseGraphics);
   }
