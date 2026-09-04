@@ -1,5 +1,5 @@
 {
-  "name": "achikaps",
+  "name": "shotantik",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,16 +14,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DenysOlkhovykDev/achikaps.git"
+    "url": "git+https://github.com/DenysOlkhovykDev/shotantik.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/DenysOlkhovykDev/achikaps/issues"
+    "url": "https://github.com/DenysOlkhovykDev/shotantik/issues"
   },
-  "homepage": "https://github.com/DenysOlkhovykDev/achikaps#readme",
+  "homepage": "https://github.com/DenysOlkhovykDev/shotantik#readme",
   "dependencies": {
     "pixi.js": "8.19.0"
   },
