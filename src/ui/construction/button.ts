@@ -12,7 +12,13 @@ export class ConstructionButton extends Container {
   constructor() {
     super();
 
-    this.graphic = new Graphics()
+    this.graphic = new Graphics();
+
+    this.graphic
+      .circle(this.buttonPosition.x, this.buttonPosition.y, 50)
+      .fill({ color: "#000000", alpha: 0 });
+
+    this.graphic
       .moveTo(this.buttonPosition.x - 25, this.buttonPosition.y)
       .lineTo(this.buttonPosition.x + 25, this.buttonPosition.y)
       .moveTo(this.buttonPosition.x, this.buttonPosition.y - 25)

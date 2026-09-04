@@ -4,7 +4,7 @@ export const sceneRender: Scenario = {
   aircraft: {
     buildings: [
       { from: "", id: "p0", type: "Platform", x: 360, y: 200 },
-      { from: "p0", id: "pump", type: "Pump", x: 260, y: 200 },
+      { from: "p0", id: "collector", type: "Collector", x: 260, y: 200 },
 
       { from: "p0", id: "p1", type: "Platform", x: 360, y: 300 },
       { from: "p1", id: "farm", type: "Farm", x: 460, y: 300 },
@@ -31,7 +31,7 @@ export const sceneRender: Scenario = {
       { from: "p8", id: "grinder", type: "Grinder", x: 260, y: 1000 },
     ],
     resources: [
-      { buildingId: "pump", resourceName: "Water", amount: 5 },
+      { buildingId: "collector", resourceName: "Water", amount: 5 },
       { buildingId: "farm", resourceName: "Organic", amount: 5 },
       { buildingId: "extractor", resourceName: "Metal", amount: 5 },
       { buildingId: "engine", resourceName: "Battery", amount: 1 },

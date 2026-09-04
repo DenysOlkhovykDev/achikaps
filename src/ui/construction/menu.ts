@@ -12,7 +12,7 @@ export interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    label: "Pump",
+    label: "Collector",
     color: "#a8d0db",
   },
   {

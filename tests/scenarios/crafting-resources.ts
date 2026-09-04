@@ -5,7 +5,7 @@ export const craftingResources: Scenario = {
     buildings: [
       { from: "", id: "p0", type: "Platform", x: 360, y: 600 },
       { from: "p0", id: "mixer", type: "Mixer", x: 460, y: 500 },
-      { from: "p0", id: "pump", type: "Pump", x: 260, y: 500 },
+      { from: "p0", id: "collector", type: "Collector", x: 260, y: 500 },
       { from: "p0", id: "farm", type: "Farm", x: 360, y: 500 },
     ],
     workers: [
